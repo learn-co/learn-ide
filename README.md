@@ -1,6 +1,6 @@
 # Integrated Learn Environment Package
 
-The goal of this package is to provide Atom with an integration to Learn that is completely OS-independent. To meet this goal, Atom scripting should be relied upon wherever possible. The point of this is to provide a reasonable level of confidence that wherever Atom can run, the Learn Integrated Environment can also run.
+The goal of this package is to provide Atom with an integration to Learn that is asOS-independent as possible. To meet this goal, Atom scripting should be relied upon wherever possible. The point of this is to provide a reasonable level of confidence that wherever Atom can run, the Learn Integrated Environment can also run.
 
 To accomplish this, some design principles are presented:
 
