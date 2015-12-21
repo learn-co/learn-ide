@@ -5,10 +5,10 @@ class WebsocketFactory
     terminal.write("Connecting to Learn...\r\n")
 
     ws.onmessage = (e) ->
-      terminal.write(e.data)
+      terminal.write(e.data + "\r\n")
     ws.onerror = ->
-      terminal.write("Error: Could not establish a connection.")
+      terminal.write("Error: Could not establish a connection.\r\n")
     ws.onclose = ->
-      terminal.write("Closed connection.")
+      terminal.write("aClosed connection.\r\n")
 
     return ws
