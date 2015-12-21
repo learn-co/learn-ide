@@ -1,20 +1,19 @@
-# See https://atom.io/docs/latest/hacking-atom-package-word-count#menus for more details
 'context-menu':
   'atom-text-editor': [
     {
-      'label': 'Toggle integrated-learn-environment'
-      'command': 'integrated-learn-environment:toggle'
+      'label': 'Toggle Learn.co Terminal'
+      'command': 'integrated-learn-environment:toggleTerminal'
     }
   ]
 'menu': [
   {
     'label': 'Packages'
     'submenu': [
-      'label': 'integrated-learn-environment'
+      'label': 'Learn.co'
       'submenu': [
         {
-          'label': 'Toggle'
-          'command': 'integrated-learn-environment:toggle'
+          'label': 'Toggle Terminal'
+          'command': 'integrated-learn-environment:toggleTerminal'
         }
       ]
     ]

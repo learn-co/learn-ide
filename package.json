@@ -1,18 +1,20 @@
 {
   "name": "integrated-learn-environment",
   "main": "./lib/integrated-learn-environment",
-  "version": "0.0.0",
-  "description": "A short description of your package",
+  "version": "1.0.0",
+  "description": "Learn meets Atom",
   "keywords": [
   ],
   "activationCommands": {
-    "atom-workspace": "integrated-learn-environment:toggle"
+    "atom-workspace": "integrated-learn-environment:toggleTerminal"
   },
   "repository": "https://github.com/atom/integrated-learn-environment",
-  "license": "MIT",
+  "license": "Pending",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
+    "term.js": "^0.0.7",
+    "atom-space-pen-views": "^2.1.0"
   }
 }

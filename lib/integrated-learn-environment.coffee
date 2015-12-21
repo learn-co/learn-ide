@@ -1,33 +1,31 @@
-IntegratedLearnEnvironmentView = require './integrated-learn-environment-view'
+TerminalView = require './terminal-view'
 {CompositeDisposable} = require 'atom'
 
 module.exports = IntegratedLearnEnvironment =
-  integratedLearnEnvironmentView: null
-  modalPanel: null
+  terminalViewState: null
+  terminalPanel: null
   subscriptions: null
 
   activate: (state) ->
-    @integratedLearnEnvironmentView = new IntegratedLearnEnvironmentView(state.integratedLearnEnvironmentViewState)
-    @modalPanel = atom.workspace.addModalPanel(item: @integratedLearnEnvironmentView.getElement(), visible: false)
+    @terminalView = new TerminalView(state.terminalViewState)
 
-    # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
+    @terminalPanel = atom.workspace.addBottomPanel(item: @terminalView, visible: false, className: 'ile-terminal-view')
+
     @subscriptions = new CompositeDisposable
-
-    # Register command that toggles this view
-    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggle': => @toggle()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': => @toggleTerminal()
 
   deactivate: ->
-    @modalPanel.destroy()
+    @terminalPanel.destroy()
+    @terminalView.destroy()
     @subscriptions.dispose()
-    @integratedLearnEnvironmentView.destroy()
 
   serialize: ->
-    integratedLearnEnvironmentViewState: @integratedLearnEnvironmentView.serialize()
+    terminalViewState: @terminalView.serialize()
 
-  toggle: ->
-    console.log 'IntegratedLearnEnvironment was toggled!'
+  toggleTerminal: ->
+    console.log 'Toggled terminalPanel'
 
-    if @modalPanel.isVisible()
-      @modalPanel.hide()
+    if @terminalPanel.isVisible()
+      @terminalPanel.hide()
     else
-      @modalPanel.show()
+      @terminalPanel.show()
