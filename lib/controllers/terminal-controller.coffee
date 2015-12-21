@@ -1,4 +1,5 @@
 module.exports =
 class TerminalController
   constructor: (ws, terminal) ->
-    terminal.write(" Connected!\r\n")
+    terminal.on 'data', (data) ->
+      ws.send data

@@ -31,8 +31,6 @@ module.exports = IntegratedLearnEnvironment =
     terminalViewState: @terminalView.serialize()
 
   toggleTerminal: ->
-    console.log 'Toggled terminalPanel'
-
     if @terminalPanel.isVisible()
       @terminalPanel.hide()
     else
