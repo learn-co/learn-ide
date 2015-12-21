@@ -16,7 +16,7 @@ module.exports = IntegratedLearnEnvironment =
     @terminalView = new TerminalView(@terminal)
     @terminalPanel = atom.workspace.addBottomPanel(item: @terminalView, visible: false, className: 'ile-terminal-view')
 
-    @ws = WebsocketFactory.createWithTerminalLogging("ws://localhost:5671", @terminal)
+    @ws = WebsocketFactory.createWithTerminalLogging("ws://localhost:4463", @terminal)
     @terminalController = new TerminalController(@ws, @terminal)
 
     @subscriptions = new CompositeDisposable

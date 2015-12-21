@@ -4,8 +4,8 @@ class WebsocketFactory
     ws = new WebSocket(uri)
     terminal.write("Connecting to Learn...")
 
-    ws.onmessage = (data) ->
-      terminal.write(data)
+    ws.onmessage = (e) ->
+      terminal.write(e.data)
     ws.onerror = ->
       terminal.write("\r\nError: Could not establish a connection.")
     ws.onclose = ->
