@@ -1,37 +1,45 @@
 {CompositeDisposable} = require 'atom'
-term = require 'term.js'
-WebsocketFactory = require './websocket-factory'
-TerminalView = require './views/terminal-view'
-TerminalController = require './controllers/terminal-controller'
+TerminalFactory = require './factories/terminal'
+TerminalView = require './views/terminal'
+WebsocketFactory = require './factories/websocket'
+RemoteFileSystem = require './models/remote-file-system'
+FileTreeView = require './views/file-tree'
 
-module.exports = IntegratedLearnEnvironment =
-  terminalViewState: null
-  terminalPanel: null
-  terminalController: null
+module.exports =
+  config:
+    oauthToken:
+      type: 'string'
+      title: 'OAuth Token'
+      description: 'Your learn.co oauth token'
+      default: "Paste your learn.co oauth token here"
+
+  termViewState: null
+  fsViewState: null
   subscriptions: null
 
   activate: (state) ->
-    @terminal = new term.Terminal(useStyle: no, screenKeys: no)
+    @term = TerminalFactory.create()
+    @termView = new TerminalView(state, @term)
 
-    @terminalView = new TerminalView(@terminal)
-    @terminalPanel = atom.workspace.addBottomPanel(item: @terminalView, visible: false, className: 'ile-terminal-view')
+    @fs = new RemoteFileSystem()
+    @fsView = new FileTreeView(state, @fs)
 
-    @ws = WebsocketFactory.createWithTerminalLogging("ws://localhost:4463", @terminal)
-    @terminalController = new TerminalController(@ws, @terminal)
+    @ws = WebsocketFactory.createWithTerminalLogging("ws://localhost:4463", @term)
+
+    @term.on 'data', (data) ->
+      @ws.send data
 
     @subscriptions = new CompositeDisposable
-    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': => @toggleTerminal()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
+      @termView.toggle()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleFileTree': =>
+      @fsView.toggle()
 
   deactivate: ->
-    @terminalPanel.destroy()
-    @terminalView.destroy()
+    @termView.destroy()
+    @fsView.destroy()
     @subscriptions.dispose()
 
   serialize: ->
-    terminalViewState: @terminalView.serialize()
-
-  toggleTerminal: ->
-    if @terminalPanel.isVisible()
-      @terminalPanel.hide()
-    else
-      @terminalPanel.show()
+    termViewState: @termView.serialize()
+    fsViewState: @fsView.serialize()
