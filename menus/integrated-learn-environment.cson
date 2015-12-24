@@ -3,10 +3,6 @@
     {
       'label': 'Toggle Learn.co Terminal'
       'command': 'integrated-learn-environment:toggleTerminal'
-    },
-    {
-      'label': 'Toggle Learn.co File Tree'
-      'command': 'integrated-learn-environment:toggleFileTree'
     }
   ]
 'menu': [
@@ -18,10 +14,6 @@
         {
           'label': 'Toggle Terminal'
           'command': 'integrated-learn-environment:toggleTerminal'
-        }
-        {
-          'label': 'Toggle File Tree'
-          'command': 'integrated-learn-environment:toggleFileTree'
         }
       ]
     ]

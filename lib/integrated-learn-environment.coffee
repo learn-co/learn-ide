@@ -3,7 +3,6 @@ TerminalFactory = require './factories/terminal'
 TerminalView = require './views/terminal'
 WebsocketFactory = require './factories/websocket'
 RemoteFileSystem = require './models/remote-file-system'
-FileTreeView = require './views/file-tree'
 
 module.exports =
   config:
@@ -22,18 +21,14 @@ module.exports =
     @termView = new TerminalView(state, @term)
 
     @fs = new RemoteFileSystem()
-    @fsView = new FileTreeView(state, @fs)
-
     @ws = WebsocketFactory.createWithTerminalLogging("ws://localhost:4463", @term)
 
-    @term.on 'data', (data) ->
+    @term.on 'data', (data) =>
       @ws.send data
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
       @termView.toggle()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleFileTree': =>
-      @fsView.toggle()
 
   deactivate: ->
     @termView.destroy()
