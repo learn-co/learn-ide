@@ -2,7 +2,7 @@
 TerminalFactory = require './factories/terminal'
 TerminalView = require './views/terminal'
 WebsocketFactory = require './factories/websocket'
-RemoteFileSystem = require './models/remote-file-system'
+SyncedFS = require './models/synced-fs'
 
 module.exports =
   config:
@@ -20,11 +20,15 @@ module.exports =
     @term = TerminalFactory.create()
     @termView = new TerminalView(state, @term)
 
-    @fs = new RemoteFileSystem()
+    @fs = new SyncedFS()
     @ws = WebsocketFactory.createWithTerminalLogging("ws://localhost:4463", @term)
 
     @term.on 'data', (data) =>
       @ws.send data
+
+    atom.workspace.observeTextEditors (editor) ->
+      editor.onDidSave ->
+        atom.notifications.addSuccess("Saved work.")
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
