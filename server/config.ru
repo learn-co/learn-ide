@@ -10,12 +10,7 @@ WebsocketServer = lambda do |env|
   @ws.on :open do
     Thread.new do
       loop do
-        begin
-          output = stdout.readpartial(4096)
-          @ws.send(output)
-        rescue
-          puts $!.inspect
-        end
+        @ws.send(stdout.readpartial(4096))
       end
     end
   end
