@@ -19,16 +19,18 @@ module.exports =
   activate: (state) ->
     @term = TerminalFactory.create()
     @termView = new TerminalView(state, @term)
+    @termWebsocket = WebsocketFactory.createWithTerminalLogging("ws://localhost:4463", @term)
+    @term.on 'data', (data) =>
+      @termWebsocket.send data
 
     @fs = new SyncedFS()
-    @ws = WebsocketFactory.createWithTerminalLogging("ws://localhost:4463", @term)
-
-    @term.on 'data', (data) =>
-      @ws.send data
-
-    atom.workspace.observeTextEditors (editor) ->
-      editor.onDidSave ->
-        atom.notifications.addSuccess("Saved work.")
+    @fsWebsocket = WebsocketFactory.createWithFSLogging("ws://localhost:4464", @term)
+    atom.workspace.observeTextEditors (editor) =>
+      console.log(editor)
+      editor.onDidSave =>
+        buffer = editor.buffer
+        @fsWebsocket.send(buffer.file.path + ":" + buffer.file.digest + ":" + buffer.getText())
+        atom.notifications.addSuccess("Synced " + buffer.getBaseName())
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
