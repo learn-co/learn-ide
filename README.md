@@ -9,4 +9,4 @@ To accomplish this, some design principles are presented:
   * Assume the host doesn't have support for a scripting language, as is the case with Windows (PowerShell may or may not exist, depending on the version of Windows).
 * Reliance on a filesystem structure should be minimal. Don't assume certain paths exist.
 
-![A screenshot of your package](https://f.cloud.github.com/assets/69169/2290250/c35d867a-a017-11e3-86be-cd7c5bf3ff9b.gif)
+![Diagram](diagram.png)
