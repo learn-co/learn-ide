@@ -30,9 +30,9 @@ module.exports =
       editor.onDidSave =>
         buffer = editor.buffer
         project = editor.project
-        relDir = buffer.file.path.replace(project.rootDirectories[0].path, '')
-        @fsWebsocket.send(relDir + ":" + buffer.file.digest + ":" + buffer.getText())
-        atom.notifications.addSuccess("Synced " + buffer.getBaseName())
+        relDir = buffer.file.path.replace(project.getPaths()[0], '')
+        rootDir = project.getPaths()[0].split('/').pop()
+        @fsWebsocket.send(rootDir + relDir + ":" + buffer.file.digest + ":" + buffer.getText())
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
