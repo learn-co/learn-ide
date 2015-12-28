@@ -29,7 +29,9 @@ module.exports =
       console.log(editor)
       editor.onDidSave =>
         buffer = editor.buffer
-        @fsWebsocket.send(buffer.file.path + ":" + buffer.file.digest + ":" + buffer.getText())
+        project = editor.project
+        relDir = buffer.file.path.replace(project.rootDirectories[0].path, '')
+        @fsWebsocket.send(relDir + ":" + buffer.file.digest + ":" + buffer.getText())
         atom.notifications.addSuccess("Synced " + buffer.getBaseName())
 
     @subscriptions = new CompositeDisposable
