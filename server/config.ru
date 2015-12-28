@@ -2,34 +2,33 @@ require 'faye/websocket'
 require 'pty'
 require 'pry'
 
-PTY.spawn("/bin/bash -li") do |stdout, stdin, pid|
-  WebsocketServer = lambda do |env|
-    @ws = Faye::WebSocket.new(env)
+stdout, stdin, pid = PTY.spawn("/bin/bash -il")
 
-    def read_without_blocking(file)
-      begin
-        @ws.send(file.read_nonblock(1024 * 1024))
-      rescue IO::WaitReadable
+WebsocketServer = lambda do |env|
+  @ws = Faye::WebSocket.new(env)
+
+  @ws.on :open do
+    Thread.new do
+      loop do
+        begin
+          output = stdout.readpartial(4096)
+          @ws.send(output)
+        rescue
+          puts $!.inspect
+        end
       end
     end
-
-    @ws.on :open do |event|
-      read_without_blocking(stdout)
-    end
-
-    @ws.on :message do |event|
-      stdin.write(event.data)
-      # hack for making sure tty buffer is filled
-      sleep 0.01
-      read_without_blocking(stdout)
-    end
-
-    @ws.on :close do |event|
-      @ws = nil
-    end
-
-    @ws.rack_response
   end
+
+  @ws.on :message do |event|
+    stdin << event.data
+  end
+
+  @ws.on :close do |event|
+    @ws = nil
+  end
+
+  @ws.rack_response
 end
 
 Faye::WebSocket.load_adapter('thin')
