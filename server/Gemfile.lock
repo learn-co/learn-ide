@@ -3,6 +3,7 @@ GEM
   specs:
     addressable (2.4.0)
     cookiejar (0.3.0)
+    daemons (1.2.3)
     em-http-request (1.1.3)
       addressable (>= 2.3.4)
       cookiejar (<= 0.3.0)
@@ -26,6 +27,10 @@ GEM
     http_parser.rb (0.6.0)
     multi_json (1.11.2)
     rack (1.6.4)
+    thin (1.6.4)
+      daemons (~> 1.0, >= 1.0.9)
+      eventmachine (~> 1.0, >= 1.0.4)
+      rack (~> 1.0)
     websocket-driver (0.6.3)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.2)
@@ -35,3 +40,4 @@ PLATFORMS
 
 DEPENDENCIES
   faye
+  thin

@@ -1,6 +1,6 @@
+require 'thin'
 require 'faye/websocket'
 require 'pty'
-require 'pry'
 
 stdout, stdin, pid = PTY.spawn("/bin/bash -il")
 
