@@ -17,6 +17,7 @@ module.exports =
   activate: (state) ->
     @term = new Terminal("ws://localhost:4463")
     @termView = new TerminalView(state, @term)
+
     @fs = new SyncedFS("ws://localhost:4464", @term)
 
     @subscriptions = new CompositeDisposable
