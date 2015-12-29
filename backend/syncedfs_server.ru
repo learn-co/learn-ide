@@ -1,8 +1,6 @@
-require 'rack'
 require 'thin'
 require 'faye/websocket'
 require './synced_fs/event.rb'
-require 'pry'
 
 Faye::WebSocket.load_adapter('thin')
 
