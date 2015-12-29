@@ -13,15 +13,26 @@ class SyncedFS
     @ws.onclose = ->
       atom.notifications.addError("Closed connection to the Learn filesystem.")
 
+    # TODO: See if we can watch the entire project dir using Atom's Directory API
     atom.workspace.observeTextEditors (editor) =>
+      project = editor.project
+      buffer = editor.buffer
+      file = buffer.file
+
       editor.onDidSave =>
-        @sendSave(editor)
+        @sendSave(project, file, buffer)
 
-  sendSave: (editor) ->
-    buffer = editor.buffer
-    project = editor.project
-    file = buffer.file
-    relDir = file.path.replace(project.getPaths()[0], '')
-    rootDir = project.getPaths()[0].split('/').pop()
-
-    @ws.send(rootDir + relDir + ":" + file.digest + ":" + buffer.getText())
+  sendSave: (project, file, buffer) ->
+    @ws.send JSON.stringify({
+      action: "local_save",
+      project: {
+        path: project.getPaths()[0]
+      },
+      file: {
+        path: file.path
+        digest: file.digest,
+      },
+      buffer: {
+        content: window.btoa(buffer.getText())
+      }
+    })
