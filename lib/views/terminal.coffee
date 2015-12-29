@@ -7,19 +7,20 @@ class TerminalView extends View
       @div class: 'terminal-view-resize-handle', style: 'height: 5px'
 
   initialize: (state, terminal) ->
-    @terminal = terminal
+    @term = terminal.term
     @panel = atom.workspace.addBottomPanel(item: this, visible: false, className: 'ile-terminal-view')
-    @terminal.open(this.get(0))
-    @terminal.on 'open', ->
+    @term.open(this.get(0))
+    @term.on 'open', ->
       @resizeTerminal()
+
     @applyEditorStyling()
     @handleEvents()
 
   applyEditorStyling: ->
-    @terminal.element.style.height = '100%'
-    @terminal.element.style.fontFamily = ->
+    @term.element.style.height = '100%'
+    @term.element.style.fontFamily = ->
       atom.config.get('editor.fontFamily') or "monospace"
-    @terminal.element.style.fontSize = ->
+    @term.element.style.fontSize = ->
       atom.config.get('editor.fontSize')
 
   handleEvents: ->
@@ -51,7 +52,7 @@ class TerminalView extends View
     rows = Math.floor(@height() / fakeRow.height())
 
     fakeRow.remove()
-    @terminal.resize(cols, rows)
+    @term.resize(cols, rows)
 
   toggle: ->
     if @panel.isVisible()
