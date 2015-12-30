@@ -8,7 +8,9 @@ class TerminalView extends View
 
   initialize: (state, terminal) ->
     @term = terminal.term
+    @ws = terminal.ws
     @panel = atom.workspace.addBottomPanel(item: this, visible: false, className: 'learn-terminal-view')
+
     @term.open(this.get(0))
 
     @applyEditorStyling()
@@ -27,6 +29,16 @@ class TerminalView extends View
     @on 'mousedown', '.terminal-view-resize-handle', (e) =>
       @resizeStarted(e)
 
+    @term.on 'data', (data) =>
+      @ws.send(data)
+
+    @ws.onmessage = (e) =>
+      @term.write(e.data)
+    @ws.onerror = =>
+      @term.write("\r\n\x1b[1m" + "Error: " + "\x1b[m" + "Could not establish a connection to terminal.")
+    @ws.onclose = =>
+      @term.write("\r\n\x1b[1m" + "Closed connection to terminal." + "\x1b[m")
+
   resizeStarted: ->
     $(document).on('mousemove', @resize)
     $(document).on('mouseup', @resizeStopped)
@@ -35,6 +47,7 @@ class TerminalView extends View
     $(document).off('mousemove', @resize)
     $(document).off('mouseup', @resizeStopped)
     @resizeTerminal()
+
 
   resize: ({pageY, which}) =>
     return @resizeStopped() unless which is 1
@@ -47,8 +60,9 @@ class TerminalView extends View
   getDimensions: ->
     terminal = @find('.terminal')
     fakeRow = $("<div><span>&nbsp;</span></div>").css(visibility: 'hidden')
-    terminal.append(fakeRow)
     fakeCol = fakeRow.children().first()
+
+    terminal.append(fakeRow)
     cols = Math.floor(terminal.width() / fakeCol.width())
     rows = Math.floor(terminal.height() / fakeRow.height())
     fakeCol.remove()

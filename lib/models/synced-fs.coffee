@@ -6,13 +6,6 @@ class SyncedFS
     @handleEvents()
 
   handleEvents: ->
-    @ws.onmessage = (e) ->
-      atom.notifications.addSuccess(e.data)
-    @ws.onerror = ->
-      atom.notifications.addError("Could not establish a connection to the Learn filesystem!")
-    @ws.onclose = ->
-      atom.notifications.addError("Closed connection to the Learn filesystem.")
-
     # TODO: See if we can watch the entire project dir using Atom's Directory API
     atom.workspace.observeTextEditors (editor) =>
       project = editor.project
