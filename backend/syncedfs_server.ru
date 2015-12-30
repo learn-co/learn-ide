@@ -10,7 +10,7 @@ SyncedFSServer = lambda do |env|
   @ws = Faye::WebSocket.new(env)
 
   @ws.on :message do |event|
-    event = SyncedFS::Event.new(event.data)
+    event = SyncedFS::Event.resolve(event.data)
     event.process
     puts event.inspect
     @ws.send(event.reply)
