@@ -20,6 +20,13 @@ TerminalServer = lambda do |env|
     @ws = nil
   end
 
+  Thread.new do
+    loop do
+      sleep 5
+      @ws.ping
+    end
+  end
+
   @ws.rack_response
 end
 

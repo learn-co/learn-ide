@@ -3,7 +3,7 @@
 module.exports =
 class TerminalView extends View
   @content: ->
-    @div class: 'learn-synced-fs-status inline-block'
+    @div class: 'learn-synced-fs-status inline-block icon-terminal'
 
   constructor: (state, fs) ->
     super
@@ -11,12 +11,14 @@ class TerminalView extends View
     @fs = fs
     @ws = fs.ws
 
-    @text("Connecting to Learn...")
+    # Default text
+    @text(" Learn")
+    @element.style.color = 'red'
 
     @handleEvents()
 
   handleEvents: ->
     @ws.onopen = (e) =>
-      @text("Connected to Learn")
+      @element.style.color = 'green'
     @ws.onclose = =>
-      @text("Disconnected from Learn")
+      @element.style.color = 'red'

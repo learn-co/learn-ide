@@ -3,8 +3,8 @@
 module.exports =
 class TerminalView extends View
   @content: ->
-    @div class: 'panel ile-terminal', =>
-      @div class: 'terminal-view-resize-handle', style: 'height: 5px'
+    @div class: 'panel learn-terminal', =>
+      @div class: 'terminal-view-resize-handle'
 
   initialize: (state, terminal) ->
     @term = terminal.term
@@ -47,7 +47,6 @@ class TerminalView extends View
     $(document).off('mousemove', @resize)
     $(document).off('mouseup', @resizeStopped)
     @resizeTerminal()
-
 
   resize: ({pageY, which}) =>
     return @resizeStopped() unless which is 1
