@@ -1,7 +1,8 @@
 {CompositeDisposable} = require 'atom'
 Terminal = require './models/terminal'
-TerminalView = require './views/terminal'
 SyncedFS = require './models/synced-fs'
+TerminalView = require './views/terminal'
+SyncedFSView = require './views/synced-fs'
 
 module.exports =
   config:
@@ -12,6 +13,7 @@ module.exports =
       default: "Paste your learn.co oauth token here"
 
   termViewState: null
+  fsViewState: null
   subscriptions: null
 
   activate: (state) ->
@@ -19,6 +21,7 @@ module.exports =
     @termView = new TerminalView(state, @term)
 
     @fs = new SyncedFS("ws://localhost:4464", @term)
+    @fsView = new SyncedFSView(state, @fs)
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
@@ -26,7 +29,12 @@ module.exports =
 
   deactivate: ->
     @termView.destroy()
+    @fsView.destroy()
     @subscriptions.dispose()
+
+  consumeStatusBar: (statusBar) ->
+    @statusBarTile = statusBar.addRightTile(item: @fsView, priority: 5000)
 
   serialize: ->
     termViewState: @termView.serialize()
+    fsViewState: @fsView.serialize()

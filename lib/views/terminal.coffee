@@ -8,10 +8,8 @@ class TerminalView extends View
 
   initialize: (state, terminal) ->
     @term = terminal.term
-    @panel = atom.workspace.addBottomPanel(item: this, visible: false, className: 'ile-terminal-view')
+    @panel = atom.workspace.addBottomPanel(item: this, visible: false, className: 'learn-terminal-view')
     @term.open(this.get(0))
-    @term.on 'open', ->
-      @resizeTerminal()
 
     @applyEditorStyling()
     @handleEvents()
@@ -43,16 +41,19 @@ class TerminalView extends View
     @height(window.innerHeight - pageY)
 
   resizeTerminal: ->
-    # inject fake row so we can get correct dimensions of 1x1
-    fakeRow = $("<div><span>&nbsp;</span></div>").css(visibility: 'hidden')
-    fakeCol = fakeRow.children().first()
-    @find('.terminal').append(fakeRow)
-
-    cols = Math.floor(@width() / fakeCol.width())
-    rows = Math.floor(@height() / fakeRow.height())
-
-    fakeRow.remove()
+    {cols, rows} = @getDimensions()
     @term.resize(cols, rows)
+
+  getDimensions: ->
+    terminal = @find('.terminal')
+    fakeRow = $("<div><span>&nbsp;</span></div>").css(visibility: 'hidden')
+    terminal.append(fakeRow)
+    fakeCol = fakeRow.children().first()
+    cols = Math.floor(terminal.width() / fakeCol.width())
+    rows = Math.floor(terminal.height() / fakeRow.height())
+    fakeCol.remove()
+
+    {cols, rows}
 
   toggle: ->
     if @panel.isVisible()
