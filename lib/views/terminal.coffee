@@ -34,10 +34,9 @@ class TerminalView extends View
 
     @ws.onmessage = (e) =>
       @term.write(e.data)
-    @ws.onerror = =>
-      @term.write("\r\n\x1b[1m" + "Error: " + "\x1b[m" + "Could not establish a connection to terminal.")
     @ws.onclose = =>
-      @term.write("\r\n\x1b[1m" + "Closed connection to terminal." + "\x1b[m")
+      @term.element.style.color = '#666'
+      @term.cursorHidden = true
 
   resizeStarted: ->
     $(document).on('mousemove', @resize)

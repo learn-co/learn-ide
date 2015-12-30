@@ -2,29 +2,23 @@ require 'oj'
 require 'base64'
 
 module SyncedFS
-  module Event
-    class LocalSave
-      def initialize(msg)
-        @project = {
-          path: msg['project']['path']
-        }
-        @file    = {
-          path: msg['file']['path'],
-          digest: msg['file']['digest']
-        }
-        @buffer  = {
-          content: Base64.decode64(msg['buffer']['content'])
-        }
+  class Event
+    def initialize(payload)
+      @msg = Oj.load(payload)
+      @event = case @msg['action']
+      when 'local_open'
+        LocalOpen.new(@msg)
+      when 'local_save'
+        LocalSave.new(@msg)
       end
     end
 
-    def self.resolve(payload)
-      msg = Oj.load(payload)
+    def process
+      @event.process
+    end
 
-      case msg['action']
-      when 'local_save'
-        LocalSave.new(msg)
-      end
+    def reply
+      @event.reply
     end
   end
 end

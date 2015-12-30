@@ -13,12 +13,14 @@ class TerminalView extends View
 
     # Default text
     @text(" Learn")
-    @element.style.color = 'red'
+    @element.style.color = '#d92626'
 
     @handleEvents()
 
   handleEvents: ->
     @ws.onopen = (e) =>
-      @element.style.color = 'green'
+      @element.style.color = '#73c990'
+    @ws.onmessage = (e) =>
+      console.log("SyncedFS debug: " + e)
     @ws.onclose = =>
-      @element.style.color = 'red'
+      @element.style.color = '#d92626'
