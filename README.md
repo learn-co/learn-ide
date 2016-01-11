@@ -11,3 +11,10 @@ To accomplish this, some design principles are presented:
   * Assume the host doesn't have support for a scripting language, as is the case with Windows (PowerShell may or may not exist, depending on the version of Windows).
   * Forward input to the student's server.
 * Reliance on a filesystem structure should be minimal. Don't assume certain paths exist.
+
+# Setup
+
+1. Clone this repository and run `apm link`. This will create a sym link to your .atom directory, making the plugin available for use.
+2. `bundle install` and `npm install`
+3. Start atom with `atom -d`.
+4. Right click in a text buffer and select the "Toggle Learn.co Terminal" option.
