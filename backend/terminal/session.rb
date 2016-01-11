@@ -6,7 +6,7 @@ module Terminal
 
     def initialize(username)
       @username = 'root'
-      @stdout, @stdin, @pid = PTY.spawn("su - #{username}")
+      @stdout, @stdin, @pid = PTY.spawn("su - #{@username}")
     end
 
     def bind_to(websocket)
