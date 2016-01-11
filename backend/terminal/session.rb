@@ -2,8 +2,11 @@ require 'pty'
 
 module Terminal
   class Session
-    def initialize
-      @stdout, @stdin, @pid = PTY.spawn("/bin/bash -il")
+    attr_reader :username
+
+    def initialize(username)
+      @username = 'root'
+      @stdout, @stdin, @pid = PTY.spawn("su #{username} /bin/bash -il")
     end
 
     def bind_to(websocket)

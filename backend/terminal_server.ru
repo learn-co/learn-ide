@@ -1,14 +1,19 @@
 require 'thin'
 require 'faye/websocket'
 require './terminal/session.rb'
+require 'pry'
 
 Faye::WebSocket.load_adapter('thin')
 
 TerminalServer = lambda do |env|
+  if env['QUERY_STRING'].split('=').last == 'foo'
+    username = 'spencer'
+  end
+
   @ws = Faye::WebSocket.new(env)
 
   @ws.on :open do
-    @term = Terminal::Session.new
+    @term = Terminal::Session.new(username)
     @term.bind_to(@ws)
   end
 
