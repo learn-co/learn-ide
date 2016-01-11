@@ -17,10 +17,10 @@ module.exports =
   subscriptions: null
 
   activate: (state) ->
-    @term = new Terminal("ws://localhost:4463")
+    @term = new Terminal("ws://localhost:4463?token=foo")
     @termView = new TerminalView(state, @term)
 
-    @fs = new SyncedFS("ws://localhost:4464", @term)
+    @fs = new SyncedFS("ws://localhost:4464?token=foo", @term)
     @fsView = new SyncedFSView(state, @fs)
 
     @subscriptions = new CompositeDisposable
