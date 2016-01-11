@@ -1,7 +1,6 @@
 require 'thin'
 require 'faye/websocket'
 require './terminal/session.rb'
-require 'pry'
 
 Faye::WebSocket.load_adapter('thin')
 
