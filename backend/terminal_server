@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+STDOUT.sync = true
+
+require 'pty'
+
+stdout, stdin, _pid = PTY.spawn("/bin/bash -li")
+
+Thread.new do
+  loop do
+    puts stdout.readpartial(4096)
+  end
+end
+
+Thread.new do
+  loop do
+    stdin << STDIN.readpartial(4096).gsub(/\n{1}/, '').gsub(/\n{2}/, "\n")
+  end
+end
+
+while true
+end
