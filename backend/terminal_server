@@ -3,8 +3,9 @@
 STDOUT.sync = true
 
 require 'pty'
+username = ENV['QUERY_STRING'].split('=').last
 
-stdout, stdin, _pid = PTY.spawn("/bin/bash -li")
+stdout, stdin, _pid = PTY.spawn("sudo su - #{username}")
 
 Thread.new do
   loop do
