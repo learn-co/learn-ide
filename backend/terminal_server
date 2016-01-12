@@ -9,7 +9,9 @@ stdout, stdin, _pid = PTY.spawn("sudo su - #{username}")
 
 Thread.new do
   loop do
-    puts stdout.readpartial(4096)
+    line = stdout.readpartial(4096)
+    line.gsub!("\n", "~~~MYCRAZYSEP~~~\n")
+    puts line
   end
 end
 
