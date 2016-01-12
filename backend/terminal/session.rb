@@ -2,8 +2,8 @@ require 'pty'
 
 module Terminal
   class Session
-    def initialize(username)
-      @stdout, @stdin, @pid = PTY.spawn("su - #{username}")
+    def initialize
+      @stdout, @stdin, @pid = PTY.spawn("/bin/bash -li")
     end
 
     def bind_to(websocket)
