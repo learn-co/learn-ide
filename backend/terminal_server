@@ -3,9 +3,22 @@
 STDOUT.sync = true
 
 require 'pty'
-username = ENV['QUERY_STRING'].split('=').last
+require 'json'
+require 'net/http'
+require 'uri'
 
-stdout, stdin, _pid = PTY.spawn("sudo su - #{username}")
+token = ENV['QUERY_STRING'].split('token=').last
+uri = URI('https://learn.co/api/v1/users/me')
+response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+  req = Net::HTTP::Get.new(uri)
+  req['Authorization'] = "Bearer #{token}"
+
+  http.request(req)
+end
+
+username = JSON.parse(response.body)['username'].sub('hasson','')
+
+stdout, stdin, _pid = PTY.spawn("sudo su -l #{username}")
 
 Thread.new do
   loop do
