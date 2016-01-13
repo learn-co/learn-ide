@@ -17,7 +17,7 @@ module.exports =
   subscriptions: null
 
   activate: (state) ->
-    @term = new Terminal("ws://localhost:4463")
+    @term = new Terminal("ws://localhost:4463?token=spencer")
     @termView = new TerminalView(state, @term)
 
     @fs = new SyncedFS("ws://localhost:4464", @term)

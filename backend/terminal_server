@@ -6,31 +6,31 @@ require 'pty'
 require 'json'
 require 'net/http'
 require 'uri'
+require 'base64'
 
-token = ENV['QUERY_STRING'].split('token=').last
-uri = URI('https://learn.co/api/v1/users/me')
-response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
-  req = Net::HTTP::Get.new(uri)
-  req['Authorization'] = "Bearer #{token}"
+#token = ENV['QUERY_STRING'].split('token=').last
+#uri = URI('https://learn.co/api/v1/users/me')
+# response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+#   req = Net::HTTP::Get.new(uri)
+#   req['Authorization'] = "Bearer #{token}"
+#
+#   http.request(req)
+# end
 
-  http.request(req)
-end
+# username = JSON.parse(response.body)['username'].sub('hasson','')
 
-username = JSON.parse(response.body)['username'].sub('hasson','')
-
-stdout, stdin, _pid = PTY.spawn("sudo su -l #{username}")
+stdout, stdin, _pid = PTY.spawn("TERM=xterm-256color sudo su - spencer1248")
 
 Thread.new do
   loop do
     line = stdout.readpartial(4096)
-    line.gsub!("\n", "~~~MYCRAZYSEP~~~\n")
-    puts line
+    puts Base64.encode64(line)
   end
 end
 
 Thread.new do
   loop do
-    stdin << STDIN.readpartial(4096).gsub(/\n{1}/, '').gsub(/\n{2}/, "\n")
+    stdin << STDIN.readpartial(4096).gsub(/\n{1}$/, '').gsub(/\n{2}$/, "\n")
   end
 end
 

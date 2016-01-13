@@ -33,7 +33,7 @@ class TerminalView extends View
       @ws.send(data)
 
     @ws.onmessage = (e) =>
-      @term.write(e.data.replace('~~~MYCRAZYSEP~~~', "\n"))
+      @term.write(window.atob(e.data))
     @ws.onclose = =>
       @term.element.style.color = '#666'
       @term.cursorHidden = true
