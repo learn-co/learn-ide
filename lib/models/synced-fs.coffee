@@ -17,13 +17,18 @@ class SyncedFS
 
     atom.commands.onDidDispatch (e) =>
       if e.type == 'tree-view:remove'
+        if e.target.attributes['data-path']
+          path = e.target.attributes['data-path'].nodeValue
+        else
+          path = e.target.file.path
+
         @ws.send JSON.stringify({
           action: "local_delete",
           project: {
             path: atom.project.getPaths()[0]
           },
           file: {
-            path: e.target.attributes['data-path'].nodeValue
+            path: path
           }
         })
 
