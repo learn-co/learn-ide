@@ -31,6 +31,8 @@ class SyncedFS
             path: path
           }
         })
+      else if e.type == 'tree-view:add-file' || e.type == 'tree-view:add-folder' || e.type == 'core:confirm'
+        console.log('other file event: ' + e.type)
 
   sendSave: (project, file, buffer) ->
     @ws.send JSON.stringify({
