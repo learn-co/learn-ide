@@ -15,6 +15,18 @@ class SyncedFS
       editor.onDidSave =>
         @sendSave(project, file, buffer)
 
+    atom.commands.onDidDispatch (e) =>
+      if e.type == 'tree-view:remove'
+        @ws.send JSON.stringify({
+          action: "local_delete",
+          project: {
+            path: atom.project.getPaths()[0]
+          },
+          file: {
+            path: e.target.attributes['data-path'].nodeValue
+          }
+        })
+
   sendSave: (project, file, buffer) ->
     @ws.send JSON.stringify({
       action: "local_save",
