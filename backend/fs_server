@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+STDOUT.sync = true
+
+require 'pty'
+require 'json'
+require 'base64'
+require 'fileutils'
+#require 'net/http'
+#require 'uri'
+
+#username = ENV['QUERY_STRING'].split('=').last
+#stdout, stdin, _pid = PTY.spawn("TERM=xterm-256color sudo su - #{username}")
+stdout, stdin, _pid = PTY.spawn("/bin/bash -li")
+
+#Thread.new do
+  #loop do
+    #line = stdout.readpartial(4096)
+    #puts Base64.encode64(line)
+  #end
+#end
+
+Thread.new do
+  loop do
+    fs_event_data = JSON.parse(STDIN.readline)
+
+    case fs_event_data['action']
+    when 'local_save'
+      project_path = fs_event_data['project']['path']
+      file_path    = fs_event_data['file']['path']
+
+      write_path   = "/Users/loganhasson/Desktop/code_dir/#{(file_path.split('/') - project_path.split('/')).join('/')}"
+
+      needed_dirs = write_path.split('/')[0..-2].join('/')
+
+      FileUtils.mkdir_p(needed_dirs)
+
+      File.open(write_path, 'w+') do |f|
+        f.write(Base64.decode64(fs_event_data['buffer']['content']))
+      end
+    else
+      # Nothing
+    end
+    File.open('/Users/loganhasson/Desktop/fs_save.log', 'a') do |f|
+      f.write STDIN.readline
+    end
+  end
+end
+
+while true
+end
