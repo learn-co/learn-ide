@@ -2,29 +2,19 @@
 
 STDOUT.sync = true
 
-require 'pty'
 require 'json'
 require 'base64'
 require 'fileutils'
-#require 'net/http'
-#require 'uri'
 
-#username = ENV['QUERY_STRING'].split('=').last
-#stdout, stdin, _pid = PTY.spawn("TERM=xterm-256color sudo su - #{username}")
-
-#Thread.new do
-  #loop do
-    #line = stdout.readpartial(4096)
-    #puts Base64.encode64(line)
-  #end
-#end
+username = ENV['QUERY_STRING'].split('=').last
 
 Thread.new do
   loop do
     fs_event_data = JSON.parse(STDIN.readline)
     project_path = fs_event_data['project']['path']
     file_path    = fs_event_data['file']['path']
-    full_path    = "/Users/loganhasson/Desktop/code_dir/#{(file_path.split('/') - project_path.split('/')).join('/')}"
+    #full_path    = "/Users/loganhasson/Desktop/code_dir/#{(file_path.split('/') - project_path.split('/')).join('/')}"
+    full_path    = "/home/#{username}/code/#{(file_path.split('/') - project_path.split('/')).join('/')}"
 
     case fs_event_data['action']
     when 'local_save'
@@ -38,9 +28,6 @@ Thread.new do
       FileUtils.rm_rf(full_path)
     else
       # Nothing
-    end
-    File.open('/Users/loganhasson/Desktop/fs_save.log', 'a') do |f|
-      f.write fs_event_data
     end
   end
 end
