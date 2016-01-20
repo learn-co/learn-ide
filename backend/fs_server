@@ -13,8 +13,12 @@ Thread.new do
     fs_event_data = JSON.parse(STDIN.readline)
     project_path = fs_event_data['project']['path']
     file_path    = fs_event_data['file']['path']
-    #full_path    = "/Users/loganhasson/Desktop/code_dir/#{(file_path.split('/') - project_path.split('/')).join('/')}"
-    full_path    = "/home/#{username}/code/#{(file_path.split('/') - project_path.split('/')).join('/')}"
+    local_path   = (file_path.split('/') - project_path.split('/')).join('/')
+    local_dir    = "/home/#{username}/code/#{local_path.split('/').first}"
+    File.open('/home/logantest/output', 'a') do |f|
+      f.write(local_dir)
+    end
+    full_path    = "/home/#{username}/code/#{local_path}"
 
     case fs_event_data['action']
     when 'local_save'
@@ -24,6 +28,8 @@ Thread.new do
       File.open(full_path, 'w+') do |f|
         f.write(Base64.decode64(fs_event_data['buffer']['content']))
       end
+
+      `sudo chown -R #{username}:ile-admin #{local_dir}`
     when 'local_delete'
       FileUtils.rm_rf(full_path)
     else
