@@ -56,18 +56,27 @@ class TerminalView extends View
         when 'content_response'
           content = new Buffer(event.content, 'base64').toString()
           file_sys.writeFileSync atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file, content
-          console.log('Saved: ' + event.file)
         when 'remote_delete'
-          console.log('Deleted: ' + event.file)
           if event.directory
             this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file
-            #file_sys.rmdirSync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file)
           else
-            file_sys.unlinkSync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file)
+            delPath = atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file
+            if file_sys.existsSync(delPath)
+              file_sys.unlinkSync(delPath)
         when 'remote_move_from'
           console.log('move_from')
         when 'remote_move_to'
           console.log('move_to')
+        when 'remote_modify'
+          if !event.directory
+            mkdirp.sync(atom.getUserWorkingDirPath() + '/' + event.location)
+            file_sys.openSync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file, 'a')
+
+            @ws.send JSON.stringify({
+              action: 'request_content',
+              location: event.location,
+              file: event.file
+            })
 
       console.log("SyncedFS debug: " + e)
     @ws.onclose = =>
