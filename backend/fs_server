@@ -8,13 +8,14 @@ require 'fileutils'
 
 username = ENV['QUERY_STRING'].split('=').last
 
+inotify = IO.popen("inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code")
+
 Thread.new do
   # For this to work, this command must be run for each user:
 
   #  inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code
   #  which requires apt-get install inotify-tools
 
-  inotify = IO.popen(%W[inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code])
   f = IO.popen(%W[tail -f -n0 /home/logantest/.fs_changes.log])
 
   loop do
@@ -74,6 +75,10 @@ end
 
 while true
   trap('INT') do
-    `kill -2 #{inotify.pid}`
+    Process.kill("INT", inotify.pid)
+    inotify.close
+    Process.kill("INT", f.pid)
+    f.close
+    `truncate --size 0 /home/#{username}/.fs_changes.log`
   end
 end
