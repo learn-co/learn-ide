@@ -9,16 +9,44 @@ require 'fileutils'
 username = ENV['QUERY_STRING'].split('=').last
 
 Thread.new do
+  # For this to work, this command must be run for each user:
+
+  #  inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code
+  #  which requires apt-get install inotify-tools
+
+  inotify = IO.popen(%W[inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code])
+  f = IO.popen(%W[tail -f -n0 /home/logantest/.fs_changes.log])
+
   loop do
-    fs_event_data = JSON.parse(STDIN.readline)
-    project_path = fs_event_data['project']['path']
-    file_path    = fs_event_data['file']['path']
-    local_path   = (file_path.split('/') - project_path.split('/')).join('/')
-    local_dir    = "/home/#{username}/code/#{local_path.split('/').first}"
-    File.open('/home/logantest/output', 'a') do |f|
-      f.write(local_dir)
+    select([f])
+    while line = f.gets
+      #Thread.new do
+        location, event, file = line.strip.split(' ')
+        event, directory = event.split(',')
+        event = "remote_#{event}".downcase
+        location = (location.split('/') - "/home/#{username}/code/".split('/')).join('/')
+
+        e = {'event' => event, 'directory' => !!directory, 'location' => location, 'file' => file}.to_json
+        puts e
+      #end
     end
-    full_path    = "/home/#{username}/code/#{local_path}"
+  end
+end
+
+Thread.new do
+  loop do
+    begin
+      fs_event_data = JSON.parse(STDIN.readline)
+      project_path = fs_event_data['project']['path']
+      file_path    = fs_event_data['file']['path']
+      local_path   = (file_path.split('/') - project_path.split('/')).join('/')
+      local_dir    = "/home/#{username}/code/#{local_path.split('/').first}"
+      File.open('/home/logantest/output', 'a') do |f|
+        f.write(local_dir)
+      end
+      full_path    = "/home/#{username}/code/#{local_path}"
+    rescue
+    end
 
     case fs_event_data['action']
     when 'local_save'
@@ -32,6 +60,12 @@ Thread.new do
       `sudo chown -R #{username}:ile-admin #{local_dir}`
     when 'local_delete'
       FileUtils.rm_rf(full_path)
+    when 'request_content'
+      Thread.new do
+        content = Base64.encode64(File.read("/home/#{username}/code/#{fs_event_data['location']}/#{fs_event_data['file']}"))
+        e = {'event' => 'content_response', 'location' => fs_event_data['location'], 'file' => fs_event_data['file'], 'content' => content}.to_json
+        puts e
+      end
     else
       # Nothing
     end
@@ -39,4 +73,7 @@ Thread.new do
 end
 
 while true
+  trap('INT') do
+    `kill -2 #{inotify.pid}`
+  end
 end
