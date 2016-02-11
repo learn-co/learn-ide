@@ -16,7 +16,7 @@ Thread.new do
   #  inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code
   #  which requires apt-get install inotify-tools
 
-  f = IO.popen(%W[tail -f -n0 /home/logantest/.fs_changes.log])
+  f = IO.popen(%W[tail -f -n0 /home/#{username}/.fs_changes.log])
 
   loop do
     select([f])
@@ -42,7 +42,7 @@ Thread.new do
       file_path    = fs_event_data['file']['path']
       local_path   = (file_path.split('/') - project_path.split('/')).join('/')
       local_dir    = "/home/#{username}/code/#{local_path.split('/').first}"
-      File.open('/home/logantest/output', 'a') do |f|
+      File.open("/home/#{username}/output", 'a') do |f|
         f.write(local_dir)
       end
       full_path    = "/home/#{username}/code/#{local_path}"
@@ -75,11 +75,13 @@ end
 
 while true
   trap('INT') do
-    inotify_pids = `ps aux | grep inotifywait | grep \/home\/#{username}\/\.fs_changes\.log | grep -v grep | awk '{ print $3 }'`.split("\n")
-    inotify_pids.each do |pid|
+    `ps aux | grep inotifywait | grep \/home\/#{username}\/\.fs_changes\.log | grep -v grep | awk '{ print $2 }'`.split("\n").each do |pid|
       `kill -9 #{pid}`
     end
-    `kill -9 #{f.pid}`
+    `ps aux | grep tail | grep \/home\/#{username}\/\.fs_changes\.log | grep -v grep | awk '{ print $2 }'`.split("\n").each do |pid|
+      `kill -9 #{pid}`
+    end
+
     `truncate --size 0 /home/#{username}/.fs_changes.log`
   end
 end
