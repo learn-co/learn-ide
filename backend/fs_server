@@ -17,6 +17,7 @@ Thread.new do
   #  which requires apt-get install inotify-tools
 
   f = IO.popen(%W[tail -f -n0 /home/#{username}/.fs_changes.log])
+  #f = IO.popen(%W[inotifywait -rme create,delete,move /home/#{username}/code])
 
   loop do
     select([f])
