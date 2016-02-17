@@ -51,6 +51,6 @@ class SyncedFS
 
   formatFilePath: (path) ->
     if path.match(/:\\/)
-      return path.sub(/(.*:\\)/, '/').gsub('\\', '/')
+      return path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
     else
       return path
