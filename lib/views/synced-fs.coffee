@@ -22,7 +22,7 @@ class TerminalView extends View
   deleteDirectoryRecursive: (path) ->
     self = this
     files = []
-    sep = /^win/.test(process.platform) ? '\\' : '/'
+    sep = if /^win/.test(process.platform) then '\\' else '/'
     console.log("SEP: " + sep)
 
     if file_sys.existsSync(path)
