@@ -41,10 +41,16 @@ class SyncedFS
         path: project.getPaths()[0]
       },
       file: {
-        path: file.path
+        path: this.formatFilePath(file.path)
         digest: file.digest,
       },
       buffer: {
         content: window.btoa(buffer.getText())
       }
     })
+
+  formatFilePath: (path) ->
+    if path.match(/:\\/)
+      return path.sub(/(.*:\\)/, '/').gsub('\\', '/')
+    else
+      return path
