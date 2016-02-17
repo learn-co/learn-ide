@@ -23,6 +23,7 @@ class TerminalView extends View
     self = this
     files = []
     sep = /^win/.test(process.platform) ? '\\' : '/'
+    console.log("SEP: " + sep)
 
     if file_sys.existsSync(path)
       files = file_sys.readdirSync(path)
