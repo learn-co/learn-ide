@@ -41,11 +41,6 @@ Thread.new do
       fs_event_data = JSON.parse(STDIN.readline)
       project_path = fs_event_data['project']['path']
       file_path    = fs_event_data['file']['path']
-
-      #if file_path.match(/:\\/)
-      #  file_path = file_path.sub(/(.*:\\)/, '/').gsub('\\', '/')
-      #end
-
       local_path   = (file_path.split('/') - project_path.split('/')).join('/')
       local_dir    = "/home/#{username}/code/#{local_path.split('/').first}"
       File.open("/home/#{username}/output", 'a') do |f|

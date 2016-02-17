@@ -22,11 +22,12 @@ class TerminalView extends View
   deleteDirectoryRecursive: (path) ->
     self = this
     files = []
+    sep = /^win/.test(process.platform) ? '\\' : '/'
 
     if file_sys.existsSync(path)
       files = file_sys.readdirSync(path)
       files.forEach (file, index) ->
-        curPath = path + '/' + file
+        curPath = path + sep + file
         if file_sys.lstatSync(curPath).isDirectory()
           self.deleteDirectoryRecursive(curPath)
         else
@@ -35,6 +36,8 @@ class TerminalView extends View
       file_sys.rmdirSync(path)
 
   handleEvents: ->
+    sep = /^win/.test(process.platform) ? '\\' : '/'
+
     @ws.onopen = (e) =>
       @element.style.color = '#73c990'
     @ws.onmessage = (e) =>
@@ -43,12 +46,12 @@ class TerminalView extends View
         event = JSON.parse(e.data)
         switch event.event
           when 'remote_create'
-            console.log('Created: ' + event.location + '/' + event.file)
+            console.log('Created: ' + event.location + sep + event.file)
             if event.directory
-              mkdirp.sync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file)
+              mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file)
             else
-              mkdirp.sync(atom.getUserWorkingDirPath() + '/' + event.location)
-              file_sys.openSync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file, 'a')
+              mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location)
+              file_sys.openSync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file, 'a')
 
               @ws.send JSON.stringify({
                 action: 'request_content',
@@ -57,12 +60,12 @@ class TerminalView extends View
               })
           when 'content_response'
             content = new Buffer(event.content, 'base64').toString()
-            file_sys.writeFileSync atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file, content
+            file_sys.writeFileSync atom.getUserWorkingDirPath() + sep + event.location + sep + event.file, content
           when 'remote_delete'
             if event.directory
-              this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file
+              this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + sep + event.location + sep + event.file
             else
-              delPath = atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file
+              delPath = atom.getUserWorkingDirPath() + sep + event.location + sep + event.file
               if file_sys.existsSync(delPath)
                 file_sys.unlinkSync(delPath)
           when 'remote_move_from'
@@ -71,8 +74,8 @@ class TerminalView extends View
             console.log('move_to')
           when 'remote_modify'
             if !event.directory
-              mkdirp.sync(atom.getUserWorkingDirPath() + '/' + event.location)
-              file_sys.openSync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file, 'a')
+              mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location)
+              file_sys.openSync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file, 'a')
 
               @ws.send JSON.stringify({
                 action: 'request_content',
@@ -80,12 +83,12 @@ class TerminalView extends View
                 file: event.file
               })
           when 'remote_open'
-            console.log('Opened: ' + event.location + '/' + event.file)
+            console.log('Opened: ' + event.location + sep + event.file)
 
             if event.location == ''
               atom.workspace.open(event.file)
             else
-              atom.workspace.open(event.location + '/' + event.file)
+              atom.workspace.open(event.location + sep + event.file)
 
       catch err
         console.log(err)
