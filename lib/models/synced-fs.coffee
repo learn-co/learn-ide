@@ -38,7 +38,7 @@ class SyncedFS
     @ws.send JSON.stringify({
       action: "local_save",
       project: {
-        path: formatFilePath(project.getPaths()[0])
+        path: this.formatFilePath(project.getPaths()[0])
       },
       file: {
         path: this.formatFilePath(file.path)
