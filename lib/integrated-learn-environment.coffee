@@ -18,7 +18,6 @@ module.exports =
 
   activate: (state) ->
     @term = new Terminal("ws://ironboard07.fe.flatironschool.com:4463?token=logantest")
-    #@term = new Terminal("ws://localhost:4463?token=logantest")
     @termView = new TerminalView(state, @term)
 
     @fs = new SyncedFS("ws://ironboard07.fe.flatironschool.com:4464?token=logantest", @term)

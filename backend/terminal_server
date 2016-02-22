@@ -8,18 +8,17 @@ require 'net/http'
 require 'uri'
 require 'base64'
 
-#token = ENV['QUERY_STRING'].split('token=').last
-#uri = URI('https://learn.co/api/v1/users/me')
-# response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
-#   req = Net::HTTP::Get.new(uri)
-#   req['Authorization'] = "Bearer #{token}"
-#
-#   http.request(req)
-# end
+token = ENV['QUERY_STRING'].split('token=').last
+uri = URI('https://learn.co/api/v1/users/me')
+response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+  req = Net::HTTP::Get.new(uri)
+  req['Authorization'] = "Bearer #{token}"
 
-# username = JSON.parse(response.body)['username'].sub('hasson','')
+  http.request(req)
+end
 
-username = ENV['QUERY_STRING'].split('=').last
+username = JSON.parse(response.body)['username']
+
 stdout, stdin, _pid = PTY.spawn("TERM=xterm-256color sudo su - #{username}")
 
 Thread.new do

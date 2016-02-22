@@ -5,8 +5,19 @@ STDOUT.sync = true
 require 'json'
 require 'base64'
 require 'fileutils'
+require 'net/http'
+require 'uri'
 
-username = ENV['QUERY_STRING'].split('=').last
+token = ENV['QUERY_STRING'].split('token=').last
+uri = URI('https://learn.co/api/v1/users/me')
+response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+  req = Net::HTTP::Get.new(uri)
+  req['Authorization'] = "Bearer #{token}"
+
+  http.request(req)
+end
+
+username = JSON.parse(response.body)['username']
 
 `inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code`
 
