@@ -17,10 +17,12 @@ module.exports =
   subscriptions: null
 
   activate: (state) ->
-    @term = new Terminal("ws://ironboard07.fe.flatironschool.com:4463?token=logantest")
+    oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
+
+    @term = new Terminal("ws://ironboard07.fe.flatironschool.com:4463?token=" + oauthToken)
     @termView = new TerminalView(state, @term)
 
-    @fs = new SyncedFS("ws://ironboard07.fe.flatironschool.com:4464?token=logantest", @term)
+    @fs = new SyncedFS("ws://ironboard07.fe.flatironschool.com:4464?token=" + oauthToken, @term)
     @fsView = new SyncedFSView(state, @fs)
 
     @subscriptions = new CompositeDisposable
