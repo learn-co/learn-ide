@@ -22,6 +22,7 @@ class TerminalView extends View
       atom.config.get('editor.fontFamily') or "monospace"
     @term.element.style.fontSize = ->
       atom.config.get('editor.fontSize')
+    @openColor = @term.element.style.color
 
   handleEvents: ->
     @on 'focus', =>
@@ -35,6 +36,7 @@ class TerminalView extends View
     @ws.onmessage = (e) =>
       @term.write(window.atob(e.data))
     @ws.onclose = =>
+      @term.off 'data'
       @term.element.style.color = '#666'
       @term.cursorHidden = true
 
@@ -72,3 +74,19 @@ class TerminalView extends View
       @panel.hide()
     else
       @panel.show()
+
+  reset: (newWs) ->
+    @ws = newWs
+    this.resetListeners()
+    @term.element.style.color = this.openColor
+    @term.cursorHidden = false
+
+  resetListeners: ->
+    @ws.onmessage = (e) =>
+      @term.write(window.atob(e.data))
+    @ws.onclose = =>
+      @term.off 'data'
+      @term.element.style.color = '#666'
+      @term.cursorHidden = true
+    @term.on 'data', (data) =>
+      @ws.send(data)

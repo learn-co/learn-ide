@@ -17,17 +17,21 @@ module.exports =
   subscriptions: null
 
   activate: (state) ->
-    oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
+    @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
 
-    @term = new Terminal("ws://ironboard07.fe.flatironschool.com:4463?token=" + oauthToken)
+    #@term = new Terminal("ws://ironboard07.fe.flatironschool.com:4463?token=" + oauthToken)
+    @term = new Terminal("ws://vm01.students.learn.co:4463?token=" + @oauthToken)
     @termView = new TerminalView(state, @term)
 
-    @fs = new SyncedFS("ws://ironboard07.fe.flatironschool.com:4464?token=" + oauthToken, @term)
+    #@fs = new SyncedFS("ws://ironboard07.fe.flatironschool.com:4464?token=" + oauthToken, @term)
+    @fs = new SyncedFS("ws://vm01.students.learn.co:4464?token=" + @oauthToken, @term)
     @fsView = new SyncedFSView(state, @fs)
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
       @termView.toggle()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:reset': =>
+      @term.reset(@termView)
 
   deactivate: ->
     @termView.destroy()
