@@ -17,7 +17,7 @@ response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
   http.request(req)
 end
 
-username = JSON.parse(response.body)['username'].sub('hasson', 'test')
+username = JSON.parse(response.body)['username']
 
 `inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code`
 
