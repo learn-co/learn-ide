@@ -11,3 +11,7 @@ To accomplish this, some design principles are presented:
   * Assume the host doesn't have support for a scripting language, as is the case with Windows (PowerShell may or may not exist, depending on the version of Windows).
   * Forward input to the student's server.
 * Reliance on a filesystem structure should be minimal. Don't assume certain paths exist.
+
+# NOTES
+
+1. To start websocketd correctly: `websocketd --port=4463 --ssl --sslcert=ile.learn.co.crt --sslkey=ile.learn.co.key --address=ile.learn.co ./terminal_server`

@@ -78,6 +78,9 @@ class TerminalView extends View
   reset: (newWs) ->
     @ws = newWs
     this.resetListeners()
+    this.resetColor()
+
+  resetColor: ->
     @term.element.style.color = this.openColor
     @term.cursorHidden = false
 

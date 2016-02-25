@@ -19,10 +19,10 @@ module.exports =
   activate: (state) ->
     @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
 
-    @term = new Terminal("ws://vm01.students.learn.co:4463?token=" + @oauthToken)
+    @term = new Terminal("wss://ile.learn.co:4463?token=" + @oauthToken)
     @termView = new TerminalView(state, @term)
 
-    @fs = new SyncedFS("ws://vm01.students.learn.co:4464?token=" + @oauthToken, @term)
+    @fs = new SyncedFS("wss://ile.learn.co:4464?token=" + @oauthToken, @term)
     @fsView = new SyncedFSView(state, @fs)
 
     @subscriptions = new CompositeDisposable
@@ -32,8 +32,10 @@ module.exports =
       @term.reset(@termView)
 
   deactivate: ->
-    @termView.destroy()
-    @fsView.destroy()
+    #@termView.destroy()
+    #@fsView.destroy()
+    @termView = null
+    @fsView = null
     @subscriptions.dispose()
 
   consumeStatusBar: (statusBar) ->
