@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# Need to run this with jruby
+
 STDOUT.sync = true
 
 require 'pty'
