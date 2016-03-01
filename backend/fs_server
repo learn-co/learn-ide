@@ -54,9 +54,6 @@ Thread.new do
       file_path    = fs_event_data['file']['path']
       local_path   = (file_path.split('/') - project_path.split('/')).join('/')
       local_dir    = "/home/#{username}/code/#{local_path.split('/').first}"
-      File.open("/home/#{username}/output", 'a') do |f|
-        f.write(local_dir)
-      end
       full_path    = "/home/#{username}/code/#{local_path}"
     rescue
     end
@@ -70,7 +67,7 @@ Thread.new do
         f.write(Base64.decode64(fs_event_data['buffer']['content']))
       end
 
-      `sudo chown -R #{username}:ile-admin #{local_dir}`
+      `sudo chown -R #{username}:students #{local_dir}`
     when 'local_delete'
       FileUtils.rm_rf(full_path)
     when 'request_content'
