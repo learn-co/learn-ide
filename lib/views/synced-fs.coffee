@@ -1,6 +1,7 @@
 {$, View} = require 'atom-space-pen-views'
 file_sys  = require 'fs'
 mkdirp    = require 'mkdirp'
+exec      = require('child_process').execSync
 
 module.exports =
 class TerminalView extends View
@@ -29,7 +30,13 @@ class TerminalView extends View
       files = file_sys.readdirSync(path)
       files.forEach (file, index) ->
         curPath = path + sep + file
-        if file_sys.lstatSync(curPath).isDirectory()
+
+        if sep == '\\'
+          isdir = exec('if exist ' + curPath + '\* echo true').match(/true/)
+        else
+          isdir = file_sys.lstatSync(curPath).isDirectory()
+
+        if isdir
           self.deleteDirectoryRecursive(curPath)
         else
           file_sys.unlinkSync(curPath)
