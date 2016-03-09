@@ -55,15 +55,9 @@ class TerminalView extends View
           when 'remote_create'
             console.log('Created: ' + event.location + sep + event.file)
             if event.directory
-              if sep == '\\'
-                mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file)
-              else
-                exec('mkdir ' + atom.getUserWorkingDirPath() + sep + event.location + sep + event.file)
+              mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file)
             else
-              if sep == '\\'
-                mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location)
-              else
-                exec('mkdir ' + atom.getUserWorkingDirPath() + sep + event.location)
+              mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location)
               file_sys.openSync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file, 'a')
 
               @ws.send JSON.stringify({
