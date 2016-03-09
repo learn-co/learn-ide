@@ -50,51 +50,52 @@ class TerminalView extends View
       try
         console.log(e.data)
         event = JSON.parse(e.data)
-        switch event.event
-          when 'remote_create'
-            console.log('Created: ' + event.location + '/' + event.file)
-            if event.directory
-              mkdirp.sync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file)
-            else
-              mkdirp.sync(atom.getUserWorkingDirPath() + '/' + event.location)
-              file_sys.openSync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file, 'a')
+        if !(event.location.match(/node_modules/) || event.file.match(/node_modules/))
+          switch event.event
+            when 'remote_create'
+              console.log('Created: ' + event.location + '/' + event.file)
+              if event.directory
+                mkdirp.sync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file)
+              else
+                mkdirp.sync(atom.getUserWorkingDirPath() + '/' + event.location)
+                file_sys.openSync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file, 'a')
 
-              @ws.send JSON.stringify({
-                action: 'request_content',
-                location: event.location,
-                file: event.file
-              })
-          when 'content_response'
-            content = new Buffer(event.content, 'base64').toString()
-            file_sys.writeFileSync atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file, content
-          when 'remote_delete'
-            if event.directory
-              this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file
-            else
-              delPath = atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file
-              if file_sys.existsSync(delPath)
-                file_sys.unlinkSync(delPath)
-          when 'remote_move_from'
-            console.log('move_from')
-          when 'remote_move_to'
-            console.log('move_to')
-          when 'remote_modify'
-            if !event.directory
-              mkdirp.sync(atom.getUserWorkingDirPath() + '/' + event.location)
-              file_sys.openSync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file, 'a')
+                @ws.send JSON.stringify({
+                  action: 'request_content',
+                  location: event.location,
+                  file: event.file
+                })
+            when 'content_response'
+              content = new Buffer(event.content, 'base64').toString()
+              file_sys.writeFileSync atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file, content
+            when 'remote_delete'
+              if event.directory
+                this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file
+              else
+                delPath = atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file
+                if file_sys.existsSync(delPath)
+                  file_sys.unlinkSync(delPath)
+            when 'remote_move_from'
+              console.log('move_from')
+            when 'remote_move_to'
+              console.log('move_to')
+            when 'remote_modify'
+              if !event.directory
+                mkdirp.sync(atom.getUserWorkingDirPath() + '/' + event.location)
+                file_sys.openSync(atom.getUserWorkingDirPath() + '/' + event.location + '/' + event.file, 'a')
 
-              @ws.send JSON.stringify({
-                action: 'request_content',
-                location: event.location,
-                file: event.file
-              })
-          when 'remote_open'
-            console.log('Opened: ' + event.location + '/' + event.file)
+                @ws.send JSON.stringify({
+                  action: 'request_content',
+                  location: event.location,
+                  file: event.file
+                })
+            when 'remote_open'
+              console.log('Opened: ' + event.location + '/' + event.file)
 
-            if event.location == ''
-              atom.workspace.open(event.file)
-            else
-              atom.workspace.open(event.location + '/' + event.file)
+              if event.location == ''
+                atom.workspace.open(event.file)
+              else
+                atom.workspace.open(event.location + '/' + event.file)
 
       catch err
         console.log(err)
