@@ -144,10 +144,10 @@ class TerminalView extends View
           when 'remote_open'
             console.log('Opened: ' + this.formatFilePath(event.location) + @sep + event.file)
 
-            if event.location == ''
-              atom.workspace.open(event.file)
-            else
+            if event.location.length
               atom.workspace.open(this.formatFilePath(event.location) + @sep + event.file)
+            else
+              atom.workspace.open(event.file)
 
       catch err
         console.log(err)
