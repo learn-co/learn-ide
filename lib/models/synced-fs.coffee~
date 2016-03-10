@@ -16,6 +16,7 @@ class SyncedFS
         @sendSave(project, file, buffer)
 
     atom.commands.onDidDispatch (e) =>
+      console.log(e)
       if e.type == 'tree-view:remove'
         if e.target.attributes['data-path']
           path = e.target.attributes['data-path'].nodeValue
@@ -25,10 +26,10 @@ class SyncedFS
         @ws.send JSON.stringify({
           action: "local_delete",
           project: {
-            path: this.formatFilePath(atom.project.getPaths()[0])
+            path: atom.project.getPaths()[0]
           },
           file: {
-            path: this.formatFilePath(path)
+            path: path
           }
         })
       else if e.type == 'tree-view:add-file' || e.type == 'tree-view:add-folder' || e.type == 'core:confirm'
