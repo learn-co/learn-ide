@@ -1,10 +1,10 @@
-{$, View} = require 'atom-space-pen-views'
-file_sys  = require 'fs'
-mkdirp    = require 'mkdirp'
-exec      = require('child_process').execSync
-spawn     = require('child_process').spawnSync
+{$, View}  = require 'atom-space-pen-views'
+file_sys   = require 'fs'
+mkdirp     = require 'mkdirp'
+execSync   = require('child_process').execSync
+spawn      = require('child_process').spawnSync
 crossSpawn = require('cross-spawn').spawn
-rmdir     = require('rimraf')
+rmdir      = require('rimraf')
 
 module.exports =
 class TerminalView extends View
@@ -37,43 +37,22 @@ class TerminalView extends View
     files = []
 
     if file_sys.existsSync(path)
-      #if sep == '\\'
-      #  files = file_sys.readdirSync(path)
-      #  files.forEach (file, index) ->
-      #    curPath = path + sep + file
-      #  #res = crossSpawn.sync('rd', ['/S', '/Q', path])
-      #  res = crossSpawn.sync('dir', [path])
-      #  console.log(res.stdout.toString())
-      #  if res.stdout.toString().match(/<DIR>/)
-      #    self.deleteDirectoryRecursive(curPath)
-      #else
       files = file_sys.readdirSync(path)
+
       files.forEach (file, index) ->
         curPath = path + @sep + file
 
-        if sep == '\\'
-          console.log('checking if dir. curPath: ' + curPath)
-          #isdir = exec('if exist ' + curPath + '\* echo true').match(/true/)
+        if @windows
           isdir = crossSpawn.sync('dir', [curPath]).stdout.toString().match(/<DIR>/)
-          console.log('CUR PATH: ' + curPath)
-          console.log('IS DIR: ' + isdir)
         else
           isdir = file_sys.lstatSync(curPath).isDirectory()
 
         if isdir
           self.deleteDirectoryRecursive(curPath)
-          #out = crossSpawn.sync('takeown', ['/f', curPath, '/r', '/d', 'y'])
         else
-          if @windows
-            console.log('DELETING FILE: ' + curPath)
-            #out2 = crossSpawn.sync('takeown', ['/F', curPath])
-            #console.log('CURPATH: ' + curPath)
-            #out = crossSpawn.sync('del', [curPath, '/q', '/f'])
-            #console.log('DELETE ATTEMPT: ' + out.stdout.toString())
-            #console.log('DELETE ATTEMPT FAILED: ' + out.stderr.toString())
-            file_sys.unlinkSync(curPath)
-          else
-            file_sys.unlinkSync(curPath)
+          console.log('DELETING FILE: ' + curPath)
+
+          file_sys.unlinkSync(curPath)
 
       file_sys.rmdirSync(path)
 
@@ -90,12 +69,12 @@ class TerminalView extends View
               console.log('Created: ' + this.formatFilePath(event.location) + @sep + event.file)
               if event.directory
                 if @windows
-                  exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location) + @sep + event.file)
+                  execSync('mkdir ' + atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location) + @sep + event.file)
                 else
                   mkdirp.sync(atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file)
               else
                 #if @windows
-                #  exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location))
+                #  execSync('mkdir ' + atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location))
                 #else
                 mkdirp.sync(atom.getUserWorkingDirPath() + @sep + event.location)
 
@@ -131,7 +110,7 @@ class TerminalView extends View
             when 'remote_modify'
               if !event.directory
                 if @windows
-                  exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location))
+                  execSync('mkdir ' + atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location))
                 else
                   mkdirp.sync(atom.getUserWorkingDirPath() + @sep + event.location)
 
