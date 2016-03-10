@@ -2,6 +2,8 @@
 file_sys  = require 'fs'
 mkdirp    = require 'mkdirp'
 exec      = require('child_process').execSync
+spawn     = require('child_process').spawnSync
+crossSpawn = require('cross-spawn').spawn
 
 module.exports =
 class TerminalView extends View
@@ -21,27 +23,52 @@ class TerminalView extends View
     @handleEvents()
 
   deleteDirectoryRecursive: (path) ->
+    console.log("PATH: " + path)
     self = this
     files = []
     sep = if /^win/.test(process.platform) then '\\' else '/'
     console.log("SEP: " + sep)
 
-    if file_sys.existsSync(path)
-      files = file_sys.readdirSync(path)
+    #if file_sys.existsSync(path)
+    #if crossSpawn.sync('if exist ' + path + '\* echo true', []).stdout.toString().match(/true/)
+    if true
+      #if sep == '\\'
+      #  files = file_sys.readdirSync(path)
+      #  files.forEach (file, index) ->
+      #    curPath = path + sep + file
+      #  #res = crossSpawn.sync('rd', ['/S', '/Q', path])
+      #  res = crossSpawn.sync('dir', [path])
+      #  console.log(res.stdout.toString())
+      #  if res.stdout.toString().match(/<DIR>/)
+      #    self.deleteDirectoryRecursive(curPath)
+      #else
+      #files = file_sys.readdirSync(path)
+      files = []
+      console.log(files)
       files.forEach (file, index) ->
         curPath = path + sep + file
 
         if sep == '\\'
-          isdir = exec('if exist ' + curPath + '\* echo true').match(/true/)
+          console.log('checking if dir. curPath: ' + curPath)
+          #isdir = exec('if exist ' + curPath + '\* echo true').match(/true/)
+          #isdir = crossSpawn.sync('dir', [curPath]).stdout.toString().match(/<DIR>/)
+          isdir = false
+          console.log('CUR PATH: ' + curPath)
+          console.log('IS DIR: ' + isdir)
         else
           isdir = file_sys.lstatSync(curPath).isDirectory()
 
         if isdir
           self.deleteDirectoryRecursive(curPath)
         else
-          file_sys.unlinkSync(curPath)
+          if sep == '\\'
+            console.log('DELETING FILE: ' + curPath)
+            #crossSpawn.sync('del', ['/q', '/f', curPath])
+            #file_sys.unlinkSync(curPath)
+          else
+            file_sys.unlinkSync(curPath)
 
-      file_sys.rmdirSync(path)
+      #file_sys.rmdirSync(path)
 
   handleEvents: ->
     @ws.onopen = (e) =>
@@ -55,9 +82,15 @@ class TerminalView extends View
           when 'remote_create'
             console.log('Created: ' + event.location + sep + event.file)
             if event.directory
-              mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file)
+              if sep == '\\'
+                mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file)
+              else
+                exec('mkdir ' + atom.getUserWorkingDirPath() + sep + event.location + sep + event.file)
             else
-              mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location)
+              if sep == '\\'
+                mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location)
+              else
+                exec('mkdir ' + atom.getUserWorkingDirPath() + sep + event.location)
               file_sys.openSync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file, 'a')
 
               @ws.send JSON.stringify({
@@ -70,7 +103,10 @@ class TerminalView extends View
             file_sys.writeFileSync atom.getUserWorkingDirPath() + sep + event.location + sep + event.file, content
           when 'remote_delete'
             if event.directory
-              this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + sep + event.location + sep + event.file
+              if event.location.length
+                this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + sep + event.location + sep + event.file
+              else
+                this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + sep + event.file
             else
               delPath = atom.getUserWorkingDirPath() + sep + event.location + sep + event.file
               if file_sys.existsSync(delPath)
