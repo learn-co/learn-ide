@@ -25,6 +25,12 @@ class TerminalView extends View
 
     @handleEvents()
 
+  formatFilePath: (path) ->
+    if path.match(/:\\/)
+      return path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
+    else
+      return path
+
   deleteDirectoryRecursive: (path) ->
     console.log("PATH: " + path)
     self = this
@@ -80,19 +86,19 @@ class TerminalView extends View
         event = JSON.parse(e.data)
         switch event.event
           when 'remote_create'
-            console.log('Created: ' + event.location + @sep + event.file)
+            console.log('Created: ' + this.formatFilePath(event.location) + @sep + event.file)
             if event.directory
               if @windows
-                exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file)
+                exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location) + @sep + event.file)
               else
                 mkdirp.sync(atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file)
             else
-              if @windows
-                exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + event.location)
-              else
-                mkdirp.sync(atom.getUserWorkingDirPath() + @sep + event.location)
+              #if @windows
+              #  exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location))
+              #else
+              mkdirp.sync(atom.getUserWorkingDirPath() + @sep + event.location)
 
-              file_sys.openSync(atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file, 'a')
+              file_sys.openSync(atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location) + @sep + event.file, 'a')
 
               @ws.send JSON.stringify({
                 action: 'request_content',
@@ -101,11 +107,11 @@ class TerminalView extends View
               })
           when 'content_response'
             content = new Buffer(event.content, 'base64').toString()
-            file_sys.writeFileSync atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file, content
+            file_sys.writeFileSync atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location) + @sep + event.file, content
           when 'remote_delete'
             if event.directory
               if @windows
-                rmdir atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file, (error) ->
+                rmdir atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location) + @sep + event.file, (error) ->
                   console.log('RMDIR ERROR: ' + error)
               else
                 if event.location.length
@@ -113,7 +119,7 @@ class TerminalView extends View
                 else
                   this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + @sep + event.file
             else
-              delPath = atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file
+              delPath = atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location) + @sep + event.file
 
               if file_sys.existsSync(delPath)
                 file_sys.unlinkSync(delPath)
@@ -124,11 +130,11 @@ class TerminalView extends View
           when 'remote_modify'
             if !event.directory
               if @windows
-                exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + event.location)
+                exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location))
               else
                 mkdirp.sync(atom.getUserWorkingDirPath() + @sep + event.location)
 
-              file_sys.openSync(atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file, 'a')
+              file_sys.openSync(atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location) + @sep + event.file, 'a')
 
               @ws.send JSON.stringify({
                 action: 'request_content',
@@ -136,12 +142,12 @@ class TerminalView extends View
                 file: event.file
               })
           when 'remote_open'
-            console.log('Opened: ' + event.location + @sep + event.file)
+            console.log('Opened: ' + this.formatFilePath(event.location) + @sep + event.file)
 
             if event.location == ''
               atom.workspace.open(event.file)
             else
-              atom.workspace.open(event.location + @sep + event.file)
+              atom.workspace.open(this.formatFilePath(event.location) + @sep + event.file)
 
       catch err
         console.log(err)
