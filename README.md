@@ -18,3 +18,7 @@ To accomplish this, some design principles are presented:
 2. `bundle install` and `npm install`
 3. Start atom with `atom -d`.
 4. Right click in a text buffer and select the "Toggle Learn.co Terminal" option.
+
+# NOTES
+
+1. To start websocketd correctly: `websocketd --port=4463 --ssl --sslcert=ile.learn.co.crt --sslkey=ile.learn.co.key --address=ile.learn.co ./terminal_server`

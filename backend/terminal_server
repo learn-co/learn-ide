@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+
+# Need to run this with jruby
+
+STDOUT.sync = true
+
+require 'pty'
+require 'json'
+require 'net/http'
+require 'uri'
+require 'base64'
+
+token = ENV['QUERY_STRING'].split('token=').last
+uri = URI('https://learn.co/api/v1/users/me')
+response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+  req = Net::HTTP::Get.new(uri.request_uri)
+  req['Authorization'] = "Bearer #{token}"
+
+  http.request(req)
+end
+
+username = JSON.parse(response.body)['username']
+
+stdout, stdin, _pid = PTY.spawn("TERM=xterm-256color sudo su - #{username}")
+
+Thread.new do
+  loop do
+    line = stdout.readpartial(4096)
+    puts Base64.encode64(line)
+  end
+end
+
+Thread.new do
+  loop do
+    stdin << STDIN.readline.gsub(/\n{1}$/, '').gsub(/\n{2}$/, "\n")
+  end
+end
+
+while true
+end

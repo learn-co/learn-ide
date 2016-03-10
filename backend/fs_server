@@ -1,0 +1,88 @@
+#!/usr/bin/env ruby
+
+STDOUT.sync = true
+
+require 'json'
+require 'base64'
+require 'fileutils'
+require 'net/http'
+require 'uri'
+
+token = ENV['QUERY_STRING'].split('token=').last
+uri = URI('https://learn.co/api/v1/users/me')
+response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+  req = Net::HTTP::Get.new(uri)
+  req['Authorization'] = "Bearer #{token}"
+
+  http.request(req)
+end
+
+username = JSON.parse(response.body)['username']
+
+`inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code`
+
+Thread.new do
+  f = IO.popen(%W[tail -f -n0 /home/#{username}/.fs_changes.log])
+
+  loop do
+    select([f])
+    while line = f.gets
+      location, event, file = line.strip.split(' ')
+      event, directory = event.split(',')
+      event = "remote_#{event}".downcase
+      location = (location.split('/') - "/home/#{username}/code/".split('/')).join('/')
+
+      e = {'event' => event, 'directory' => !!directory, 'location' => location, 'file' => file}.to_json
+      puts e
+    end
+  end
+end
+
+Thread.new do
+  loop do
+    begin
+      fs_event_data = JSON.parse(STDIN.readline)
+      project_path = fs_event_data['project']['path']
+      file_path    = fs_event_data['file']['path']
+      local_path   = (file_path.split('/') - project_path.split('/')).join('/')
+      local_dir    = "/home/#{username}/code/#{local_path.split('/').first}"
+      full_path    = "/home/#{username}/code/#{local_path}"
+    rescue
+    end
+
+    case fs_event_data['action']
+    when 'local_save'
+      needed_dirs = full_path.split('/')[0..-2].join('/')
+      FileUtils.mkdir_p(needed_dirs)
+
+      File.open(full_path, 'w+') do |f|
+        f.write(Base64.decode64(fs_event_data['buffer']['content']))
+      end
+
+      `sudo chown -R #{username}:students #{local_dir}`
+    when 'local_delete'
+      FileUtils.rm_rf(full_path)
+    when 'request_content'
+      Thread.new do
+        content = Base64.encode64(File.read("/home/#{username}/code/#{fs_event_data['location']}/#{fs_event_data['file']}"))
+        e = {'event' => 'content_response', 'location' => fs_event_data['location'], 'file' => fs_event_data['file'], 'content' => content}.to_json
+        puts e
+      end
+    else
+      # Nothing
+    end
+  end
+end
+
+while true
+  trap('INT') do
+    `ps aux | grep inotifywait | grep \/home\/#{username}\/\.fs_changes\.log | grep -v grep | awk '{ print $2 }'`.split("\n").each do |pid|
+      `kill -9 #{pid}`
+    end
+    `ps aux | grep tail | grep \/home\/#{username}\/\.fs_changes\.log | grep -v grep | awk '{ print $2 }'`.split("\n").each do |pid|
+      `kill -9 #{pid}`
+    end
+
+    `truncate --size 0 /home/#{username}/.fs_changes.log`
+  end
+end

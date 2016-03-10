@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $1 == "." ]; then
+  open_output="$(pwd)/ OPEN README.md"
+else
+  open_output="$(pwd)/ OPEN $1"
+fi
+
+echo $open_output >> $HOME/.fs_changes.log

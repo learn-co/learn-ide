@@ -17,19 +17,25 @@ module.exports =
   subscriptions: null
 
   activate: (state) ->
-    @term = new Terminal("ws://localhost:4463")
+    @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
+
+    @term = new Terminal("wss://ile.learn.co:4463?token=" + @oauthToken)
     @termView = new TerminalView(state, @term)
 
-    @fs = new SyncedFS("ws://localhost:4464", @term)
+    @fs = new SyncedFS("wss://ile.learn.co:4464?token=" + @oauthToken, @term)
     @fsView = new SyncedFSView(state, @fs)
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
       @termView.toggle()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:reset': =>
+      @term.reset(@termView)
 
   deactivate: ->
-    @termView.destroy()
-    @fsView.destroy()
+    #@termView.destroy()
+    #@fsView.destroy()
+    @termView = null
+    @fsView = null
     @subscriptions.dispose()
 
   consumeStatusBar: (statusBar) ->

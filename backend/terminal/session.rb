@@ -3,7 +3,7 @@ require 'pty'
 module Terminal
   class Session
     def initialize
-      @stdout, @stdin, @pid = PTY.spawn("/bin/bash -il")
+      @stdout, @stdin, @pid = PTY.spawn("/bin/bash -li")
     end
 
     def bind_to(websocket)

@@ -3,8 +3,7 @@
   "main": "./lib/integrated-learn-environment",
   "version": "1.0.0",
   "description": "Learn meets Atom",
-  "keywords": [
-  ],
+  "keywords": [],
   "activationCommands": {
     "atom-workspace": "integrated-learn-environment:toggleTerminal"
   },
@@ -21,8 +20,10 @@
     }
   },
   "dependencies": {
-    "term.js": "^0.0.7",
+    "atom-space-pen-views": "^2.1.0",
+    "mkdirp": "^0.5.1",
+    "rmdir": "^1.2.0",
     "socket.io-client": "1.3.7",
-    "atom-space-pen-views": "^2.1.0"
+    "term.js": "^0.0.7"
   }
 }
