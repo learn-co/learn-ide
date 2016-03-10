@@ -1,11 +1,9 @@
 #!/bin/bash
 
-# Note, this needs to be added to users' PATH
-
 if [ $1 == "." ]; then
   open_output="$(pwd)/ OPEN README.md"
 else
   open_output="$(pwd)/ OPEN $1"
 fi
 
-echo $open_output >> /home/logantest/.fs_changes.log
+echo $open_output >> $HOME/.fs_changes.log
