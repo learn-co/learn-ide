@@ -16,6 +16,8 @@ class TerminalView extends View
 
     @fs = fs
     @ws = fs.ws
+    @sep = if /^win/.test(process.platform) then '\\' else '/'
+    @windows = if @sep == '\\' then true else false
 
     # Default text
     @text(" Learn")
@@ -27,8 +29,6 @@ class TerminalView extends View
     console.log("PATH: " + path)
     self = this
     files = []
-    sep = if /^win/.test(process.platform) then '\\' else '/'
-    console.log("SEP: " + sep)
 
     if file_sys.existsSync(path)
       #if sep == '\\'
@@ -43,7 +43,7 @@ class TerminalView extends View
       #else
       files = file_sys.readdirSync(path)
       files.forEach (file, index) ->
-        curPath = path + sep + file
+        curPath = path + @sep + file
 
         if sep == '\\'
           console.log('checking if dir. curPath: ' + curPath)
@@ -58,7 +58,7 @@ class TerminalView extends View
           self.deleteDirectoryRecursive(curPath)
           #out = crossSpawn.sync('takeown', ['/f', curPath, '/r', '/d', 'y'])
         else
-          if sep == '\\'
+          if @windows
             console.log('DELETING FILE: ' + curPath)
             #out2 = crossSpawn.sync('takeown', ['/F', curPath])
             #console.log('CURPATH: ' + curPath)
@@ -75,24 +75,24 @@ class TerminalView extends View
     @ws.onopen = (e) =>
       @element.style.color = '#73c990'
     @ws.onmessage = (e) =>
-      sep = if /^win/.test(process.platform) then '\\' else '/'
       try
         console.log(e.data)
         event = JSON.parse(e.data)
         switch event.event
           when 'remote_create'
-            console.log('Created: ' + event.location + sep + event.file)
+            console.log('Created: ' + event.location + @sep + event.file)
             if event.directory
-              if sep == '\\'
-                mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file)
+              if @windows
+                exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file)
               else
-                exec('mkdir ' + atom.getUserWorkingDirPath() + sep + event.location + sep + event.file)
+                mkdirp.sync(atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file)
             else
-              if sep == '\\'
-                mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location)
+              if @windows
+                exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + event.location)
               else
-                exec('mkdir ' + atom.getUserWorkingDirPath() + sep + event.location)
-              file_sys.openSync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file, 'a')
+                mkdirp.sync(atom.getUserWorkingDirPath() + @sep + event.location)
+
+              file_sys.openSync(atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file, 'a')
 
               @ws.send JSON.stringify({
                 action: 'request_content',
@@ -101,17 +101,20 @@ class TerminalView extends View
               })
           when 'content_response'
             content = new Buffer(event.content, 'base64').toString()
-            file_sys.writeFileSync atom.getUserWorkingDirPath() + sep + event.location + sep + event.file, content
+            file_sys.writeFileSync atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file, content
           when 'remote_delete'
             if event.directory
-              rmdir atom.getUserWorkingDirPath() + sep + event.location + sep + event.file, (error) ->
-                console.log(error)
-              #if event.location.length
-              #  this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + sep + event.location + sep + event.file
-              #else
-              #  this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + sep + event.file
+              if @windows
+                rmdir atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file, (error) ->
+                  console.log('RMDIR ERROR: ' + error)
+              else
+                if event.location.length
+                  this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file
+                else
+                  this.deleteDirectoryRecursive atom.getUserWorkingDirPath() + @sep + event.file
             else
-              delPath = atom.getUserWorkingDirPath() + sep + event.location + sep + event.file
+              delPath = atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file
+
               if file_sys.existsSync(delPath)
                 file_sys.unlinkSync(delPath)
           when 'remote_move_from'
@@ -120,11 +123,12 @@ class TerminalView extends View
             console.log('move_to')
           when 'remote_modify'
             if !event.directory
-              if sep == '\\'
-                mkdirp.sync(atom.getUserWorkingDirPath() + sep + event.location)
+              if @windows
+                exec('mkdir ' + atom.getUserWorkingDirPath() + @sep + event.location)
               else
-                exec('mkdir ' + atom.getUserWorkingDirPath() + sep + event.location)
-              file_sys.openSync(atom.getUserWorkingDirPath() + sep + event.location + sep + event.file, 'a')
+                mkdirp.sync(atom.getUserWorkingDirPath() + @sep + event.location)
+
+              file_sys.openSync(atom.getUserWorkingDirPath() + @sep + event.location + @sep + event.file, 'a')
 
               @ws.send JSON.stringify({
                 action: 'request_content',
@@ -132,12 +136,12 @@ class TerminalView extends View
                 file: event.file
               })
           when 'remote_open'
-            console.log('Opened: ' + event.location + sep + event.file)
+            console.log('Opened: ' + event.location + @sep + event.file)
 
             if event.location == ''
               atom.workspace.open(event.file)
             else
-              atom.workspace.open(event.location + sep + event.file)
+              atom.workspace.open(event.location + @sep + event.file)
 
       catch err
         console.log(err)
