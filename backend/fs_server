@@ -22,26 +22,18 @@ username = JSON.parse(response.body)['username']
 `inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code`
 
 Thread.new do
-  # For this to work, this command must be run for each user:
-
-  #  inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code
-  #  which requires apt-get install inotify-tools
-
   f = IO.popen(%W[tail -f -n0 /home/#{username}/.fs_changes.log])
-  #f = IO.popen(%W[inotifywait -rme create,delete,move /home/#{username}/code])
 
   loop do
     select([f])
     while line = f.gets
-      #Thread.new do
-        location, event, file = line.strip.split(' ')
-        event, directory = event.split(',')
-        event = "remote_#{event}".downcase
-        location = (location.split('/') - "/home/#{username}/code/".split('/')).join('/')
+      location, event, file = line.strip.split(' ')
+      event, directory = event.split(',')
+      event = "remote_#{event}".downcase
+      location = (location.split('/') - "/home/#{username}/code/".split('/')).join('/')
 
-        e = {'event' => event, 'directory' => !!directory, 'location' => location, 'file' => file}.to_json
-        puts e
-      #end
+      e = {'event' => event, 'directory' => !!directory, 'location' => location, 'file' => file}.to_json
+      puts e
     end
   end
 end
