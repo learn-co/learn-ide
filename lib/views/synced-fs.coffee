@@ -5,6 +5,7 @@ execSync   = require('child_process').execSync
 spawn      = require('child_process').spawnSync
 crossSpawn = require('cross-spawn').spawn
 rmdir      = require('rimraf')
+utf8       = require('utf8')
 
 module.exports =
 class TerminalView extends View
@@ -87,7 +88,7 @@ class TerminalView extends View
                 })
             when 'content_response'
               content = new Buffer(event.content, 'base64').toString()
-              file_sys.writeFileSync atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location) + @sep + event.file, content
+              file_sys.writeFileSync atom.getUserWorkingDirPath() + @sep + this.formatFilePath(event.location) + @sep + event.file, utf8.decode(content)
             when 'remote_delete'
               if event.directory
                 if @windows

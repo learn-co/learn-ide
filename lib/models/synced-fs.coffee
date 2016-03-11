@@ -13,7 +13,8 @@ class SyncedFS
       file = buffer.file
 
       editor.onDidSave =>
-        @sendSave(project, file, buffer)
+        if this.formatFilePath(file.path).match(/\.atom\/code/)
+          @sendSave(project, file, buffer)
 
     atom.commands.onDidDispatch (e) =>
       if e.type == 'tree-view:remove'
@@ -32,7 +33,8 @@ class SyncedFS
           }
         })
       else if e.type == 'tree-view:add-file' || e.type == 'tree-view:add-folder' || e.type == 'core:confirm'
-        console.log('other file event: ' + e.type)
+        true
+        # No good way yet to handle creations until a file is written
 
   sendSave: (project, file, buffer) ->
     @ws.send JSON.stringify({

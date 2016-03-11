@@ -1,4 +1,5 @@
 {$, View} = require 'atom-space-pen-views'
+utf8      = require 'utf8'
 
 module.exports =
 class TerminalView extends View
@@ -34,7 +35,7 @@ class TerminalView extends View
       @ws.send(data)
 
     @ws.onmessage = (e) =>
-      @term.write(window.atob(e.data))
+      @term.write(utf8.decode(window.atob(e.data)))
     @ws.onclose = =>
       @term.off 'data'
       @term.element.style.color = '#666'
