@@ -1,5 +1,6 @@
 {$, View} = require 'atom-space-pen-views'
 utf8      = require 'utf8'
+ipc       = require 'ipc'
 
 module.exports =
 class TerminalView extends View
@@ -9,7 +10,9 @@ class TerminalView extends View
 
   initialize: (state, terminal) ->
     @term = terminal.term
-    @ws = terminal.ws
+    @terminal = terminal
+    #@ws = terminal.ws
+    #@ws = null
     @panel = atom.workspace.addBottomPanel(item: this, visible: false, className: 'learn-terminal-view')
 
     @term.open(this.get(0))
@@ -32,14 +35,23 @@ class TerminalView extends View
       @resizeStarted(e)
 
     @term.on 'data', (data) =>
-      @ws.send(data)
+      ipc.send 'terminal-data', data
+      #@ws.send(data)
 
-    @ws.onmessage = (e) =>
-      @term.write(utf8.decode(window.atob(e.data)))
-    @ws.onclose = =>
+    @terminal.on 'terminal-message-received', (message) =>
+      @term.write(utf8.decode(window.atob(message)))
+
+    @terminal.on 'terminal-session-closed', () =>
       @term.off 'data'
       @term.element.style.color = '#666'
       @term.cursorHidden = true
+
+    #@ws.onmessage = (e) =>
+      #@term.write(utf8.decode(window.atob(e.data)))
+    #@ws.onclose = =>
+      #@term.off 'data'
+      #@term.element.style.color = '#666'
+      #@term.cursorHidden = true
 
   resizeStarted: ->
     $(document).on('mousemove', @resize)

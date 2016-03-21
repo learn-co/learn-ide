@@ -3,6 +3,7 @@ Terminal = require './models/terminal'
 SyncedFS = require './models/synced-fs'
 TerminalView = require './views/terminal'
 SyncedFSView = require './views/synced-fs'
+ipc = require 'ipc'
 
 module.exports =
   config:
