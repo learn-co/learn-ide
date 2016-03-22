@@ -32,28 +32,12 @@ class Terminal extends EventEmitter
         if node.innerText.match(/vm/)
           lastNode = node
 
-      console.log(JSON.stringify(lastNode.innerText))
-      for char in lastNode.innerText
+      sanitizedText = lastNode.innerText.replace(/^\s+|\s+$/g, '') + ' '
+
+      for char in sanitizedText
         this.emit 'raw-terminal-char-copy-received', char
 
       @term.showCursor()
-      #text = lastNode.innerText
-
-      #@term.cursorBlink = false
-      #existingNodes[0].innerText = lastNode.innerText
-      #@term.cursorBlink = true
-      #@term.startBlink()
-      #@term.refreshBlink()
-        #existingNodes[index].innerText = node.innerText
-
-      window.term = @term
-      #document.getElementsByClassName('terminal')[0].innerHTML = newHtml
-      #@term.showCursor()
-      #@term.initGlobal()
-      #@term.refresh(0, @term.rows - 1)
-      #@term.reset()
-      #@term.refreshBlink()
-      #@term.emit 'refresh-view'
 
   reset: (termView) ->
     @term.emit('data', "\r") # This doesn't work yet
