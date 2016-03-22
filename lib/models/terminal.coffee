@@ -32,7 +32,7 @@ class Terminal extends EventEmitter
         if node.innerText.match(/vm/)
           lastNode = node
 
-      sanitizedText = lastNode.innerText.replace(/^\s+|\s+$/g, '') + ' '
+      sanitizedText = lastNode.innerText.replace(/^\s+|\s+$/g, '')
 
       for char in sanitizedText
         this.emit 'raw-terminal-char-copy-received', char
