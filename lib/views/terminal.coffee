@@ -11,8 +11,6 @@ class TerminalView extends View
   initialize: (state, terminal) ->
     @term = terminal.term
     @terminal = terminal
-    #@ws = terminal.ws
-    #@ws = null
     @panel = atom.workspace.addBottomPanel(item: this, visible: false, className: 'learn-terminal-view')
 
     @term.open(this.get(0))
@@ -36,22 +34,17 @@ class TerminalView extends View
 
     @term.on 'data', (data) =>
       ipc.send 'terminal-data', data
-      #@ws.send(data)
 
     @terminal.on 'terminal-message-received', (message) =>
       @term.write(utf8.decode(window.atob(message)))
+
+    @terminal.on 'raw-terminal-char-copy-received', (message) =>
+      @term.write(message)
 
     @terminal.on 'terminal-session-closed', () =>
       @term.off 'data'
       @term.element.style.color = '#666'
       @term.cursorHidden = true
-
-    #@ws.onmessage = (e) =>
-      #@term.write(utf8.decode(window.atob(e.data)))
-    #@ws.onclose = =>
-      #@term.off 'data'
-      #@term.element.style.color = '#666'
-      #@term.cursorHidden = true
 
   resizeStarted: ->
     $(document).on('mousemove', @resize)
