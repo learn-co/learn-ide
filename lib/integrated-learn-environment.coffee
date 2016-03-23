@@ -32,13 +32,15 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:reset': =>
       @term.reset(@termView)
 
+    ipc.on 'remote-log', (msg) ->
+      console.log(msg)
+
   deactivate: ->
-    #@termView.destroy()
-    #@fsView.destroy()
     @termView = null
     @fsView = null
     @subscriptions.dispose()
-    ipc.send 'deactivate-terminal'
+
+    ipc.send 'deactivate-listener'
 
   consumeStatusBar: (statusBar) ->
     @statusBarTile = statusBar.addRightTile(item: @fsView, priority: 5000)

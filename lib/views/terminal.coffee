@@ -33,6 +33,7 @@ class TerminalView extends View
       @resizeStarted(e)
 
     @term.on 'data', (data) =>
+      console.log(data)
       ipc.send 'terminal-data', data
 
     @terminal.on 'terminal-message-received', (message) =>

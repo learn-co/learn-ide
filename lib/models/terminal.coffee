@@ -6,10 +6,9 @@ module.exports =
 class Terminal extends EventEmitter
   constructor: (ws_url) ->
     @term = new term.Terminal(cols: 80, rows: 24, useStyle: no, screenKeys: no, scrollback: yes)
+    window.term = @term
     ipc.send 'register-new-terminal', ws_url
     this.setListeners()
-    #@ws_url = ws_url
-    #@ws = new WebSocket(@ws_url)
 
   setListeners: () ->
     ipc.on 'terminal-message', (message) =>

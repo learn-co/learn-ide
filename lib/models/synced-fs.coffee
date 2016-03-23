@@ -1,12 +1,15 @@
+ipc = require 'ipc'
+
 module.exports =
 class SyncedFS
   constructor: (ws_url) ->
-    @ws = new WebSocket(ws_url)
+    ipc.send 'register-new-fs-connection', ws_url
+    ipc.on 'remote-open-event', (file) ->
+      atom.workspace.open(file)
 
     @handleEvents()
 
   handleEvents: ->
-    # TODO: See if we can watch the entire project dir using Atom's Directory API
     atom.workspace.observeTextEditors (editor) =>
       project = editor.project
       buffer = editor.buffer
@@ -23,8 +26,8 @@ class SyncedFS
         else
           path = e.target.file.path
 
-        @ws.send JSON.stringify({
-          action: "local_delete",
+        ipc.send 'fs-local-delete', JSON.stringify({
+          action: 'local_delete',
           project: {
             path: this.formatFilePath(atom.project.getPaths()[0])
           },
@@ -37,8 +40,8 @@ class SyncedFS
         # No good way yet to handle creations until a file is written
 
   sendSave: (project, file, buffer) ->
-    @ws.send JSON.stringify({
-      action: "local_save",
+    ipc.send 'fs-local-save', JSON.stringify({
+      action: 'local_save',
       project: {
         path: this.formatFilePath(project.getPaths()[0])
       },
