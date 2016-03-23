@@ -38,6 +38,7 @@ module.exports =
     @termView = null
     @fsView = null
     @subscriptions.dispose()
+    ipc.send 'deactivate-terminal'
 
   consumeStatusBar: (statusBar) ->
     @statusBarTile = statusBar.addRightTile(item: @fsView, priority: 5000)
