@@ -27,7 +27,7 @@
     "rimraf": "2.1",
     "rmdir": "^1.2.0",
     "socket.io-client": "1.3.7",
-    "term.js": "^0.0.7",
+    "term.js": "learn-co/term.js",
     "utf8": "^2.1.1"
   }
 }
