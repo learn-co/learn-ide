@@ -26,7 +26,7 @@ stdout_queue = Queue.new
 
 Thread.new do
   loop do
-    puts stdout_queue.pop
+    puts stdout_queue.shift
   end
 end
 
