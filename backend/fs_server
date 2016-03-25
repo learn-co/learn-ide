@@ -7,6 +7,7 @@ require 'base64'
 require 'fileutils'
 require 'net/http'
 require 'uri'
+require 'thread'
 
 token = ENV['QUERY_STRING'].split('token=').last
 uri = URI('https://learn.co/api/v1/users/me')
@@ -21,6 +22,14 @@ username = JSON.parse(response.body)['username']
 
 `inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code`
 
+stdout_queue = Queue.new
+
+Thread.new do
+  loop do
+    puts stdout_queue.pop
+  end
+end
+
 Thread.new do
   f = IO.popen(%W[tail -f -n0 /home/#{username}/.fs_changes.log])
 
@@ -33,7 +42,7 @@ Thread.new do
       location = (location.split('/') - "/home/#{username}/code/".split('/')).join('/')
 
       e = {'event' => event, 'directory' => !!directory, 'location' => location, 'file' => file}.to_json
-      puts e
+      stdout_queue << e
     end
   end
 end
@@ -66,7 +75,7 @@ Thread.new do
       Thread.new do
         content = Base64.encode64(File.read("/home/#{username}/code/#{fs_event_data['location']}/#{fs_event_data['file']}"))
         e = {'event' => 'content_response', 'location' => fs_event_data['location'], 'file' => fs_event_data['file'], 'content' => content}.to_json
-        puts e
+        stdout_queue << e
       end
     else
       # Nothing
