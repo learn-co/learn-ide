@@ -18,6 +18,8 @@ class TerminalView extends View
     @applyEditorStyling()
     @handleEvents()
 
+    ipc.send 'connection-state-request'
+
   applyEditorStyling: ->
     @term.element.style.height = '100%'
     @term.element.style.fontFamily = ->
@@ -33,7 +35,6 @@ class TerminalView extends View
       @resizeStarted(e)
 
     @term.on 'data', (data) =>
-      console.log(data)
       ipc.send 'terminal-data', data
 
     @terminal.on 'terminal-message-received', (message) =>
@@ -46,6 +47,18 @@ class TerminalView extends View
       @term.off 'data'
       @term.element.style.color = '#666'
       @term.cursorHidden = true
+
+    @terminal.on 'terminal-session-opened', () =>
+      console.log('OPENED')
+      @term.off 'data'
+      @term.on 'data', (data) =>
+        ipc.send 'terminal-data', data
+
+      @term.element.style.color = this.openColor
+      @term.cursorHidden = false
+
+    ipc.on 'connection-state', (state) =>
+      @terminal.updateConnectionState(state)
 
   resizeStarted: ->
     $(document).on('mousemove', @resize)
@@ -81,22 +94,3 @@ class TerminalView extends View
       @panel.hide()
     else
       @panel.show()
-
-  reset: (newWs) ->
-    @ws = newWs
-    this.resetListeners()
-    this.resetColor()
-
-  resetColor: ->
-    @term.element.style.color = this.openColor
-    @term.cursorHidden = false
-
-  resetListeners: ->
-    @ws.onmessage = (e) =>
-      @term.write(window.atob(e.data))
-    @ws.onclose = =>
-      @term.off 'data'
-      @term.element.style.color = '#666'
-      @term.cursorHidden = true
-    @term.on 'data', (data) =>
-      @ws.send(data)

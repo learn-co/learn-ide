@@ -10,6 +10,12 @@ class Terminal extends EventEmitter
     ipc.send 'register-new-terminal', ws_url
     this.setListeners()
 
+  updateConnectionState: (state) ->
+    if state == 'closed'
+      this.emit 'terminal-session-closed'
+    else
+      this.emit 'terminal-session-opened'
+
   setListeners: () ->
     ipc.on 'terminal-message', (message) =>
       this.emit 'terminal-message-received', message
@@ -18,6 +24,9 @@ class Terminal extends EventEmitter
       ipc.send 'terminal-view-response',
         index: request.index
         html: document.getElementsByClassName('terminal')[0].innerHTML
+
+    ipc.on 'connection-state', (state) =>
+      @updateConnectionState(state)
 
     ipc.on 'update-terminal-view', (newHtml) =>
       parser = new DOMParser()
@@ -31,7 +40,8 @@ class Terminal extends EventEmitter
         if node.innerText.match(/vm/)
           lastNode = node
 
-      sanitizedText = lastNode.innerText.replace(/^\s+|\s+$/g, '')
+      if lastNode
+        sanitizedText = lastNode.innerText.replace(/^\s+|\s+$/g, '')
 
       for char in sanitizedText
         this.emit 'raw-terminal-char-copy-received', char
