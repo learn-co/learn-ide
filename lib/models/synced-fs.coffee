@@ -8,6 +8,7 @@ class SyncedFS
       atom.workspace.open(file)
 
     @handleEvents()
+    @treeViewEventQueue = []
 
   handleEvents: ->
     atom.workspace.observeTextEditors (editor) =>
@@ -18,6 +19,8 @@ class SyncedFS
       editor.onDidSave =>
         if this.formatFilePath(file.path).match(/\.atom\/code/)
           @sendSave(project, file, buffer)
+      editor.onDidChangePath =>
+        console.log('PATH CHANGED')
 
     atom.commands.onDidDispatch (e) =>
       if e.type == 'tree-view:remove'
@@ -35,9 +38,32 @@ class SyncedFS
             path: this.formatFilePath(path)
           }
         })
-      else if e.type == 'tree-view:add-file' || e.type == 'tree-view:add-folder' || e.type == 'core:confirm'
-        true
-        # No good way yet to handle creations until a file is written
+      else if e.type == 'tree-view:add-file'
+        console.log(e)
+        # Add event to queue
+      else if e.type == 'tree-view:move'
+        window.currentEvent = e
+        @treeViewEventQueue.push
+          type: 'move'
+          event: e
+      else if e.type == 'core:cancel'
+        @treeViewEventQueue = []
+      else if e.type == 'core:confirm'
+        # do whatever's necessary to confirm event in queue
+
+        window.confirmedEvent = e
+        confirmedEvent = @treeViewEventQueue.shift()
+
+        switch confirmedEvent.type
+          when 'move'
+            event = confirmedEvent.event
+            from = event.target.getAttribute('data-name')
+            fromPath = event.target.getAttribute('data-path')
+          when 'addFile'
+            true
+        console.log(e)
+      else
+        console.log(e.type)
 
   sendSave: (project, file, buffer) ->
     ipc.send 'fs-local-save', JSON.stringify({
