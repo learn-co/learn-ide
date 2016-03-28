@@ -17,8 +17,8 @@ class SyncedFS
       file = buffer.file
 
       editor.onDidSave =>
-        if this.formatFilePath(file.path).match(/\.atom\/code/)
-          @sendSave(project, file, buffer)
+        if this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
+          @sendSave(editor.project, buffer.file, buffer)
       editor.onDidChangePath =>
         console.log('PATH CHANGED')
 
@@ -38,30 +38,23 @@ class SyncedFS
             path: this.formatFilePath(path)
           }
         })
-      else if e.type == 'tree-view:add-file'
-        console.log(e)
-        # Add event to queue
-      else if e.type == 'tree-view:move'
-        window.currentEvent = e
+      else if e.type == 'tree-view:add-file' || e.type == 'tree-view:move'
         @treeViewEventQueue.push
-          type: 'move'
+          type: e.type
           event: e
       else if e.type == 'core:cancel'
         @treeViewEventQueue = []
       else if e.type == 'core:confirm'
-        # do whatever's necessary to confirm event in queue
-
-        window.confirmedEvent = e
         confirmedEvent = @treeViewEventQueue.shift()
+        event = confirmedEvent.event
 
         switch confirmedEvent.type
-          when 'move'
-            event = confirmedEvent.event
+          when 'tree-view:move'
             from = event.target.getAttribute('data-name')
             fromPath = event.target.getAttribute('data-path')
-          when 'addFile'
+          when 'tree-view:add-file'
+            window.confirmedEvent = event
             true
-        console.log(e)
       else
         console.log(e.type)
 
