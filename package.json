@@ -1,6 +1,7 @@
 {
   "name": "integrated-learn-environment",
   "main": "./lib/integrated-learn-environment",
+  "urlMain": "./lib/url-handler",
   "version": "1.0.0",
   "description": "Learn meets Atom",
   "keywords": [],
