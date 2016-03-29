@@ -1,30 +1,52 @@
-#ipc = require 'ipc'
+ipc = require 'ipc'
+url = require 'url'
 
-#ipc.send 'user-opened-file'
-#{urlToOpen} = JSON.parse(decodeURIComponent(location.search.substr(14)))
+module.exports = ({blobStore}) ->
+  #{urlToOpen} = JSON.parse(decodeURIComponent(location.search.substr(14)))
 
-#console.log urlToOpen
+  #console.log urlToOpen
+  ipc.send('call-window-method', 'show')
+  ipc.send('call-window-method', 'focus')
+  window.focus()
+  #ipc.send('call-window-method', 'openDevTools')
 
-#ipc = require 'ipc'
-#ipc.send('call-window-method', 'show')
-#ipc.send('call-window-method', 'focus')
-#window.focus()
+  #parsed = url.parse urlToOpen, true
+  #console.log parsed
 
-#ipc.send('call-window-method', 'openDevTools')
+  #filePath = "/Users/tclem/github/github/#{parsed.query.filepath}"
+  #console.log filePath
 
-#url = require 'url'
+  # TODO Once you have the path to open, uncomment this line
+  ipc.send('open', {pathsToOpen: ['/Users/loganhasson/Desktop/ile_open.html']})
+  #path = require 'path'
+  #require './window'
+  #{getWindowLoadSettings} = require './window-load-settings-helpers'
 
-#parsed = url.parse urlToOpen, true
-#console.log parsed
+  #{resourcePath, isSpec, devMode} = getWindowLoadSettings()
 
-#filePath = "/Users/tclem/github/github/#{parsed.query.filepath}"
-#console.log filePath
+  # Add application-specific exports to module search path.
+  #exportsPath = path.join(resourcePath, 'exports')
+  #require('module').globalPaths.push(exportsPath)
+  #process.env.NODE_PATH = exportsPath
 
-# TODO Once you have the path to open, uncomment this line
-#ipc.send('open', {pathsToOpen: ['/Users/loganhasson/Desktop/ile_opeh.html']})
+  # Make React faster
+  #process.env.NODE_ENV ?= 'production' unless devMode
 
-# TODO Once done, uncomment this to close the window
-# require('remote').getCurrentWindow().close()
-module.exports =
-  activate: (state) ->
-    console.log('here')
+  #AtomEnvironment = require './atom-environment'
+  #ApplicationDelegate = require './application-delegate'
+  #window.atom = new AtomEnvironment({
+    #window, document, blobStore,
+    #applicationDelegate: new ApplicationDelegate,
+    #configDirPath: process.env.ATOM_HOME
+    #enablePersistence: true
+  #})
+
+  #atom.displayWindow()
+  #atom.startEditorWindow()
+
+  # Workaround for focus getting cleared upon window creation
+  #windowFocused = ->
+    #window.removeEventListener('focus', windowFocused)
+    #setTimeout (-> document.querySelector('atom-workspace').focus()), 0
+  #window.addEventListener('focus', windowFocused)
+
