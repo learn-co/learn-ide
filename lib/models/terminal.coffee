@@ -37,7 +37,7 @@ class Terminal extends EventEmitter
 
       lastNode = null
       for node in newNodes
-        if node.innerText.match(/vm/)
+        if node.innerText.match(/\S/)
           lastNode = node
 
       if lastNode
