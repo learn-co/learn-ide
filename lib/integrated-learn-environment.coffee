@@ -19,11 +19,10 @@ module.exports =
 
   activate: (state) ->
     @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
-    path = atom.blobStore.get("learnOpenUrl", "learn-open-url-key")
-    console.log('Data mf::', path, path.toString())
+    openPath = atom.blobStore.get("learnOpenUrl", "learn-open-url-key")
 
     @term = new Terminal("wss://ile.learn.co:4463?token=" + @oauthToken)
-    @termView = new TerminalView(state, @term)
+    @termView = new TerminalView(state, @term, openPath)
 
     @fs = new SyncedFS("wss://ile.learn.co:4464?token=" + @oauthToken, @term)
     @fsView = new SyncedFSView(state, @fs)

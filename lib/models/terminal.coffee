@@ -47,10 +47,3 @@ class Terminal extends EventEmitter
         this.emit 'raw-terminal-char-copy-received', char
 
       @term.showCursor()
-
-  reset: (termView) ->
-    @term.emit('data', "\r") # This doesn't work yet
-    @ws.close()
-    @ws = new WebSocket(@ws_url)
-    @ws.onopen = =>
-      termView.reset(@ws)

@@ -8,10 +8,11 @@ class TerminalView extends View
     @div class: 'panel learn-terminal', =>
       @div class: 'terminal-view-resize-handle'
 
-  initialize: (state, terminal) ->
+  initialize: (state, terminal, openPath) ->
     @term = terminal.term
     @terminal = terminal
     @panel = atom.workspace.addBottomPanel(item: this, visible: false, className: 'learn-terminal-view')
+    @openPath = openPath
 
     @term.open(this.get(0))
 
@@ -39,6 +40,11 @@ class TerminalView extends View
 
     @terminal.on 'terminal-message-received', (message) =>
       @term.write(utf8.decode(window.atob(message)))
+
+      if @openPath
+        console.log('open path!')
+        ipc.send 'terminal-data', 'learn open ' + @openPath.toString() + '\r'
+        @openPath = null
 
     @terminal.on 'raw-terminal-char-copy-received', (message) =>
       @term.write(message)
