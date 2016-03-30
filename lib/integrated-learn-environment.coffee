@@ -33,7 +33,7 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
       @termView.toggle()
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:reset': =>
-      @term.term.write("\n\r")
+      @term.term.write('\n\rReconnecting...\r')
       ipc.send 'reset-connection'
       ipc.send 'connection-state-request'
 
