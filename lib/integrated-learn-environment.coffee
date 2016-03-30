@@ -19,7 +19,7 @@ module.exports =
 
   activate: (state) ->
     @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
-    path = atom.blobStore.get("url", "invalidation-key-1")
+    path = atom.blobStore.get("learnOpenUrl", "learn-open-url-key")
     console.log('Data mf::', path, path.toString())
 
     @term = new Terminal("wss://ile.learn.co:4463?token=" + @oauthToken)
