@@ -55,7 +55,6 @@ class TerminalView extends View
       @term.cursorHidden = true
 
     @terminal.on 'terminal-session-opened', () =>
-      console.log('OPENED')
       @term.off 'data'
       @term.on 'data', (data) =>
         ipc.send 'terminal-data', data
@@ -68,7 +67,6 @@ class TerminalView extends View
 
   openLab: ->
     if @openPath
-      console.log('open path!')
       ipc.send 'terminal-data', 'learn open ' + @openPath.toString() + '\r'
       @openPath = null
 
