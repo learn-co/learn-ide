@@ -48,3 +48,4 @@ class Terminal extends EventEmitter
           this.emit 'raw-terminal-char-copy-received', char
 
       @term.showCursor()
+      this.emit 'raw-terminal-char-copy-done'

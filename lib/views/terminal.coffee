@@ -41,14 +41,13 @@ class TerminalView extends View
 
     @terminal.on 'terminal-message-received', (message) =>
       @term.write(utf8.decode(window.atob(message)))
-
-      if @openPath
-        console.log('open path!')
-        ipc.send 'terminal-data', 'learn open ' + @openPath.toString() + '\r'
-        @openPath = null
+      @openLab()
 
     @terminal.on 'raw-terminal-char-copy-received', (message) =>
       @term.write(message)
+
+    @terminal.on 'raw-terminal-char-copy-done', () =>
+      @openLab()
 
     @terminal.on 'terminal-session-closed', () =>
       @term.off 'data'
@@ -66,6 +65,12 @@ class TerminalView extends View
 
     ipc.on 'connection-state', (state) =>
       @terminal.updateConnectionState(state)
+
+  openLab: ->
+    if @openPath
+      console.log('open path!')
+      ipc.send 'terminal-data', 'learn open ' + @openPath.toString() + '\r'
+      @openPath = null
 
   resizeStarted: ->
     $(document).on('mousemove', @resize)
