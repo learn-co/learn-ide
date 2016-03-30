@@ -19,7 +19,9 @@ module.exports =
 
   activate: (state) ->
     @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
-    openPath = atom.blobStore.get("learnOpenUrl", "learn-open-url-key")
+    openPath = atom.blobStore.get('learnOpenUrl', 'learn-open-url-key')
+    atom.blobStore.delete('learnOpenUrl')
+    atom.blobStore.save()
 
     @term = new Terminal("wss://ile.learn.co:4463?token=" + @oauthToken)
     @termView = new TerminalView(state, @term, openPath)

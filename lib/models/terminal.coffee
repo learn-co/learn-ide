@@ -5,7 +5,7 @@ ipc  = require 'ipc'
 module.exports =
 class Terminal extends EventEmitter
   constructor: (ws_url) ->
-    @term = new term.Terminal(cols: 80, rows: 24, useStyle: no, screenKeys: no, scrollback: yes)
+    @term = new term.Terminal(cols: 80, rows: 18, useStyle: no, screenKeys: no, scrollback: yes)
     window.term = @term
     ipc.send 'register-new-terminal', ws_url
     this.setListeners()
