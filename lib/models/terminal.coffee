@@ -43,7 +43,8 @@ class Terminal extends EventEmitter
       if lastNode
         sanitizedText = lastNode.innerText.replace(/^\s+|\s+$/g, '')
 
-      for char in sanitizedText
-        this.emit 'raw-terminal-char-copy-received', char
+      if sanitizedText
+        for char in sanitizedText
+          this.emit 'raw-terminal-char-copy-received', char
 
       @term.showCursor()
