@@ -3,6 +3,7 @@ Terminal = require './models/terminal'
 SyncedFS = require './models/synced-fs'
 TerminalView = require './views/terminal'
 SyncedFSView = require './views/synced-fs'
+{EventEmitter} = require 'events'
 ipc = require 'ipc'
 
 module.exports =
@@ -27,7 +28,8 @@ module.exports =
     @termView = new TerminalView(state, @term, openPath)
 
     @fs = new SyncedFS("wss://ile.learn.co:4464?token=" + @oauthToken, @term)
-    @fsView = new SyncedFSView(state, @fs)
+    @fsViewEmitter = new EventEmitter
+    @fsView = new SyncedFSView(state, @fs, @fsViewEmitter)
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
@@ -39,6 +41,9 @@ module.exports =
 
     ipc.on 'remote-log', (msg) ->
       console.log(msg)
+
+    @fsViewEmitter.on 'toggleTerminal', =>
+      @termView.toggle()
 
   deactivate: ->
     @termView = null

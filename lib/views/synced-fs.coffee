@@ -6,12 +6,13 @@ class SyncedFSView extends View
   @content: ->
     @div class: 'learn-synced-fs-status inline-block icon-terminal'
 
-  constructor: (state, fs) ->
+  constructor: (state, fs, emitter) ->
     super
 
     @fs = fs
     @text " Learn"
     @element.style.color = '#d92626'
+    @emitter = emitter
 
     @handleEvents()
 
@@ -20,6 +21,9 @@ class SyncedFSView extends View
   handleEvents: () ->
     ipc.on 'connection-state', (state) =>
       this.updateConnectionState(state)
+
+    this.on 'click', =>
+      @emitter.emit 'toggleTerminal'
 
   updateConnectionState: (state) ->
     if state == 'open'
