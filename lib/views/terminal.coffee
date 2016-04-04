@@ -31,10 +31,10 @@ class TerminalView extends View
     @openColor = @term.element.style.color
 
   handleEvents: ->
-    @on 'focus', =>
-      @resizeTerminal()
-    @on 'mousedown', '.terminal-view-resize-handle', (e) =>
-      @resizeStarted(e)
+    #@on 'focus', =>
+      #@resizeTerminal()
+    #@on 'mousedown', '.terminal-view-resize-handle', (e) =>
+      #@resizeStarted(e)
 
     @term.on 'data', (data) =>
       ipc.send 'terminal-data', data
