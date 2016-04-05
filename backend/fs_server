@@ -23,6 +23,7 @@ username = JSON.parse(response.body)['username']
 `inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code`
 
 stdout_queue = Queue.new
+dir_scan_queue = Queue.new
 
 Thread.new do
   loop do
@@ -31,7 +32,28 @@ Thread.new do
 end
 
 Thread.new do
+  loop do
+    line = dir_scan_queue.shift
+    location, event, file = line.strip.split(' ')
+    location = "#{location}#{file}"
+    entries = Dir.entries(location).reject { |entry| ['.','..','.git'].include?(entry) }
+
+    entries.each do |ent|
+      is_dir = File.directory?("#{location}/#{ent}") ? ',ISDIR' : ''
+      line = "#{location}/ CREATE#{is_dir} #{ent}"
+      `echo "#{line}" >> /home/#{username}/.fs_changes.log`
+    end
+  end
+end
+
+Thread.new do
+  # For this to work, this command must be run for each user:
+
+  #  inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code
+  #  which requires apt-get install inotify-tools
+
   f = IO.popen(%W[tail -f -n0 /home/#{username}/.fs_changes.log])
+  #f = IO.popen(%W[inotifywait -rme create,delete,move /home/#{username}/code])
 
   loop do
     select([f])
@@ -40,12 +62,19 @@ Thread.new do
       event, directory = event.split(',')
       event = "remote_#{event}".downcase
       location = (location.split('/') - "/home/#{username}/code/".split('/')).join('/')
+      e = {'event' => event, 'directory' => !!directory, 'location' => location, 'file' => file}
 
-      e = {'event' => event, 'directory' => !!directory, 'location' => location, 'file' => file}.to_json
-      stdout_queue << e
+      if !!directory && event == 'remote_create' && file != '.git' && !location.match(/\.git/)
+        dir_scan_queue << line.strip
+      end
+
+      if file != '.git' && !location.match(/\.git/)
+        stdout_queue << e.to_json
+      end
     end
   end
 end
+
 
 Thread.new do
   loop do
