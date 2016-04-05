@@ -10,7 +10,7 @@ require 'uri'
 require 'thread'
 
 token = ENV['QUERY_STRING'].split('token=').last
-uri = URI('https://learn.co/api/v1/users/me')
+uri = URI('https://learn.co/api/v1/users/me?ile_login=true')
 response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
   req = Net::HTTP::Get.new(uri)
   req['Authorization'] = "Bearer #{token}"
