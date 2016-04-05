@@ -20,7 +20,7 @@ end
 
 username = JSON.parse(response.body)['username']
 
-`inotifywait -rde create,delete,move --outfile /home/#{username}/.fs_changes.log /home/#{username}/code`
+`inotifywait -rde create,delete,move --exclude '(node_modules|\b.git\b)' --outfile /home/#{username}/.fs_changes.log /home/#{username}/code`
 
 stdout_queue = Queue.new
 dir_scan_queue = Queue.new
