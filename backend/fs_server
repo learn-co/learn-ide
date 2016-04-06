@@ -18,7 +18,26 @@ response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
   http.request(req)
 end
 
-username = JSON.parse(response.body)['username']
+begin
+  username = JSON.parse(response.body)['username']
+rescue
+  exit
+end
+
+if !username || username.empty?
+  exit
+end
+
+def kill_inotify(username)
+  `ps aux | grep inotifywait | grep \/home\/#{username}\/\.fs_changes\.log | grep -v grep | awk '{ print $2 }'`.split("\n").each do |pid|
+    `kill -9 #{pid}`
+  end
+  `ps aux | grep tail | grep \/home\/#{username}\/\.fs_changes\.log | grep -v grep | awk '{ print $2 }'`.split("\n").each do |pid|
+    `kill -9 #{pid}`
+  end
+end
+
+kill_inotify(username)
 
 `inotifywait -rde create,delete,move --exclude '(node_modules|\b.git\b)' --outfile /home/#{username}/.fs_changes.log /home/#{username}/code`
 
@@ -114,12 +133,7 @@ end
 
 while true
   trap('INT') do
-    `ps aux | grep inotifywait | grep \/home\/#{username}\/\.fs_changes\.log | grep -v grep | awk '{ print $2 }'`.split("\n").each do |pid|
-      `kill -9 #{pid}`
-    end
-    `ps aux | grep tail | grep \/home\/#{username}\/\.fs_changes\.log | grep -v grep | awk '{ print $2 }'`.split("\n").each do |pid|
-      `kill -9 #{pid}`
-    end
+    kill_inotify(username)
 
     `truncate --size 0 /home/#{username}/.fs_changes.log`
   end

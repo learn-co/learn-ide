@@ -19,7 +19,17 @@ response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
   http.request(req)
 end
 
-username = JSON.parse(response.body)['username']
+begin
+  username = JSON.parse(response.body)['username']
+rescue
+  puts Base64.encode64('Not authorized.')
+  exit
+end
+
+if !username || username.empty?
+  puts Base64.encode64('Not authorized.')
+  exit
+end
 
 stdout, stdin, _pid = PTY.spawn("TERM=xterm-256color sudo su - #{username}")
 
