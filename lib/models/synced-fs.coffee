@@ -46,15 +46,16 @@ class SyncedFS
         @treeViewEventQueue = []
       else if e.type == 'core:confirm'
         confirmedEvent = @treeViewEventQueue.shift()
-        event = confirmedEvent.event
+        if confirmedEvent
+          event = confirmedEvent.event
 
-        switch confirmedEvent.type
-          when 'tree-view:move'
-            from = event.target.getAttribute('data-name')
-            fromPath = event.target.getAttribute('data-path')
-          when 'tree-view:add-file'
-            window.confirmedEvent = event
-            true
+          switch confirmedEvent.type
+            when 'tree-view:move'
+              from = event.target.getAttribute('data-name')
+              fromPath = event.target.getAttribute('data-path')
+            when 'tree-view:add-file'
+              window.confirmedEvent = event
+              true
       else
         console.log(e.type)
 
