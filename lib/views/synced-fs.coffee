@@ -28,5 +28,7 @@ class SyncedFSView extends View
   updateConnectionState: (state) ->
     if state == 'open'
       @element.style.color = '#73c990'
+      @element.textContent = ' Learn'
     else
       @element.style.color = '#d92626'
+      @element.textContent = ' Learn [DISCONNECTED]'
