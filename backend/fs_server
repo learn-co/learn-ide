@@ -108,6 +108,17 @@ Thread.new do
     end
 
     case fs_event_data['action']
+    when 'local_move'
+      from_path = fs_event_data['from']
+      local_from_path = (from_path.split('/') - project_path.split('/')).join('/')
+      full_from_path = "/home/#{username}/code/#{local_from_path}"
+
+      needed_dirs = full_path.split('/')[0..-2].join('/')
+      FileUtils.mkdir_p(needed_dirs)
+
+      FileUtils.mv(full_from_path, full_path)
+
+      `sudo chown -R #{username}:students #{local_dir}`
     when 'local_save'
       needed_dirs = full_path.split('/')[0..-2].join('/')
       FileUtils.mkdir_p(needed_dirs)
