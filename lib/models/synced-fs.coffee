@@ -7,6 +7,9 @@ class SyncedFS
     ipc.on 'remote-open-event', (file) ->
       atom.workspace.open(file)
 
+    ipc.on 'connection-state', (state) =>
+      @connectionState = state
+
     @handleEvents()
     @treeViewEventQueue = []
 
@@ -18,6 +21,9 @@ class SyncedFS
 
       editor.onDidSave =>
         if this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
+          if @connectionState == 'closed'
+            @popupNoConnectionWarning()
+
           @sendSave(editor.project, buffer.file, buffer)
       editor.onDidChangePath =>
         console.log('PATH CHANGED')
@@ -58,6 +64,27 @@ class SyncedFS
               true
       else
         console.log(e.type)
+
+  popupNoConnectionWarning: ->
+    noConnectionPopup = document.createElement 'div'
+    noConnectionPopup.setAttribute 'style', 'width: 100%; text-align: center;'
+    noConnectionTextContainer = document.createElement 'div'
+    noConnectionTextContainer.setAttribute 'style', 'margin-bottom: 14px; margin-top: 20px; font-weight: bold; font-size: 14px; color: red;'
+    noConnectionTextContainer.appendChild document.createTextNode "You aren't currently connected to Learn, and local changes won't sync. Please save this file again when you reconnect."
+    noConnectionButtonContainer = document.createElement 'div'
+    noConnectionButton = document.createElement 'input'
+    noConnectionButton.setAttribute 'type', 'submit'
+    noConnectionButton.setAttribute 'value', 'OK'
+    noConnectionButton.setAttribute 'style', 'width: 10%; color: black; margin-bottom: 7px;'
+    noConnectionButtonContainer.setAttribute 'style', 'width: 100%, text-align: center;'
+    noConnectionButtonContainer.appendChild noConnectionButton
+
+    noConnectionPopup.appendChild noConnectionTextContainer
+    noConnectionPopup.appendChild noConnectionButtonContainer
+    panel = atom.workspace.addModalPanel item: noConnectionPopup
+
+    noConnectionButton.addEventListener 'click', (e) =>
+      panel.destroy()
 
   sendSave: (project, file, buffer) ->
     ipc.send 'fs-local-save', JSON.stringify({
