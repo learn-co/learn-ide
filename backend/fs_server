@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/local/rvm/rubies/ruby-2.2.3/bin/ruby
 
 STDOUT.sync = true
 
@@ -46,12 +46,14 @@ dir_scan_queue = Queue.new
 
 Thread.new do
   loop do
+    sleep 0.017
     puts stdout_queue.shift
   end
 end
 
 Thread.new do
   loop do
+    sleep 0.017
     line = dir_scan_queue.shift
     location, event, file = line.strip.split(' ')
     location = "#{location}#{file}"
@@ -75,6 +77,7 @@ Thread.new do
   #f = IO.popen(%W[inotifywait -rme create,delete,move /home/#{username}/code])
 
   loop do
+    sleep 0.017
     select([f])
     while line = f.gets
       location, event, file = line.strip.split(' ')
@@ -94,9 +97,9 @@ Thread.new do
   end
 end
 
-
 Thread.new do
   loop do
+    sleep 0.017
     begin
       fs_event_data = JSON.parse(STDIN.readline)
       project_path = fs_event_data['project']['path']
@@ -143,6 +146,7 @@ Thread.new do
 end
 
 while true
+  sleep 0.017
   trap('INT') do
     kill_inotify(username)
 
