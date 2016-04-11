@@ -70,6 +70,8 @@ class TerminalView extends View
             Clipboard.writeText(getSelection().toString())
           else if event.which == 86 && event.shiftKey && event.ctrlKey
             ipc.send 'terminal-data', Clipboard.readText()
+          else if event.altKey
+            console.log 'Saved from alt key disaster!'
           else
             ipc.send 'terminal-data', data
         else
