@@ -18,13 +18,7 @@ class TerminalView extends View
     @term.open(this.get(0))
     @term.write('Connecting...\r')
 
-    if !!process.platform.match(/win/)
-      @term.on 'keydown', (e) =>
-        if e.which == 67 && e.shiftKey && e.ctrlKey
-          Clipboard.writeText(getSelection().toString())
-        else if e.which == 86 && e.shiftKey && e.ctrlKey
-          @term.emit 'data', Clipboard.readText()
-    else
+    if !process.platform.match(/win/)
       this.on 'keydown', (e) =>
         if e.which == 67 && e.metaKey
           Clipboard.writeText(getSelection().toString())
@@ -71,7 +65,15 @@ class TerminalView extends View
     @terminal.on 'terminal-session-opened', () =>
       @term.off 'data'
       @term.on 'data', (data) =>
-        ipc.send 'terminal-data', data
+        if !!process.platform.match(/win/)
+          if event.which == 67 && event.shiftKey && event.ctrlKey
+            Clipboard.writeText(getSelection().toString())
+          else if event.which == 86 && event.shiftKey && event.ctrlKey
+            ipc.send 'terminal-data', Clipboard.readText()
+          else
+            ipc.send 'terminal-data', data
+        else
+          ipc.send 'terminal-data', data
 
       @term.element.style.color = this.openColor
       @term.cursorHidden = false
