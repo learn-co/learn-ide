@@ -18,11 +18,18 @@ class TerminalView extends View
     @term.open(this.get(0))
     @term.write('Connecting...\r')
 
-    this.on 'keydown', (e) =>
-      if e.which == 67 && e.metaKey
-        Clipboard.writeText(getSelection().toString())
-      else if e.which == 86 && e.metaKey
-        @term.emit 'data', Clipboard.readText()
+    if !!process.platform.match(/win/)
+      @term.on 'keydown', (e) =>
+        if e.which == 67 && e.shiftKey && e.ctrlKey
+          Clipboard.writeText(getSelection().toString())
+        else if e.which == 86 && e.shiftKey && e.ctrlKey
+          @term.emit 'data', Clipboard.readText()
+    else
+      this.on 'keydown', (e) =>
+        if e.which == 67 && e.metaKey
+          Clipboard.writeText(getSelection().toString())
+        else if e.which == 86 && e.metaKey
+          @term.emit 'data', Clipboard.readText()
 
     @applyEditorStyling()
     @handleEvents()
