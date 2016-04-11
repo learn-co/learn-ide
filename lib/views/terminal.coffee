@@ -1,6 +1,7 @@
 {$, View} = require 'atom-space-pen-views'
 utf8      = require 'utf8'
 ipc       = require 'ipc'
+Clipboard = require 'clipboard'
 
 module.exports =
 class TerminalView extends View
@@ -16,6 +17,12 @@ class TerminalView extends View
 
     @term.open(this.get(0))
     @term.write('Connecting...\r')
+
+    this.on 'keydown', (e) =>
+      if e.which == 67 && e.metaKey
+        Clipboard.writeText(getSelection().toString())
+      else if e.which == 86 && e.metaKey
+        @term.emit 'data', Clipboard.readText()
 
     @applyEditorStyling()
     @handleEvents()
