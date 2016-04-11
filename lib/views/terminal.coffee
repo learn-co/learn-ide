@@ -18,7 +18,7 @@ class TerminalView extends View
     @term.open(this.get(0))
     @term.write('Connecting...\r')
 
-    if !process.platform.match(/win/)
+    if !!process.platform.match(/darwin/)
       this.on 'keydown', (e) =>
         if e.which == 67 && e.metaKey
           Clipboard.writeText(getSelection().toString())
@@ -65,7 +65,7 @@ class TerminalView extends View
     @terminal.on 'terminal-session-opened', () =>
       @term.off 'data'
       @term.on 'data', (data) =>
-        if !!process.platform.match(/win/)
+        if !!process.platform.match(/win/) && !process.platform.match(/darwin/)
           if event.which == 67 && event.shiftKey && event.ctrlKey
             Clipboard.writeText(getSelection().toString())
           else if event.which == 86 && event.shiftKey && event.ctrlKey
