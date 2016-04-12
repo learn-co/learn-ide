@@ -44,6 +44,12 @@ class TerminalView extends View
     #@on 'mousedown', '.terminal-view-resize-handle', (e) =>
       #@resizeStarted(e)
 
+    #$('.terminal').on 'focus', =>
+      #@term.focus()
+
+    #$('.terminal').on 'blur', =>
+      #@term.blur()
+
     @term.on 'data', (data) =>
       ipc.send 'terminal-data', data
 

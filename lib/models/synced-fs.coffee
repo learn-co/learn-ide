@@ -6,9 +6,19 @@ class SyncedFS
     ipc.send 'register-new-fs-connection', ws_url
     ipc.on 'remote-open-event', (file) =>
       atom.workspace.open(file)
-      setTimeout =>
-        @expandTreeView()
-      , 0
+        .then (editor) =>
+          @expandTreeView()
+        #.then (pane) =>
+          #@expandTreeView()
+          #setTimeout =>
+            #window.textPane = pane
+            #console.log(pane)
+            #pane.setCursorBufferPosition(0)
+            #pane.activate()
+          #, 0
+      #setTimeout =>
+        #@expandTreeView()
+      #, 0
 
     ipc.on 'connection-state', (state) =>
       @connectionState = state
