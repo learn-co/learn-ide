@@ -16,7 +16,7 @@ class TerminalView extends View
     @openPath = openPath
 
     @term.open(this.get(0))
-    @term.write('Connecting...\r')
+    #@term.write('Connecting...\r')
 
     if !!process.platform.match(/darwin/)
       this.on 'keydown', (e) =>
