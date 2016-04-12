@@ -4,14 +4,21 @@ module.exports =
 class SyncedFS
   constructor: (ws_url) ->
     ipc.send 'register-new-fs-connection', ws_url
-    ipc.on 'remote-open-event', (file) ->
+    ipc.on 'remote-open-event', (file) =>
       atom.workspace.open(file)
+      setTimeout =>
+        @expandTreeView()
+      , 0
 
     ipc.on 'connection-state', (state) =>
       @connectionState = state
 
     @handleEvents()
     @treeViewEventQueue = []
+
+  expandTreeView: ->
+    workspaceView = atom.views.getView(atom.workspace)
+    atom.commands.dispatch(workspaceView, 'tree-view:reveal-active-file')
 
   handleEvents: ->
     atom.workspace.observeTextEditors (editor) =>
