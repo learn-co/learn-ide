@@ -8,17 +8,14 @@ class SyncedFS
       atom.workspace.open(file)
         .then (editor) =>
           @expandTreeView()
-        #.then (pane) =>
-          #@expandTreeView()
-          #setTimeout =>
-            #window.textPane = pane
-            #console.log(pane)
-            #pane.setCursorBufferPosition(0)
-            #pane.activate()
-          #, 0
-      #setTimeout =>
-        #@expandTreeView()
-      #, 0
+
+          setTimeout =>
+            pane = (atom.workspace.getPanes().filter (p) =>
+              return p.activeItem == editor
+            )[0]
+
+            pane.activate() if pane
+          , 0
 
     ipc.on 'connection-state', (state) =>
       @connectionState = state
