@@ -18,6 +18,9 @@ class TerminalView extends View
     @term.open(this.get(0))
     #@term.write('Connecting...\r')
 
+    ipc.on 'remote-open-event', (file) =>
+      @term.blur()
+
     if !!process.platform.match(/darwin/)
       this.on 'keydown', (e) =>
         if e.which == 67 && e.metaKey
@@ -44,11 +47,8 @@ class TerminalView extends View
     #@on 'mousedown', '.terminal-view-resize-handle', (e) =>
       #@resizeStarted(e)
 
-    #$('.terminal').on 'focus', =>
-      #@term.focus()
-
-    #$('.terminal').on 'blur', =>
-      #@term.blur()
+    $('.terminal').on 'focus', (e) =>
+      @term.focus()
 
     @term.on 'data', (data) =>
       ipc.send 'terminal-data', data
