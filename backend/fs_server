@@ -130,7 +130,15 @@ Thread.new do
         f.write(Base64.decode64(fs_event_data['buffer']['content']))
       end
 
-      `sudo chown -R #{username}:students #{local_dir}`
+      if File.directory?(local_dir)
+        `sudo chown -R #{username}:students #{local_dir} && sudo chmod -R 2770 #{local_dir}`
+      else
+        `sudo chown #{username}:students #{local_dir} && sudo chmod 664 #{local_dir}`
+      end
+
+      if !File.directory?(full_path)
+        `sudo chown #{username}:students #{full_path} && sudo chmod 664 #{full_path}`
+      end
     when 'local_delete'
       FileUtils.rm_rf(full_path)
     when 'request_content'
