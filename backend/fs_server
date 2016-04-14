@@ -143,7 +143,7 @@ Thread.new do
       FileUtils.rm_rf(full_path)
     when 'request_content'
       Thread.new do
-        content = Base64.encode64(File.read("/home/#{username}/code/#{fs_event_data['location']}/#{fs_event_data['file']}"))
+        content = Base64.strict_encode64(File.read("/home/#{username}/code/#{fs_event_data['location']}/#{fs_event_data['file']}"))
         e = {'event' => 'content_response', 'location' => fs_event_data['location'], 'file' => fs_event_data['file'], 'content' => content}.to_json
         stdout_queue << e
       end
