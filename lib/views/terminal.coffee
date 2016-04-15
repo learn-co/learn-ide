@@ -26,7 +26,8 @@ class TerminalView extends View
         if e.which == 67 && e.metaKey
           Clipboard.writeText(getSelection().toString())
         else if e.which == 86 && e.metaKey
-          @term.emit 'data', Clipboard.readText()
+          text = Clipboard.readText().replace(/\n/g, "\r")
+          @term.emit 'data', text
 
     @applyEditorStyling()
     @handleEvents()
