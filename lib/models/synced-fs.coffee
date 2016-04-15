@@ -111,9 +111,15 @@ class SyncedFS
         digest: file.digest,
       },
       buffer: {
-        content: window.btoa(buffer.getText())
+        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
       }
     })
+
+  #formattedText: (text) ->
+    #try
+      #window.btoa(text)
+    #catch
+      #window.btoa(unescape(encodeURIComponent(text)))
 
   formatFilePath: (path) ->
     if path.match(/:\\/)
