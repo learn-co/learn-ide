@@ -35,7 +35,6 @@ module.exports = class LearnUpdater extends EventEmitter
               title: 'Update Learn IDE'
               resizable: false
               outOfDate: @outOfDate(currentVersionNums, latestVersionNums)
-              autoCheck: @autoCheck
           catch
             console.log 'There was a problem checking for updates.'
 
