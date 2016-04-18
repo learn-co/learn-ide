@@ -5,6 +5,7 @@ TerminalView = require './views/terminal'
 SyncedFSView = require './views/synced-fs'
 {EventEmitter} = require 'events'
 ipc = require 'ipc'
+LearnUpdater = require './models/learn-updater'
 
 module.exports =
   config:
@@ -38,6 +39,9 @@ module.exports =
       @term.term.write('\n\rReconnecting...\r')
       ipc.send 'reset-connection'
       ipc.send 'connection-state-request'
+    @subscriptions.add atom.commands.add 'atom-workspace', 'application:update-ile': =>
+      updater = new LearnUpdater
+      updater.checkForUpdate()
 
     ipc.on 'remote-log', (msg) ->
       console.log(msg)
