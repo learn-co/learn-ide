@@ -37,6 +37,12 @@ def kill_inotify(username)
   end
 end
 
+def kill_user_processes(username)
+  `pgrep -u #{username}`.split("\n").each do |pid|
+    `kill -9 #{pid}`
+  end
+end
+
 kill_inotify(username)
 
 `inotifywait -rde create,delete,move --exclude '(node_modules|\b.git\b)' --outfile /home/#{username}/.fs_changes.log /home/#{username}/code`
@@ -157,6 +163,7 @@ while true
   sleep 0.017
   trap('INT') do
     kill_inotify(username)
+    kill_user_processes(username)
 
     `truncate --size 0 /home/#{username}/.fs_changes.log`
   end
