@@ -28,13 +28,19 @@ module.exports = class LearnUpdater extends EventEmitter
             atom.blobStore.set('learnUpdateCheckDate', 'learn-update-key', new Buffer(Date.now().toString()))
             atom.blobStore.save()
 
-            ipc.send 'new-update-window',
-              width: 400
-              height: 200
-              show: false
-              title: 'Update Learn IDE'
-              resizable: false
-              outOfDate: @outOfDate(currentVersionNums, latestVersionNums)
+            outOfDate = @outOfDate(currentVersionNums, latestVersionNums)
+
+            if @autoCheck && !outOfDate
+              console.log 'Automatically checked for updates...up to date.'
+            else
+              ipc.send 'new-update-window',
+                width: 500
+                height: 250
+                show: false
+                title: 'Update Learn IDE'
+                resizable: false
+                outOfDate: outOfDate
+
           catch
             console.log 'There was a problem checking for updates.'
 
@@ -53,7 +59,7 @@ module.exports = class LearnUpdater extends EventEmitter
   noCheckToday: =>
     checkDate = atom.blobStore.get('learnUpdateCheckDate', 'learn-update-key')
 
-    if checkDate && Date.now() - checkDate >= 86400
+    if !checkDate || (checkDate && Date.now() - checkDate >= 86400)
       true
     else
       false

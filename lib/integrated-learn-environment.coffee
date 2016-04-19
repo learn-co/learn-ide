@@ -49,6 +49,9 @@ module.exports =
     @fsViewEmitter.on 'toggleTerminal', =>
       @termView.toggle()
 
+    autoUpdater = new LearnUpdater(true)
+    autoUpdater.checkForUpdate()
+
   deactivate: ->
     @termView = null
     @fsView = null
