@@ -39,7 +39,7 @@ end
 
 def kill_user_processes(username)
   `pgrep -u #{username}`.split("\n").each do |pid|
-    `kill -9 #{pid}`
+    `sudo kill -9 #{pid}`
   end
 end
 
