@@ -59,6 +59,9 @@ module.exports = class LearnUpdater extends EventEmitter
   noCheckToday: =>
     checkDate = atom.blobStore.get('learnUpdateCheckDate', 'learn-update-key')
 
+    if checkDate
+      checkDate = parseInt(checkDate.toString())
+
     if !checkDate || (checkDate && Date.now() - checkDate >= 86400)
       true
     else
