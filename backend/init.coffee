@@ -34,15 +34,15 @@ confirmOauthToken = (token) ->
   )
 
 if !atom.config.get('integrated-learn-environment.oauthToken')
-  oauthPrompt = document.createElement "div"
+  oauthPrompt = document.createElement 'div'
   oauthPrompt.setAttribute 'style', 'width:100%; text-align: center;'
 
-  oauthLabel = document.createElement "div"
+  oauthLabel = document.createElement 'div'
   oauthLabel.setAttribute 'style', 'margin-top: 12px; font-weight: bold; font-size: 12px;'
   oauthLabel.appendChild document.createTextNode 'Please enter your Learn OAuth Token'
-  tokenLinkDiv = document.createElement "div"
+  tokenLinkDiv = document.createElement 'div'
   tokenText = document.createTextNode 'Get your token here: '
-  tokenLink = document.createElement "a"
+  tokenLink = document.createElement 'a'
   tokenLink.title = 'https://learn.co/ile/token'
   tokenLink.href = 'https://learn.co/ile/token'
   tokenLink.setAttribute 'style', 'text-decoration: underline;'
