@@ -43,8 +43,19 @@ module.exports =
       updater = new LearnUpdater
       updater.checkForUpdate()
 
+    ipc.send 'register-for-notifications', @oauthToken
+
     ipc.on 'remote-log', (msg) ->
       console.log(msg)
+
+    ipc.on 'new-notification', (data) ->
+      notif = new Notification data.displayTitle,
+        body: data.message
+
+      notif.onclick = ->
+        notif.close()
+
+      console.log(data)
 
     @fsViewEmitter.on 'toggleTerminal', =>
       @termView.toggle()
