@@ -43,19 +43,23 @@ module.exports =
       updater = new LearnUpdater
       updater.checkForUpdate()
 
+    @passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
+    @failingIcon = 'http://i.imgbox.com/vVZZG1Gx.png'
+
     ipc.send 'register-for-notifications', @oauthToken
 
     ipc.on 'remote-log', (msg) ->
       console.log(msg)
 
     ipc.on 'new-notification', (data) ->
+      icon = if data.passing == 'true' then @passingIcon else @failingIcon
+
       notif = new Notification data.displayTitle,
         body: data.message
+        icon: icon
 
       notif.onclick = ->
         notif.close()
-
-      console.log(data)
 
     @fsViewEmitter.on 'toggleTerminal', =>
       @termView.toggle()
