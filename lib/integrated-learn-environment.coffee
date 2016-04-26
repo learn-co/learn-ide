@@ -25,10 +25,16 @@ module.exports =
     atom.blobStore.delete('learnOpenUrl')
     atom.blobStore.save()
 
-    @term = new Terminal("wss://ile.learn.co:4463?token=" + @oauthToken)
+    isTerminalWindow = atom.isTerminalWindow
+
+    if isTerminalWindow
+      workspaceView = atom.views.getView(atom.workspace)
+      atom.commands.dispatch(workspaceView, 'tree-view:toggle')
+
+    @term = new Terminal("wss://ile.learn.co:4463?token=" + @oauthToken, isTerminalWindow)
     @termView = new TerminalView(state, @term, openPath)
 
-    @fs = new SyncedFS("wss://ile.learn.co:4464?token=" + @oauthToken, @term)
+    @fs = new SyncedFS("wss://ile.learn.co:4464?token=" + @oauthToken, isTerminalWindow)
     @fsViewEmitter = new EventEmitter
     @fsView = new SyncedFSView(state, @fs, @fsViewEmitter)
 
@@ -51,7 +57,7 @@ module.exports =
     ipc.on 'remote-log', (msg) ->
       console.log(msg)
 
-    ipc.on 'new-notification', (data) ->
+    ipc.on 'new-notification', (data) =>
       icon = if data.passing == 'true' then @passingIcon else @failingIcon
 
       notif = new Notification data.displayTitle,

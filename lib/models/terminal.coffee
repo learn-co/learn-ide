@@ -4,8 +4,9 @@ ipc  = require 'ipc'
 
 module.exports =
 class Terminal extends EventEmitter
-  constructor: (ws_url) ->
-    @term = new term.Terminal(cols: 80, rows: 18, useStyle: no, screenKeys: no, scrollback: yes)
+  constructor: (ws_url, isTermView=false) ->
+    rows = if isTermView then 30 else 18
+    @term = new term.Terminal(cols: 80, rows: rows, useStyle: no, screenKeys: no, scrollback: yes)
     window.term = @term
     ipc.send 'register-new-terminal', ws_url
     this.setListeners()

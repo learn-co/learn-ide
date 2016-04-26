@@ -2,20 +2,21 @@ ipc = require 'ipc'
 
 module.exports =
 class SyncedFS
-  constructor: (ws_url) ->
+  constructor: (ws_url, isTermView=false) ->
     ipc.send 'register-new-fs-connection', ws_url
     ipc.on 'remote-open-event', (file) =>
-      atom.workspace.open(file)
-        .then (editor) =>
-          @expandTreeView()
+      if !isTermView
+        atom.workspace.open(file)
+          .then (editor) =>
+            @expandTreeView()
 
-          setTimeout =>
-            pane = (atom.workspace.getPanes().filter (p) =>
-              return p.activeItem == editor
-            )[0]
+            setTimeout =>
+              pane = (atom.workspace.getPanes().filter (p) =>
+                return p.activeItem == editor
+              )[0]
 
-            pane.activate() if pane
-          , 0
+              pane.activate() if pane
+            , 0
 
     ipc.on 'connection-state', (state) =>
       @connectionState = state
