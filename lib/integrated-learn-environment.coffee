@@ -27,12 +27,14 @@ module.exports =
 
     isTerminalWindow = atom.isTerminalWindow
 
-    if isTerminalWindow
-      workspaceView = atom.views.getView(atom.workspace)
-      atom.commands.dispatch(workspaceView, 'tree-view:toggle')
-
     @term = new Terminal("wss://ile.learn.co:4463?token=" + @oauthToken, isTerminalWindow)
     @termView = new TerminalView(state, @term, openPath)
+
+    if isTerminalWindow
+      document.getElementsByClassName('terminal-view-resize-handle')[0].setAttribute('style', 'display:none;')
+      document.getElementsByClassName('inset-panel')[0].setAttribute('style', 'display:none;')
+      workspaceView = atom.views.getView(atom.workspace)
+      atom.commands.dispatch(workspaceView, 'tree-view:toggle')
 
     @fs = new SyncedFS("wss://ile.learn.co:4464?token=" + @oauthToken, isTerminalWindow)
     @fsViewEmitter = new EventEmitter

@@ -5,7 +5,7 @@ ipc  = require 'ipc'
 module.exports =
 class Terminal extends EventEmitter
   constructor: (ws_url, isTermView=false) ->
-    rows = if isTermView then 30 else 18
+    rows = if isTermView then 26 else 18
     @term = new term.Terminal(cols: 80, rows: rows, useStyle: no, screenKeys: no, scrollback: yes)
     window.term = @term
     ipc.send 'register-new-terminal', ws_url
@@ -47,6 +47,14 @@ class Terminal extends EventEmitter
       if sanitizedText
         for char in sanitizedText
           this.emit 'raw-terminal-char-copy-received', char
+
+      # Sadly, this doesn't work yet...but it's a start
+      #swapNode = existingNodes[0]
+      #if swapNode && lastNode
+        #swapNode.style.display = 'inline'
+        #lastNode.style.display = 'inline'
+        #lastNode.innerHTML = lastNode.innerHTML.replace(/(&nbsp;)+$/, '')
+        #swapNode.parentNode.insertBefore(lastNode, swapNode)
 
       @term.showCursor()
       this.emit 'raw-terminal-char-copy-done'
