@@ -4,13 +4,15 @@ ipc = require 'ipc'
 module.exports =
 class SyncedFSView extends View
   @content: ->
-    @div class: 'learn-synced-fs-status inline-block icon-terminal'
+    @div class: 'learn-synced-fs-status', =>
+      @div class: 'learn-status-icon inline-block icon-terminal', id: 'learn-status-icon', ' Learn'
+      @div class: 'active learn-popout-terminal-icon inline-block icon-share-icon', id: 'learn-popout-terminal-icon', 'Popout'
 
   constructor: (state, fs, emitter) ->
     super
 
     @fs = fs
-    @text " Learn"
+
     @element.style.color = '#d92626'
     @emitter = emitter
 
@@ -23,12 +25,20 @@ class SyncedFSView extends View
       this.updateConnectionState(state)
 
     this.on 'click', =>
-      @emitter.emit 'toggleTerminal'
+      workspaceView = atom.views.getView(atom.workspace)
+      atom.commands.dispatch(workspaceView, 'application:new-popout-terminal')
+      #@emitter.emit 'toggleTerminal'
 
-  updateConnectionState: (state) ->
+  statusIcon: =>
+    @element.getElementsByClassName('learn-status-icon')[0]
+
+  popoutIcon: =>
+    @element.getElementsByClassName('learn-popout-terminal-icon')[0]
+
+  updateConnectionState: (state) =>
     if state == 'open'
-      @element.style.color = '#73c990'
-      @element.textContent = ' Learn'
+      @statusIcon().style.color = '#73c990'
+      @statusIcon().textContent = ' Learn'
     else
-      @element.style.color = '#d92626'
-      @element.textContent = ' Learn [DISCONNECTED]'
+      @statusIcon().style.color = '#d92626'
+      @statusIcon().textContent = ' Learn [DISCONNECTED]'
