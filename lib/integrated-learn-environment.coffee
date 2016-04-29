@@ -38,7 +38,7 @@ module.exports =
 
     @fs = new SyncedFS("wss://ile.learn.co:4464?token=" + @oauthToken, isTerminalWindow)
     @fsViewEmitter = new EventEmitter
-    @fsView = new SyncedFSView(state, @fs, @fsViewEmitter)
+    @fsView = new SyncedFSView(state, @fs, @fsViewEmitter, isTerminalWindow)
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
@@ -69,8 +69,8 @@ module.exports =
       notif.onclick = ->
         notif.close()
 
-    @fsViewEmitter.on 'toggleTerminal', =>
-      @termView.toggle()
+    @fsViewEmitter.on 'toggleTerminal', (focus) =>
+      @termView.toggle(focus)
 
     autoUpdater = new LearnUpdater(true)
     autoUpdater.checkForUpdate()

@@ -124,8 +124,12 @@ class TerminalView extends View
 
     {cols, rows}
 
-  toggle: ->
+  toggle: (focus) ->
     if @panel.isVisible()
       @panel.hide()
     else
       @panel.show()
+
+      if focus
+        @term.focus()
+        $('.terminal').focus()
