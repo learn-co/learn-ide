@@ -8,7 +8,7 @@ confirmOauthToken = (token) ->
   return new Promise((resolve, reject) ->
     https.get
       host: 'learn.co'
-      path: '/api/v1/users/me'
+      path: '/api/v1/users/me?ile_version=' + atom.appVersion
       headers:
         'Authorization': 'Bearer ' + token
     , (response) =>
