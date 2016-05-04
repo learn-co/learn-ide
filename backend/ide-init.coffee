@@ -33,7 +33,9 @@ confirmOauthToken = (token) ->
           resolve false
   )
 
-if !atom.config.get('integrated-learn-environment.oauthToken')
+existingToken = atom.config.get('integrated-learn-environment.oauthToken')
+
+if !existingToken
   oauthPrompt = document.createElement 'div'
   oauthPrompt.setAttribute 'style', 'width:100%; text-align: center;'
 
@@ -77,3 +79,4 @@ if !atom.config.get('integrated-learn-environment.oauthToken')
           invalidLabel.setAttribute 'style', 'color: red; opacity: 100;'
 else
   atom.commands.dispatch(workspaceView, 'integrated-learn-environment:toggleTerminal')
+  confirmOauthToken(existingToken)
