@@ -35,6 +35,7 @@ class SyncedFS
       file = buffer.file
 
       editor.onDidSave =>
+        console.log 'Saving: Path - ' + this.formatFilePath(buffer.file.path) + ' Matches? - ' + this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
         if this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
           if @connectionState == 'closed'
             @popupNoConnectionWarning()
