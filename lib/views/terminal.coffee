@@ -81,8 +81,8 @@ class TerminalView extends View
             ipc.send 'terminal-data', Clipboard.readText().replace(/\n/g, "\r")
           else if event.altKey
             console.log 'Saved from alt key disaster!'
-          else if (e.which == 187 || e.which == 189) && e.ctrlKey
-            @adjustTermFontSize(e.which)
+          else if (event.which == 187 || event.which == 189) && event.ctrlKey
+            @adjustTermFontSize(event.which)
           else
             ipc.send 'terminal-data', data
         else
