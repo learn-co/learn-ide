@@ -9,9 +9,10 @@ class TerminalView extends View
     @div class: 'panel learn-terminal', =>
       @div class: 'terminal-view-resize-handle'
 
-  initialize: (state, terminal, openPath) ->
+  initialize: (state, terminal, openPath, isTerminalWindow) ->
     @term = terminal.term
     @terminal = terminal
+    @isTerminalWindow = isTerminalWindow
     @panel = atom.workspace.addBottomPanel(item: this, visible: false, className: 'learn-terminal-view')
     @openPath = openPath
 
@@ -141,7 +142,7 @@ class TerminalView extends View
     currentFontSize = parseInt($('.terminal').css('font-size'))
 
     if key == 187 || key == 38
-      if currentFontSize < 26
+      if (!@isTerminalWindow && currentFontSize < 26) || (@isTerminalWindow && currentFontSize < 18)
         $termDiv.css('font-size', currentFontSize + 2)
     else if key == 189 || key == 40
       if currentFontSize > 8

@@ -28,11 +28,12 @@ module.exports =
     isTerminalWindow = atom.isTerminalWindow
 
     @term = new Terminal("wss://ile.learn.co:4463?token=" + @oauthToken, isTerminalWindow)
-    @termView = new TerminalView(state, @term, openPath)
+    @termView = new TerminalView(state, @term, openPath, isTerminalWindow)
 
     if isTerminalWindow
       document.getElementsByClassName('terminal-view-resize-handle')[0].setAttribute('style', 'display:none;')
       document.getElementsByClassName('inset-panel')[0].setAttribute('style', 'display:none;')
+      document.getElementsByClassName('learn-terminal')[0].style.height = '448px'
       workspaceView = atom.views.getView(atom.workspace)
       atom.commands.dispatch(workspaceView, 'tree-view:toggle')
 
