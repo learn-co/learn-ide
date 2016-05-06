@@ -79,6 +79,8 @@ class TerminalView extends View
             Clipboard.writeText(getSelection().toString())
           else if event.which == 86 && event.shiftKey && event.ctrlKey
             ipc.send 'terminal-data', Clipboard.readText().replace(/\n/g, "\r")
+          else if (event.which == 38 || event.which == 40) && event.altKey
+            @adjustTermFontSize(event.which)
           else if event.altKey
             console.log 'Saved from alt key disaster!'
           else if (event.which == 187 || event.which == 189) && event.ctrlKey
@@ -138,10 +140,10 @@ class TerminalView extends View
     $termDiv = $('.terminal')
     currentFontSize = parseInt($('.terminal').css('font-size'))
 
-    if key == 187
+    if key == 187 || key == 38
       if currentFontSize < 26
         $termDiv.css('font-size', currentFontSize + 2)
-    else if key == 189
+    else if key == 189 || key == 40
       if currentFontSize > 8
         $termDiv.css('font-size', currentFontSize - 2)
 
