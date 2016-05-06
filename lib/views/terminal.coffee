@@ -28,6 +28,8 @@ class TerminalView extends View
         else if e.which == 86 && e.metaKey
           text = Clipboard.readText().replace(/\n/g, "\r")
           @term.emit 'data', text
+        else if (e.which == 187 || e.which == 189) && e.metaKey
+          @adjustTermFontSize(e.which)
 
     @applyEditorStyling()
     @handleEvents()
@@ -123,6 +125,27 @@ class TerminalView extends View
     fakeCol.remove()
 
     {cols, rows}
+
+  newTerminalRowCount: ->
+    Math.floor($('.learn-terminal').height() / $('.terminal div').height())
+
+  resizeTermForFontSizeChange: ->
+    @term.resize(80, @newTerminalRowCount())
+
+  adjustTermFontSize: (key) ->
+    $termDiv = $('.terminal')
+    currentFontSize = parseInt($('.terminal').css('font-size'))
+
+    if key == 187
+      if currentFontSize < 26
+        $termDiv.css('font-size', currentFontSize + 2)
+    else if key == 189
+      if currentFontSize > 8
+        $termDiv.css('font-size', currentFontSize - 2)
+
+    @resizeTermForFontSizeChange()
+    @term.focus()
+    $('.terminal').focus()
 
   toggle: (focus) ->
     if @panel.isVisible()
