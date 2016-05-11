@@ -30,6 +30,8 @@ class TerminalView extends View
           text = Clipboard.readText().replace(/\n/g, "\r")
           @term.emit 'data', text
         else if (e.which == 187 || e.which == 189) && e.metaKey
+          e.preventDefault()
+          e.stopPropagation()
           @adjustTermFontSize(e.which)
 
     @applyEditorStyling()
