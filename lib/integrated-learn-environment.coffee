@@ -70,6 +70,9 @@ module.exports =
       notif.onclick = ->
         notif.close()
 
+    ipc.on 'in-app-notification', (notifData) =>
+      atom.notifications['add' + notifData.type.charAt(0).toUpperCase() + notifData.type.slice(1)] notifData.message, {detail: notifData.detail, dismissable: notifData.dismissable}
+
     @fsViewEmitter.on 'toggleTerminal', (focus) =>
       @termView.toggle(focus)
 
