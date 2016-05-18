@@ -156,7 +156,11 @@ class TerminalView extends View
 
   paste: () ->
     text = Clipboard.readText().replace(/\n/g, "\r")
-    @term.emit 'data', text
+
+    if !!process.platform.match(/win/) && !process.platform.match(/darwin/)
+      ipc.send 'terminal-data', text
+    else
+      @term.emit 'data', text
 
   toggle: (focus) ->
     if @panel.isVisible()
