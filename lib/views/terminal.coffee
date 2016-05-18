@@ -2,6 +2,8 @@
 utf8      = require 'utf8'
 ipc       = require 'ipc'
 Clipboard = require 'clipboard'
+remote    = require 'remote'
+Menu      = remote.require 'menu'
 
 module.exports =
 class TerminalView extends View
@@ -50,6 +52,10 @@ class TerminalView extends View
 
     $('.terminal').on 'focus', (e) =>
       @term.focus()
+
+    $('.terminal').on 'contextmenu', (e) =>
+      e.preventDefault()
+      @onContextMenu()
 
     @term.on 'data', (data) =>
       ipc.send 'terminal-data', data
@@ -161,3 +167,20 @@ class TerminalView extends View
       if focus
         @term.focus()
         $('.terminal').focus()
+
+  onContextMenu: () ->
+    @contextMenu().popup()
+
+  contextMenu: () ->
+    Menu.buildFromTemplate([
+      {
+        label: 'Copy',
+        accelerator: 'CmdOrCtrl+C',
+        role: 'copy'
+      },
+      {
+        label: 'Paste',
+        accelerator: 'CmdOrCtrl+V',
+        role: 'paste'
+      }
+    ])
