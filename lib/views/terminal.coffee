@@ -24,12 +24,7 @@ class TerminalView extends View
 
     if !!process.platform.match(/darwin/)
       this.on 'keydown', (e) =>
-        if e.which == 67 && e.metaKey
-          Clipboard.writeText(getSelection().toString())
-        else if e.which == 86 && e.metaKey
-          text = Clipboard.readText().replace(/\n/g, "\r")
-          @term.emit 'data', text
-        else if (e.which == 187 || e.which == 189) && e.metaKey
+        if (e.which == 187 || e.which == 189) && e.metaKey
           e.preventDefault()
           e.stopPropagation()
           @adjustTermFontSize(e.which)
@@ -78,11 +73,7 @@ class TerminalView extends View
       @term.off 'data'
       @term.on 'data', (data) =>
         if !!process.platform.match(/win/) && !process.platform.match(/darwin/)
-          if event.which == 67 && event.shiftKey && event.ctrlKey
-            Clipboard.writeText(getSelection().toString())
-          else if event.which == 86 && event.shiftKey && event.ctrlKey
-            ipc.send 'terminal-data', Clipboard.readText().replace(/\n/g, "\r")
-          else if (event.which == 38 || event.which == 40) && event.altKey
+          if (event.which == 38 || event.which == 40) && event.altKey
             @adjustTermFontSize(event.which)
           else if event.altKey
             console.log 'Saved from alt key disaster!'
@@ -153,6 +144,13 @@ class TerminalView extends View
     @resizeTermForFontSizeChange()
     @term.focus()
     $('.terminal').focus()
+
+  copy: () ->
+    Clipboard.writeText(getSelection().toString())
+
+  paste: () ->
+    text = Clipboard.readText().replace(/\n/g, "\r")
+    @term.emit 'data', text
 
   toggle: (focus) ->
     if @panel.isVisible()
