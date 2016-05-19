@@ -2,6 +2,8 @@
 utf8      = require 'utf8'
 ipc       = require 'ipc'
 Clipboard = require 'clipboard'
+remote    = require 'remote'
+Menu      = remote.require 'menu'
 
 module.exports =
 class TerminalView extends View
@@ -24,12 +26,7 @@ class TerminalView extends View
 
     if !!process.platform.match(/darwin/)
       this.on 'keydown', (e) =>
-        if e.which == 67 && e.metaKey
-          Clipboard.writeText(getSelection().toString())
-        else if e.which == 86 && e.metaKey
-          text = Clipboard.readText().replace(/\n/g, "\r")
-          @term.emit 'data', text
-        else if (e.which == 187 || e.which == 189) && e.metaKey
+        if (e.which == 187 || e.which == 189) && e.metaKey
           e.preventDefault()
           e.stopPropagation()
           @adjustTermFontSize(e.which)
@@ -56,6 +53,10 @@ class TerminalView extends View
     $('.terminal').on 'focus', (e) =>
       @term.focus()
 
+    $('.terminal').on 'contextmenu', (e) =>
+      e.preventDefault()
+      @onContextMenu()
+
     @term.on 'data', (data) =>
       ipc.send 'terminal-data', data
 
@@ -77,11 +78,11 @@ class TerminalView extends View
     @terminal.on 'terminal-session-opened', () =>
       @term.off 'data'
       @term.on 'data', (data) =>
-        if !!process.platform.match(/win/) && !process.platform.match(/darwin/)
+        if !!process.platform.match(/^win/)
           if event.which == 67 && event.shiftKey && event.ctrlKey
-            Clipboard.writeText(getSelection().toString())
+            @copy()
           else if event.which == 86 && event.shiftKey && event.ctrlKey
-            ipc.send 'terminal-data', Clipboard.readText().replace(/\n/g, "\r")
+            @paste()
           else if (event.which == 38 || event.which == 40) && event.altKey
             @adjustTermFontSize(event.which)
           else if event.altKey
@@ -154,6 +155,17 @@ class TerminalView extends View
     @term.focus()
     $('.terminal').focus()
 
+  copy: () ->
+    Clipboard.writeText(getSelection().toString())
+
+  paste: () ->
+    text = Clipboard.readText().replace(/\n/g, "\r")
+
+    if !!process.platform.match(/^win/)
+      ipc.send 'terminal-data', text
+    else
+      @term.emit 'data', text
+
   toggle: (focus) ->
     if @panel.isVisible()
       @panel.hide()
@@ -163,3 +175,34 @@ class TerminalView extends View
       if focus
         @term.focus()
         $('.terminal').focus()
+
+  onContextMenu: () ->
+    Menu.buildFromTemplate(@contextMenuTemplate()).popup()
+
+  contextMenuTemplate: () ->
+    if !!process.platform.match(/^win/)
+      [
+        {
+          label: 'Copy',
+          accelerator: 'Shift+Ctrl+C',
+          role: 'copy'
+        },
+        {
+          label: 'Paste',
+          accelerator: 'Shift+Ctrl+V',
+          role: 'paste'
+        }
+      ]
+    else
+      [
+        {
+          label: 'Copy',
+          accelerator: 'Cmd+C'
+          role: 'copy'
+        },
+        {
+          label: 'Paste',
+          accelerator: 'Cmd+V'
+          role: 'paste'
+        }
+      ]
