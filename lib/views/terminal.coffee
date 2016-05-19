@@ -78,7 +78,7 @@ class TerminalView extends View
     @terminal.on 'terminal-session-opened', () =>
       @term.off 'data'
       @term.on 'data', (data) =>
-        if !!process.platform.match(/win/)
+        if !!process.platform.match(/^win/)
           if (event.which == 38 || event.which == 40) && event.altKey
             @adjustTermFontSize(event.which)
           else if event.altKey
@@ -157,7 +157,7 @@ class TerminalView extends View
   paste: () ->
     text = Clipboard.readText().replace(/\n/g, "\r")
 
-    if !!process.platform.match(/win/)
+    if !!process.platform.match(/^win/)
       ipc.send 'terminal-data', text
     else
       @term.emit 'data', text
@@ -176,7 +176,7 @@ class TerminalView extends View
     Menu.buildFromTemplate(@contextMenuTemplate()).popup()
 
   contextMenuTemplate: () ->
-    if !!process.platform.match(/win/)
+    if !!process.platform.match(/^win/)
       [
         {
           label: 'Copy',
