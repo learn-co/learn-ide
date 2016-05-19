@@ -90,9 +90,9 @@ module.exports =
         console.log @progressBarPopup
         window.progressBar = @progressBarPopup
 
-      @progressBarPopup.item.getElementsByClassName('learn-progress-bar')[0].setAttribute 'style', 'width:' + value * 100 + '%;'
-
-      if value > 0.995
+      if value >= 0 && value < 1
+        @progressBarPopup.item.getElementsByClassName('learn-progress-bar')[0].setAttribute 'style', 'width:' + value * 100 + '%;'
+      else
         @progressBarPopup.destroy()
         @progressBarPopup = null
 
