@@ -21,6 +21,7 @@ module.exports =
 
   activate: (state) ->
     @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
+    @progressBarPopup = null
     openPath = atom.blobStore.get('learnOpenUrl', 'learn-open-url-key')
     atom.blobStore.delete('learnOpenUrl')
     atom.blobStore.save()
@@ -37,7 +38,7 @@ module.exports =
       workspaceView = atom.views.getView(atom.workspace)
       atom.commands.dispatch(workspaceView, 'tree-view:toggle')
 
-    @fs = new SyncedFS("wss://ile.learn.co:4464?token=" + @oauthToken, isTerminalWindow)
+    @fs = new SyncedFS("wss://ile.learn.co:3000?token=" + @oauthToken, isTerminalWindow)
     @fsViewEmitter = new EventEmitter
     @fsView = new SyncedFSView(state, @fs, @fsViewEmitter, isTerminalWindow)
 
@@ -75,6 +76,25 @@ module.exports =
 
     ipc.on 'progress-bar-update', (value) =>
       atom.getCurrentWindow().setProgressBar(value)
+
+      if !@progressBarPopup
+        progressBarContainer = document.createElement 'div'
+        progressBarInnerDiv = document.createElement 'div'
+        progressBarInnerDiv.className = 'w3-progress-container w3-round-xlarge w3-dark-grey'
+        progressBar = document.createElement 'div'
+        progressBar.className = 'learn-progress-bar w3-progressbar w3-round-xlarge w3-green'
+        progressBarInnerDiv.appendChild progressBar
+        progressBarContainer.appendChild progressBarInnerDiv
+
+        @progressBarPopup = atom.workspace.addModalPanel item: progressBarContainer
+        console.log @progressBarPopup
+        window.progressBar = @progressBarPopup
+
+      @progressBarPopup.item.getElementsByClassName('learn-progress-bar')[0].setAttribute 'style', 'width:' + value * 100 + '%;'
+
+      if value > 0.995
+        @progressBarPopup.destroy()
+        @progressBarPopup = null
 
     @fsViewEmitter.on 'toggleTerminal', (focus) =>
       @termView.toggle(focus)
