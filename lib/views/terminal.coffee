@@ -79,7 +79,11 @@ class TerminalView extends View
       @term.off 'data'
       @term.on 'data', (data) =>
         if !!process.platform.match(/^win/)
-          if (event.which == 38 || event.which == 40) && event.altKey
+          if event.which == 67 && event.shiftKey && event.ctrlKey
+            @copy()
+          else if event.which == 86 && event.shiftKey && event.ctrlKey
+            @paste()
+          else if (event.which == 38 || event.which == 40) && event.altKey
             @adjustTermFontSize(event.which)
           else if event.altKey
             console.log 'Saved from alt key disaster!'
