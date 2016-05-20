@@ -87,8 +87,6 @@ module.exports =
         progressBarContainer.appendChild progressBarInnerDiv
 
         @progressBarPopup = atom.workspace.addModalPanel item: progressBarContainer
-        console.log @progressBarPopup
-        window.progressBar = @progressBarPopup
 
       if value >= 0 && value < 1
         @progressBarPopup.item.getElementsByClassName('learn-progress-bar')[0].setAttribute 'style', 'width:' + value * 100 + '%;'
