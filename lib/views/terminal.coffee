@@ -78,7 +78,7 @@ class TerminalView extends View
     @terminal.on 'terminal-session-opened', () =>
       @term.off 'data'
       @term.on 'data', (data) =>
-        if !!process.platform.match(/^win/)
+        if !!process.platform.match(/^win/) && event?
           if event.which == 67 && event.shiftKey && event.ctrlKey
             @copy()
           else if event.which == 86 && event.shiftKey && event.ctrlKey
