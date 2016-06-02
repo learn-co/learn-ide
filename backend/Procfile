@@ -1,2 +1,0 @@
-terminal: bundle exec thin start -p 4463 -R terminal_server.ru
-filesystem: bundle exec thin start -p 4464 -R syncedfs_server.ru
