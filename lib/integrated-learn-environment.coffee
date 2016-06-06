@@ -44,7 +44,7 @@ module.exports =
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:open': (e) =>
-      openPath = e.detail
+      openPath = e.detail.path
       @termView.openLab openPath
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
       @termView.toggle()
