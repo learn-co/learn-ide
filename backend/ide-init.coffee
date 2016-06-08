@@ -48,7 +48,7 @@ if !existingToken
   tokenLink.title = 'https://learn.co/ide/token'
   tokenLink.href = 'https://learn.co/ide/token'
   tokenLink.setAttribute 'style', 'text-decoration: underline;'
-  tokenLink.appendChild document.createTextNode 'https://learn.co/ile/token'
+  tokenLink.appendChild document.createTextNode 'https://learn.co/ide/token'
   tokenLinkDiv.appendChild tokenText
   tokenLinkDiv.appendChild tokenLink
   oauthPrompt.appendChild oauthLabel
