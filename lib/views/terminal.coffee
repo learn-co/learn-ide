@@ -100,9 +100,9 @@ class TerminalView extends View
     ipc.on 'connection-state', (state) =>
       @terminal.updateConnectionState(state)
 
-  openLab: ->
-    if @openPath
-      ipc.send 'terminal-data', 'learn open ' + @openPath.toString() + '\r'
+  openLab: (path = @openPath)->
+    if path
+      ipc.send 'terminal-data', 'learn open ' + path.toString() + '\r'
       @openPath = null
 
   resizeStarted: ->

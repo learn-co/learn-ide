@@ -43,6 +43,9 @@ module.exports =
     @fsView = new SyncedFSView(state, @fs, @fsViewEmitter, isTerminalWindow)
 
     @subscriptions = new CompositeDisposable
+    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:open': (e) =>
+      openPath = e.detail.path
+      @termView.openLab openPath
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
       @termView.toggle()
     @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:reset': =>

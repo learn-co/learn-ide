@@ -45,8 +45,8 @@ if !existingToken
   tokenLinkDiv = document.createElement 'div'
   tokenText = document.createTextNode 'Get your token here: '
   tokenLink = document.createElement 'a'
-  tokenLink.title = 'https://learn.co/ile/token'
-  tokenLink.href = 'https://learn.co/ile/token'
+  tokenLink.title = 'https://learn.co/ide/token'
+  tokenLink.href = 'https://learn.co/ide/token'
   tokenLink.setAttribute 'style', 'text-decoration: underline;'
   tokenLink.appendChild document.createTextNode 'https://learn.co/ile/token'
   tokenLinkDiv.appendChild tokenText
