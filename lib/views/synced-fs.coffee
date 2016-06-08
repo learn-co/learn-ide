@@ -48,6 +48,10 @@ class SyncedFSView extends View
           @emitter.emit 'toggleTerminal'
         , 100
 
+    @statusIcon().addEventListener 'click', ->
+      workspaceView = atom.views.getView(atom.workspace)
+      atom.commands.dispatch(workspaceView, 'integrated-learn-environment:reset')
+
   togglePopoutIcon: =>
     if @popoutIcon().classList.contains('inactive')
       @popoutIcon().classList.remove('inactive')
@@ -63,9 +67,9 @@ class SyncedFSView extends View
     @element.getElementsByClassName('learn-popout-terminal-icon')[0]
 
   updateConnectionState: (state) =>
-    if state == 'open'
+    if state is 'open'
       @statusIcon().style.color = '#73c990'
       @statusIcon().textContent = ' Learn'
     else
       @statusIcon().style.color = '#d92626'
-      @statusIcon().textContent = ' Learn [DISCONNECTED]'
+      @statusIcon().textContent = ' Learn... reconnect?'
