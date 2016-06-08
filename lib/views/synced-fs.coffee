@@ -13,7 +13,6 @@ class SyncedFSView extends View
 
     @fs = fs
 
-    @statusIcon().style.color = '#d92626'
     @emitter = emitter
 
     @handleEvents()
@@ -48,9 +47,10 @@ class SyncedFSView extends View
           @emitter.emit 'toggleTerminal'
         , 100
 
-    @statusIcon().addEventListener 'click', ->
-      workspaceView = atom.views.getView(atom.workspace)
-      atom.commands.dispatch(workspaceView, 'integrated-learn-environment:reset')
+    @statusIcon().addEventListener 'click', (e) ->
+      if e.target.dataset.status is 'bad'
+        workspaceView = atom.views.getView(atom.workspace)
+        atom.commands.dispatch(workspaceView, 'integrated-learn-environment:reset')
 
   togglePopoutIcon: =>
     if @popoutIcon().classList.contains('inactive')
@@ -68,8 +68,8 @@ class SyncedFSView extends View
 
   updateConnectionState: (state) =>
     if state is 'open'
-      @statusIcon().style.color = '#73c990'
       @statusIcon().textContent = ' Learn'
+      @statusIcon().dataset.status = 'good'
     else
-      @statusIcon().style.color = '#d92626'
       @statusIcon().textContent = ' Learn... reconnect?'
+      @statusIcon().dataset.status = 'bad'

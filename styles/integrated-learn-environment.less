@@ -46,8 +46,17 @@
 }
 
 .learn-status-icon {
-  &:hover {
-    cursor: pointer;
+  &[data-status='good'] {
+    color: #73c990;
+  }
+
+  &[data-status='bad'] {
+    color: #d92626;
+    text-decoration: underline;
+
+    &:hover {
+      cursor: pointer;
+    }
   }
 }
 
