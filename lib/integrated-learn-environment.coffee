@@ -6,6 +6,7 @@ SyncedFSView = require './views/synced-fs'
 {EventEmitter} = require 'events'
 ipc = require 'ipc'
 LearnUpdater = require './models/learn-updater'
+LocalhostProxy = require './models/localhost-proxy'
 
 module.exports =
   config:
@@ -21,6 +22,7 @@ module.exports =
 
   activate: (state) ->
     @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
+    @vm_port = atom.config.get('integrated-learn-environment.vm_port')
     @progressBarPopup = null
     openPath = atom.blobStore.get('learnOpenUrl', 'learn-open-url-key')
     atom.blobStore.delete('learnOpenUrl')
@@ -62,6 +64,8 @@ module.exports =
 
     @passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
     @failingIcon = 'http://i.imgbox.com/vVZZG1Gx.png'
+
+    @startLocalhostProxy()
 
     ipc.send 'register-for-notifications', @oauthToken
 
@@ -106,6 +110,10 @@ module.exports =
 
     autoUpdater = new LearnUpdater(true)
     autoUpdater.checkForUpdate()
+
+  startLocalhostProxy: ->
+    @localhostProxy = new LocalhostProxy(@vm_port)
+    @localhostProxy.start()
 
   deactivate: ->
     @termView = null
