@@ -4,25 +4,34 @@ httpProxy = require 'http-proxy'
 module.exports = class LocalhostProxy
   constructor: (port) ->
     @port = port
-    @bound = false
     @remoteHost = 'http://159.203.117.55'
+    @desiredPorts = ['3000', '4000', '8000', '9393']
 
   start: ->
-    @withAvailablePort((available) =>
-      if !!available
-        @bound = true
-        httpProxy.createProxyServer({target: @remoteHost + ':' + @port}).listen(3000, 'localhost')
+    @withAvailablePort((ports) =>
+      console.log ports
+      server = httpProxy.createProxyServer({target: @remoteHost + ':' + @port})
+
+      for port in @desiredPorts
+        console.log 'Port: ' + port + ' Available: ' + !!ports[port]
+        if !!ports[port]
+          server.listen(parseInt(port), 'localhost')
     )
 
   withAvailablePort: (callback) ->
-    try
-      server = net.createServer()
-      server.listen 3000, 'localhost'
+    ports = {}
 
-      server.on 'error', (e) ->
-        callback false
-      server.on 'listening', (e) ->
-        server.close()
-        callback true
-    catch error
-      callback false
+    for port in @desiredPorts
+      try
+        server = net.createServer()
+        server.listen parseInt(port), 'localhost'
+
+        server.on 'error', (e) ->
+          ports[port] = false
+        server.on 'listening', (e) ->
+          server.close()
+          ports[port] = true
+      catch error
+        ports[port] = false
+
+    callback(ports)
