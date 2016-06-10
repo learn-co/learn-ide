@@ -5,7 +5,7 @@ module.exports = class LocalhostProxy
   constructor: (port) ->
     @port = port
     @remoteHost = 'http://ile.learn.co'
-    @desiredPorts = ['3000', '4000', '8000', '9393']
+    @desiredPorts = ['3000', '4000', '4567', '8000', '9292', '9393']
 
   start: ->
     @withAvailablePort((ports) =>
