@@ -37,12 +37,15 @@ confirmOauthToken = (token) ->
   )
 
 getTokenAndVMPort = ->
-  win = new BrowserWindow({show: false})
+  win = new BrowserWindow(show: false, width: 1040, height: 660)
+  win.setSkipTaskbar(true)
+  win.setAlwaysOnTop(true)
+  win.setClosable(false)
+  win.setMinimizable(false)
+  win.setTitle('Sign in to Github to get started with the Learn IDE')
+
   webContents = win.webContents
-
-  webContents.on 'did-finish-load', ->
-    win.show()
-
+  webContents.on 'did-finish-load', -> win.show()
   webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
     if newURL.match(/ide_token/)
       token = url.parse(newURL, true).query.ide_token
