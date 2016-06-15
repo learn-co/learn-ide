@@ -55,7 +55,7 @@ getTokenAndVMPort = ->
           atom.commands.dispatch(workspaceView, 'integrated-learn-environment:toggleTerminal')
         else
 
-  promptManualEntry() unless win.loadUrl('http://staging.learn.co/ide/token?ide_config=true')
+  promptManualEntry() unless win.loadUrl('https://learn.co/ide/token?ide_config=true')
 
 promptManualEntry = ->
   oauthPrompt = document.createElement 'div'
