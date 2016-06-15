@@ -40,6 +40,9 @@ getTokenAndVMPort = ->
   win = new BrowserWindow({show: false})
   webContents = win.webContents
 
+  webContents.on 'did-finish-load', ->
+    win.show()
+
   webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
     if newURL.match(/ide_token/)
       token = url.parse(newURL, true).query.ide_token
@@ -52,10 +55,7 @@ getTokenAndVMPort = ->
           atom.commands.dispatch(workspaceView, 'integrated-learn-environment:toggleTerminal')
         else
 
-  if win.loadUrl('https://learn.co/ide/token')
-    win.show()
-  else
-    promptManualEntry()
+  promptManualEntry() unless win.loadUrl('http://staging.learn.co/ide/token?ide_config=true')
 
 promptManualEntry = ->
   oauthPrompt = document.createElement 'div'
