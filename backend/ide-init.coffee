@@ -117,6 +117,12 @@ getVMPort = ->
       atom.commands.dispatch(workspaceView, 'integrated-learn-environment:toggleTerminal')
       return true
 
+# TODO: Remove this temporary helper eventually...
+window.githubLogout = ->
+  win = new BrowserWindow(show: false)
+  win.webContents.on 'did-finish-load', -> win.show()
+  win.loadUrl('https://github.com/logout')
+
 existingToken = atom.config.get('integrated-learn-environment.oauthToken')
 vmPort = atom.config.get('integrated-learn-environment.vm_port')
 
