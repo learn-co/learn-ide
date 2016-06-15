@@ -63,7 +63,6 @@ getTokenAndVMPort = ->
           win.destroy()
 
           atom.commands.dispatch(workspaceView, 'integrated-learn-environment:toggleTerminal')
-        else
 
   promptManualEntry() unless win.loadUrl('https://learn.co/ide/token?ide_config=true')
 
