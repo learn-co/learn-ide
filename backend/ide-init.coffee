@@ -41,7 +41,6 @@ getTokenAndVMPort = ->
   webContents = win.webContents
 
   win.setSkipTaskbar(true)
-  win.setAlwaysOnTop(true)
   win.setMenuBarVisibility(false)
   win.setTitle('Sign in to Github to get started with the Learn IDE')
 
