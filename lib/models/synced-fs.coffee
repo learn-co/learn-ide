@@ -33,8 +33,10 @@ class SyncedFS
       project = editor.project
       buffer = editor.buffer
       file = buffer.file
+      editorElement = atom.views.getView(editor)
 
       editor.onDidSave =>
+        atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
         console.log 'Saving: Path - ' + this.formatFilePath(buffer.file.path) + ' Matches? - ' + !!this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
         if @formatFilePath(buffer.file.path).match(/\.atom\/code/)
           if @connectionState == 'closed'
@@ -114,7 +116,7 @@ class SyncedFS
         digest: file.digest,
       },
       buffer: {
-        content: window.btoa(unescape(encodeURIComponent(@getText(buffer))))
+        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
       }
     })
 
@@ -129,10 +131,3 @@ class SyncedFS
       return path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
     else
       return path
-
-  getText: (buffer) ->
-    text = ''
-    for rowIndex in [0...buffer.getLastRow()]
-      text += buffer.lines[rowIndex] + '\n'
-
-    return text
