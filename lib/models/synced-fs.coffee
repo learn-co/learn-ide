@@ -25,16 +25,20 @@ class SyncedFS
     @treeViewEventQueue = []
 
   expandTreeView: ->
-    workspaceView = atom.views.getView(atom.workspace)
-    atom.commands.dispatch(workspaceView, 'tree-view:reveal-active-file')
+    atom.commands.dispatch(@workspaceView(), 'tree-view:reveal-active-file')
+
+  workspaceView: ->
+    atom.views.getView(atom.workspace)
 
   handleEvents: ->
     atom.workspace.observeTextEditors (editor) =>
       project = editor.project
       buffer = editor.buffer
       file = buffer.file
+      editorElement = atom.views.getView(editor)
 
       editor.onDidSave =>
+        atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
         console.log 'Saving: Path - ' + this.formatFilePath(buffer.file.path) + ' Matches? - ' + !!this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
         if @formatFilePath(buffer.file.path).match(/\.atom\/code/)
           if @connectionState == 'closed'
@@ -104,6 +108,8 @@ class SyncedFS
       panel.destroy()
 
   sendSave: (project, file, buffer) ->
+    window.b = buffer
+    window.c = @getText
     ipc.send 'fs-local-save', JSON.stringify({
       action: 'local_save',
       project: {
@@ -114,7 +120,7 @@ class SyncedFS
         digest: file.digest,
       },
       buffer: {
-        content: window.btoa(unescape(encodeURIComponent(@getText(buffer))))
+        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
       }
     })
 
@@ -129,10 +135,3 @@ class SyncedFS
       return path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
     else
       return path
-
-  getText: (buffer) ->
-    text = ''
-    for rowIndex in [0...buffer.getLastRow()]
-      text += buffer.lines[rowIndex] + '\n'
-
-    return text
