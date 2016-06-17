@@ -36,11 +36,12 @@ class SyncedFS
 
       editor.onDidSave =>
         console.log 'Saving: Path - ' + this.formatFilePath(buffer.file.path) + ' Matches? - ' + !!this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
-        if this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
+        if @formatFilePath(buffer.file.path).match(/\.atom\/code/)
           if @connectionState == 'closed'
             @popupNoConnectionWarning()
 
           @sendSave(editor.project, buffer.file, buffer)
+
       editor.onDidChangePath =>
         console.log('PATH CHANGED')
 
@@ -103,19 +104,20 @@ class SyncedFS
       panel.destroy()
 
   sendSave: (project, file, buffer) ->
-    ipc.send 'fs-local-save', JSON.stringify({
-      action: 'local_save',
-      project: {
-        path: this.formatFilePath(project.getPaths()[0])
-      },
-      file: {
-        path: this.formatFilePath(file.path)
-        digest: file.digest,
-      },
-      buffer: {
-        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
-      }
-    })
+    @convertLineEndingsToUnixFormat(buffer).then =>
+      ipc.send 'fs-local-save', JSON.stringify({
+        action: 'local_save',
+        project: {
+          path: this.formatFilePath(project.getPaths()[0])
+        },
+        file: {
+          path: this.formatFilePath(file.path)
+          digest: file.digest,
+        },
+        buffer: {
+          content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
+        }
+      })
 
   #formattedText: (text) ->
     #try
@@ -128,3 +130,20 @@ class SyncedFS
       return path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
     else
       return path
+
+  convertLineEndingsToUnixFormat: (buffer) ->
+    return new Promise (resolve, reject) ->
+      format = '\n'
+      lastRowIndex = buffer.getLastRow()
+      buffer.transact ->
+        for rowIndex in [0...lastRowIndex]
+          do (rowIndex) ->
+            currEol = buffer.lineEndingForRow rowIndex
+            if currEol isnt format
+              lineEndingRange = new Range(
+                new Point(rowIndex, buffer.lineLengthForRow(rowIndex)),
+                new Point(rowIndex + 1, 0)
+              )
+              buffer.setTextInRange lineEndingRange, format,
+                { normalizeLineEndings: false }
+      resolve true
