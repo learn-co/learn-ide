@@ -36,11 +36,12 @@ class SyncedFS
 
       editor.onDidSave =>
         console.log 'Saving: Path - ' + this.formatFilePath(buffer.file.path) + ' Matches? - ' + !!this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
-        if this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
+        if @formatFilePath(buffer.file.path).match(/\.atom\/code/)
           if @connectionState == 'closed'
             @popupNoConnectionWarning()
 
           @sendSave(editor.project, buffer.file, buffer)
+
       editor.onDidChangePath =>
         console.log('PATH CHANGED')
 
@@ -113,7 +114,7 @@ class SyncedFS
         digest: file.digest,
       },
       buffer: {
-        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
+        content: window.btoa(unescape(encodeURIComponent(@getText(buffer))))
       }
     })
 
@@ -128,3 +129,10 @@ class SyncedFS
       return path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
     else
       return path
+
+  getText: (buffer) ->
+    text = ''
+    for rowIndex in [0...buffer.getLastRow()]
+      text += buffer.lines[rowIndex] + '\n'
+
+    return text
