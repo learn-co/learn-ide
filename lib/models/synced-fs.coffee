@@ -104,20 +104,19 @@ class SyncedFS
       panel.destroy()
 
   sendSave: (project, file, buffer) ->
-    @convertLineEndingsToUnixFormat(buffer).then =>
-      ipc.send 'fs-local-save', JSON.stringify({
-        action: 'local_save',
-        project: {
-          path: this.formatFilePath(project.getPaths()[0])
-        },
-        file: {
-          path: this.formatFilePath(file.path)
-          digest: file.digest,
-        },
-        buffer: {
-          content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
-        }
-      })
+    ipc.send 'fs-local-save', JSON.stringify({
+      action: 'local_save',
+      project: {
+        path: this.formatFilePath(project.getPaths()[0])
+      },
+      file: {
+        path: this.formatFilePath(file.path)
+        digest: file.digest,
+      },
+      buffer: {
+        content: window.btoa(unescape(encodeURIComponent(@getText(buffer))))
+      }
+    })
 
   #formattedText: (text) ->
     #try
@@ -131,19 +130,9 @@ class SyncedFS
     else
       return path
 
-  convertLineEndingsToUnixFormat: (buffer) ->
-    return new Promise (resolve, reject) ->
-      format = '\n'
-      lastRowIndex = buffer.getLastRow()
-      buffer.transact ->
-        for rowIndex in [0...lastRowIndex]
-          do (rowIndex) ->
-            currEol = buffer.lineEndingForRow rowIndex
-            if currEol isnt format
-              lineEndingRange = new Range(
-                new Point(rowIndex, buffer.lineLengthForRow(rowIndex)),
-                new Point(rowIndex + 1, 0)
-              )
-              buffer.setTextInRange lineEndingRange, format,
-                { normalizeLineEndings: false }
-      resolve true
+  getText: (buffer) ->
+    text = ''
+    for rowIndex in [0...buffer.getLastRow()]
+      text += buffer.lines[rowIndex] + '\n'
+
+    return text
