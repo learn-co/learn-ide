@@ -53,10 +53,6 @@ class TerminalView extends View
     $('.terminal').on 'focus', (e) =>
       @term.focus()
 
-    $('.terminal').on 'contextmenu', (e) =>
-      e.preventDefault()
-      @onContextMenu()
-
     @term.on 'data', (data) =>
       ipc.send 'terminal-data', data
 
@@ -99,6 +95,12 @@ class TerminalView extends View
 
     ipc.on 'connection-state', (state) =>
       @terminal.updateConnectionState(state)
+
+    atom.commands.add @element,
+      'core:copy': => atom.commands.dispatch(@element, 'learn-ide:copy')
+      'core:paste': => atom.commands.dispatch(@element, 'learn-ide:paste')
+      'learn-ide:copy': => @copy()
+      'learn-ide:paste': => @paste()
 
   openLab: (path = @openPath)->
     if path
@@ -155,10 +157,10 @@ class TerminalView extends View
     @term.focus()
     $('.terminal').focus()
 
-  copy: () ->
+  copy: ->
     Clipboard.writeText(getSelection().toString())
 
-  paste: () ->
+  paste: ->
     text = Clipboard.readText().replace(/\n/g, "\r")
 
     if !!process.platform.match(/^win/)
@@ -175,34 +177,3 @@ class TerminalView extends View
       if focus
         @term.focus()
         $('.terminal').focus()
-
-  onContextMenu: () ->
-    Menu.buildFromTemplate(@contextMenuTemplate()).popup()
-
-  contextMenuTemplate: () ->
-    if !!process.platform.match(/^win/)
-      [
-        {
-          label: 'Copy',
-          accelerator: 'Shift+Ctrl+C',
-          role: 'copy'
-        },
-        {
-          label: 'Paste',
-          accelerator: 'Shift+Ctrl+V',
-          role: 'paste'
-        }
-      ]
-    else
-      [
-        {
-          label: 'Copy',
-          accelerator: 'Cmd+C'
-          role: 'copy'
-        },
-        {
-          label: 'Paste',
-          accelerator: 'Cmd+V'
-          role: 'paste'
-        }
-      ]
