@@ -45,10 +45,10 @@ class TerminalView extends View
     @openColor = @term.element.style.color
 
   handleEvents: ->
-    #@on 'focus', =>
-      #@resizeTerminal()
-    #@on 'mousedown', '.terminal-view-resize-handle', (e) =>
-      #@resizeStarted(e)
+    @on 'focus', =>
+      @resizeTerminal()
+    @on 'mousedown', '.terminal-view-resize-handle', (e) =>
+      @resizeStarted(e)
 
     $('.terminal').on 'focus', (e) =>
       @term.focus()
@@ -116,7 +116,7 @@ class TerminalView extends View
 
   resize: ({pageY, which}) =>
     return @resizeStopped() unless which is 1
-    @height(window.innerHeight - pageY)
+    @height(@outerHeight() + @offset().top - pageY)
 
   resizeTerminal: ->
     {cols, rows} = @getDimensions()
