@@ -21,7 +21,7 @@ class TerminalView extends View
     @term.open(this.get(0))
     #@term.write('Connecting...\r')
 
-    @$terminalEl = @find('.terminal')
+    @$terminalEl = $(@term.element)
 
     ipc.on 'remote-open-event', (file) =>
       @term.blur()
@@ -35,8 +35,8 @@ class TerminalView extends View
     @term.element.style.height = '100%'
     @term.element.style.fontFamily = ->
       atom.config.get('editor.fontFamily') or "monospace"
-    @term.element.style.fontSize = ->
-      atom.config.get('editor.fontSize')
+    recentFontSize = atom.config.get('integrated-learn-environment.currentFontSize')
+    @term.element.style.fontSize = recentFontSize + 'px'
     @openColor = @term.element.style.color
 
   handleEvents: ->
@@ -87,7 +87,7 @@ class TerminalView extends View
       'learn-ide:paste': => @paste()
       'learn-ide:increase-font-size': => @increaseFontSize()
       'learn-ide:decrease-font-size': => @decreaseFontSize()
-      'learn-ide:reset-font-size': => # @resetFontSize()
+      'learn-ide:reset-font-size': => @resetFontSize()
 
   openLab: (path = @openPath)->
     if path
@@ -139,8 +139,13 @@ class TerminalView extends View
 
     @changeFontSize currentFontSize - 2
 
+  resetFontSize: ->
+    defaultSize = atom.config.get('integrated-learn-environment.defaultFontSize')
+    @changeFontSize defaultSize
+
   changeFontSize: (fontSize) ->
     @$terminalEl.css 'font-size', fontSize
+    atom.config.set('integrated-learn-environment.currentFontSize', fontSize)
     @term.resize(@term.cols, @visibleRowCount())
     @term.focus()
     @$terminalEl.focus()
