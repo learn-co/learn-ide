@@ -21,15 +21,10 @@ class TerminalView extends View
     @term.open(this.get(0))
     #@term.write('Connecting...\r')
 
+    @$terminalEl = @find('.terminal')
+
     ipc.on 'remote-open-event', (file) =>
       @term.blur()
-
-    if !!process.platform.match(/darwin/)
-      this.on 'keydown', (e) =>
-        if (e.which == 187 || e.which == 189) && e.metaKey
-          e.preventDefault()
-          e.stopPropagation()
-          @adjustTermFontSize(e.which)
 
     @applyEditorStyling()
     @handleEvents()
@@ -50,7 +45,7 @@ class TerminalView extends View
     #@on 'mousedown', '.terminal-view-resize-handle', (e) =>
       #@resizeStarted(e)
 
-    $('.terminal').on 'focus', (e) =>
+    @$terminalEl.on 'focus', (e) =>
       @term.focus()
 
     @term.on 'data', (data) =>
@@ -74,19 +69,8 @@ class TerminalView extends View
     @terminal.on 'terminal-session-opened', () =>
       @term.off 'data'
       @term.on 'data', (data) =>
-        if !!process.platform.match(/^win/) && event?
-          if event.which == 67 && event.shiftKey && event.ctrlKey
-            @copy()
-          else if event.which == 86 && event.shiftKey && event.ctrlKey
-            @paste()
-          else if (event.which == 38 || event.which == 40) && event.altKey
-            @adjustTermFontSize(event.which)
-          else if event.altKey
-            console.log 'Saved from alt key disaster!'
-          else if (event.which == 187 || event.which == 189) && event.ctrlKey
-            @adjustTermFontSize(event.which)
-          else
-            ipc.send 'terminal-data', data
+        if !!process.platform.match(/^win/) and event? and event.altKey
+          console.log 'Saved from alt key disaster!'
         else
           ipc.send 'terminal-data', data
 
@@ -101,6 +85,9 @@ class TerminalView extends View
       'core:paste': => atom.commands.dispatch(@element, 'learn-ide:paste')
       'learn-ide:copy': => @copy()
       'learn-ide:paste': => @paste()
+      'learn-ide:increase-font-size': => @increaseFontSize()
+      'learn-ide:decrease-font-size': => @decreaseFontSize()
+      'learn-ide:reset-font-size': => # @resetFontSize()
 
   openLab: (path = @openPath)->
     if path
@@ -136,26 +123,27 @@ class TerminalView extends View
 
     {cols, rows}
 
-  newTerminalRowCount: ->
-    Math.floor($('.learn-terminal').height() / $('.terminal div').height())
+  visibleRowCount: ->
+    Math.floor(@$terminalEl.height() / @$terminalEl.children().height())
 
-  resizeTermForFontSizeChange: ->
-    @term.resize(80, @newTerminalRowCount())
+  increaseFontSize: ->
+    currentFontSize = parseInt @$terminalEl.css 'font-size'
+    return if @isTerminalWindow and currentFontSize > 16
+    return if not @isTerminalWindow and currentFontSize > 24
 
-  adjustTermFontSize: (key) ->
-    $termDiv = $('.terminal')
-    currentFontSize = parseInt($('.terminal').css('font-size'))
+    @changeFontSize currentFontSize + 2
 
-    if key == 187 || key == 38
-      if (!@isTerminalWindow && currentFontSize < 26) || (@isTerminalWindow && currentFontSize < 18)
-        $termDiv.css('font-size', currentFontSize + 2)
-    else if key == 189 || key == 40
-      if currentFontSize > 8
-        $termDiv.css('font-size', currentFontSize - 2)
+  decreaseFontSize: ->
+    currentFontSize = parseInt @$terminalEl.css 'font-size'
+    return if currentFontSize < 10
 
-    @resizeTermForFontSizeChange()
+    @changeFontSize currentFontSize - 2
+
+  changeFontSize: (fontSize) ->
+    @$terminalEl.css 'font-size', fontSize
+    @term.resize(@term.cols, @visibleRowCount())
     @term.focus()
-    $('.terminal').focus()
+    @$terminalEl.focus()
 
   copy: ->
     Clipboard.writeText(getSelection().toString())
@@ -176,4 +164,4 @@ class TerminalView extends View
 
       if focus
         @term.focus()
-        $('.terminal').focus()
+        @$terminalEl.focus()

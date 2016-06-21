@@ -1,7 +1,0 @@
-'.platform-darwin .learn-terminal':
-  'cmd-c': 'learn-ide:copy'
-  'cmd-v': 'learn-ide:paste'
-
-'.platform-win32 .learn-terminal':
-  'shift-ctrl-c': 'learn-ide:copy'
-  'shift-ctrl-v': 'learn-ide:paste'
