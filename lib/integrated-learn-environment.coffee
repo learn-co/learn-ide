@@ -57,10 +57,6 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace', 'application:update-ile': =>
       updater = new LearnUpdater
       updater.checkForUpdate()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'core:copy': =>
-      @termView.copy()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'core:paste': =>
-      @termView.paste()
 
     @passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
     @failingIcon = 'http://i.imgbox.com/vVZZG1Gx.png'

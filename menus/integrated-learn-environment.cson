@@ -5,6 +5,16 @@
       'command': 'integrated-learn-environment:toggleTerminal'
     }
   ]
+  '.learn-terminal': [
+    {
+      'label': 'Copy'
+      'command': 'learn-ide:copy'
+    }
+    {
+      'label': 'Paste'
+      'command': 'learn-ide:paste'
+    }
+  ]
 'menu': [
   {
     'label': 'Packages'
