@@ -124,13 +124,8 @@ class TerminalView extends View
 
   getDimensions: ->
     terminal = @find('.terminal')
-    fakeRow = $("<div><span>&nbsp;</span></div>").css(visibility: 'hidden')
-    fakeCol = fakeRow.children().first()
-
-    terminal.append(fakeRow)
-    cols = Math.floor(terminal.width() / fakeCol.width())
-    rows = Math.floor(terminal.height() / fakeRow.height())
-    fakeCol.remove()
+    rows = Math.floor(terminal.height() / terminal.children().height())
+    cols = @term.cols
 
     {cols, rows}
 
