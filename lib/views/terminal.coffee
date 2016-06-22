@@ -68,6 +68,8 @@ class TerminalView extends View
 
     @terminal.on 'terminal-session-opened', () =>
       @term.off 'data'
+      @term.on 'data', (data) ->
+        ipc.send 'terminal-data', data
       @term.element.style.color = this.openColor
       @term.cursorHidden = false
 
