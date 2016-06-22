@@ -66,10 +66,16 @@ class TerminalView extends View
       @term.element.style.color = '#666'
       @term.cursorHidden = true
 
-    @terminal.on 'terminal-session-opened', () =>
+    @terminal.on 'terminal-session-opened', =>
       @term.off 'data'
       @term.on 'data', (data) ->
-        ipc.send 'terminal-data', data
+        # TODO: handle non-darwin copy/paste shortcut in keymaps
+        {ctrlKey, shiftKey, which} = event if event
+        if process.platform isnt 'darwin' and event and ctrlKey and shiftKey
+          atom.commands.dispatch(@element, 'learn-ide:copy') if which is 67
+          atom.commands.dispatch(@element, 'learn-ide:paste') if which is 86
+        else
+          ipc.send 'terminal-data', data
       @term.element.style.color = this.openColor
       @term.cursorHidden = false
 
@@ -145,7 +151,7 @@ class TerminalView extends View
   paste: ->
     text = Clipboard.readText().replace(/\n/g, "\r")
 
-    if !!process.platform.match(/^win/)
+    if process.platform isnt 'darwin'
       ipc.send 'terminal-data', text
     else
       @term.emit 'data', text
