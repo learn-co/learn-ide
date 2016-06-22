@@ -13,10 +13,12 @@ module.exports =
     defaultFontSize:
       type: 'integer'
       title: 'Default Terminal Font Size'
+      description: 'Resetting your font size will fall back to this default'
       default: 14
     currentFontSize:
       type: 'integer'
       title: 'Current Terminal Font Size'
+      description: 'This is used to maintain any font size adjustment you\'ve made'
       default: 14
     oauthToken:
       type: 'string'

@@ -21,7 +21,7 @@ class TerminalView extends View
     @term.open(this.get(0))
     #@term.write('Connecting...\r')
 
-    @$terminalEl = $(@term.element)
+    @$termEl = $(@term.element)
 
     ipc.on 'remote-open-event', (file) =>
       @term.blur()
@@ -41,11 +41,11 @@ class TerminalView extends View
 
   handleEvents: ->
     @on 'focus', =>
-      @resizeTerminal()
+      @fitTerminal()
     @on 'mousedown', '.terminal-view-resize-handle', (e) =>
       @resizeStarted(e)
 
-    @$terminalEl.on 'focus', (e) =>
+    @$termEl.on 'focus', (e) =>
       @term.focus()
 
     @term.on 'data', (data) =>
@@ -101,35 +101,30 @@ class TerminalView extends View
   resizeStopped: =>
     $(document).off('mousemove', @resize)
     $(document).off('mouseup', @resizeStopped)
-    @resizeTerminal()
+    @fitTerminal()
 
   resize: ({pageY, which}) =>
     return @resizeStopped() unless which is 1
     @height(@outerHeight() + @offset().top - pageY)
 
-  resizeTerminal: ->
-    {cols, rows} = @getDimensions()
-    @term.resize(cols, rows)
-
-  getDimensions: ->
-    terminal = @find('.terminal')
-    rows = Math.floor(terminal.height() / terminal.children().height())
-    cols = @term.cols
-
-    {cols, rows}
+  fitTerminal: ->
+    @term.resize(@term.cols, @visibleRowCount())
 
   visibleRowCount: ->
-    Math.floor(@$terminalEl.height() / @$terminalEl.children().height())
+    Math.floor(@$termEl.height() / @$termEl.children().height())
+
+  currentFontSize: ->
+    parseInt @$termEl.css 'font-size'
 
   increaseFontSize: ->
-    currentFontSize = parseInt @$terminalEl.css 'font-size'
+    currentFontSize = @currentFontSize()
     return if @isTerminalWindow and currentFontSize > 16
     return if not @isTerminalWindow and currentFontSize > 24
 
     @changeFontSize currentFontSize + 2
 
   decreaseFontSize: ->
-    currentFontSize = parseInt @$terminalEl.css 'font-size'
+    currentFontSize = @currentFontSize()
     return if currentFontSize < 10
 
     @changeFontSize currentFontSize - 2
@@ -138,12 +133,15 @@ class TerminalView extends View
     defaultSize = atom.config.get('integrated-learn-environment.defaultFontSize')
     @changeFontSize defaultSize
 
-  changeFontSize: (fontSize) ->
-    @$terminalEl.css 'font-size', fontSize
+  persistFontSize: (fontSize = @currentFontSize()) ->
     atom.config.set('integrated-learn-environment.currentFontSize', fontSize)
-    @term.resize(@term.cols, @visibleRowCount())
+
+  changeFontSize: (fontSize) ->
+    @$termEl.css 'font-size', fontSize
+    @persistFontSize fontSize
+    @fitTerminal()
     @term.focus()
-    @$terminalEl.focus()
+    @$termEl.focus()
 
   copy: ->
     Clipboard.writeText(getSelection().toString())
@@ -164,4 +162,4 @@ class TerminalView extends View
 
       if focus
         @term.focus()
-        @$terminalEl.focus()
+        @$termEl.focus()
