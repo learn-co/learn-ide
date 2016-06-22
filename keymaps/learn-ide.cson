@@ -6,7 +6,7 @@
   'cmd-0': 'learn-ide:reset-font-size'
 
 '.platform-win32 .learn-terminal':
-  # TODO: figure out 
+  # TODO: make these work & remove listeners in TerminalView
   # 'ctrl-shift-C': 'learn-ide:copy'
   # 'ctrl-shift-V': 'learn-ide:paste'
   'ctrl-+': 'learn-ide:increase-font-size'

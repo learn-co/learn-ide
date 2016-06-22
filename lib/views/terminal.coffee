@@ -67,6 +67,7 @@ class TerminalView extends View
       @term.cursorHidden = true
 
     @terminal.on 'terminal-session-opened', =>
+      @fitTerminal()
       @term.off 'data'
       @term.on 'data', (data) ->
         # TODO: handle non-darwin copy/paste shortcut in keymaps
