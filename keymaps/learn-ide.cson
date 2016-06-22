@@ -8,8 +8,8 @@
 '.platform-win32 .learn-terminal':
   'shift-ctrl-c': 'learn-ide:copy'
   'shift-ctrl-v': 'learn-ide:paste'
-  'ctrl-=': 'learn-ide:increase-font-size'
-  'ctrl--': 'learn-ide:decrease-font-size'
-  'ctrl-0': 'learn-ide:reset-font-size'
+  'shift-ctrl-=': 'learn-ide:increase-font-size'
+  'shift-ctrl--': 'learn-ide:decrease-font-size'
+  'shift-ctrl-0': 'learn-ide:reset-font-size'
   'alt-up': 'learn-ide:increase-font-size'
   'alt-down': 'learn-ide:decrease-font-size'
