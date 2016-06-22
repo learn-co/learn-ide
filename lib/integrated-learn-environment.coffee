@@ -10,11 +10,25 @@ LocalhostProxy = require './models/localhost-proxy'
 
 module.exports =
   config:
+    defaultFontSize:
+      type: 'integer'
+      title: 'Default Terminal Font Size'
+      description: 'Resetting your font size will fall back to this default'
+      default: 14
+    currentFontSize:
+      type: 'integer'
+      title: 'Current Terminal Font Size'
+      description: 'This is used to maintain any font size adjustment you\'ve made'
+      default: 14
     oauthToken:
       type: 'string'
       title: 'OAuth Token'
       description: 'Your learn.co oauth token'
       default: "Paste your learn.co oauth token here"
+    vm_port:
+      type: 'integer'
+      title: 'Remote Port'
+      description: 'The remote port available to you via the IDE terminal'
 
   termViewState: null
   fsViewState: null

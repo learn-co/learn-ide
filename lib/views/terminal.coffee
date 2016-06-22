@@ -21,15 +21,10 @@ class TerminalView extends View
     @term.open(this.get(0))
     #@term.write('Connecting...\r')
 
+    @$termEl = $(@term.element)
+
     ipc.on 'remote-open-event', (file) =>
       @term.blur()
-
-    if !!process.platform.match(/darwin/)
-      this.on 'keydown', (e) =>
-        if (e.which == 187 || e.which == 189) && e.metaKey
-          e.preventDefault()
-          e.stopPropagation()
-          @adjustTermFontSize(e.which)
 
     @applyEditorStyling()
     @handleEvents()
@@ -40,17 +35,17 @@ class TerminalView extends View
     @term.element.style.height = '100%'
     @term.element.style.fontFamily = ->
       atom.config.get('editor.fontFamily') or "monospace"
-    @term.element.style.fontSize = ->
-      atom.config.get('editor.fontSize')
+    recentFontSize = atom.config.get('integrated-learn-environment.currentFontSize')
+    @term.element.style.fontSize = recentFontSize + 'px'
     @openColor = @term.element.style.color
 
   handleEvents: ->
     @on 'focus', =>
-      @resizeTerminal()
+      @fitTerminal()
     @on 'mousedown', '.terminal-view-resize-handle', (e) =>
       @resizeStarted(e)
 
-    $('.terminal').on 'focus', (e) =>
+    @$termEl.on 'focus', (e) =>
       @term.focus()
 
     @term.on 'data', (data) =>
@@ -71,25 +66,17 @@ class TerminalView extends View
       @term.element.style.color = '#666'
       @term.cursorHidden = true
 
-    @terminal.on 'terminal-session-opened', () =>
+    @terminal.on 'terminal-session-opened', =>
+      @fitTerminal()
       @term.off 'data'
-      @term.on 'data', (data) =>
-        if !!process.platform.match(/^win/) && event?
-          if event.which == 67 && event.shiftKey && event.ctrlKey
-            @copy()
-          else if event.which == 86 && event.shiftKey && event.ctrlKey
-            @paste()
-          else if (event.which == 38 || event.which == 40) && event.altKey
-            @adjustTermFontSize(event.which)
-          else if event.altKey
-            console.log 'Saved from alt key disaster!'
-          else if (event.which == 187 || event.which == 189) && event.ctrlKey
-            @adjustTermFontSize(event.which)
-          else
-            ipc.send 'terminal-data', data
+      @term.on 'data', (data) ->
+        # TODO: handle non-darwin copy/paste shortcut in keymaps
+        {ctrlKey, shiftKey, which} = event if event
+        if process.platform isnt 'darwin' and event and ctrlKey and shiftKey
+          atom.commands.dispatch(@element, 'learn-ide:copy') if which is 67
+          atom.commands.dispatch(@element, 'learn-ide:paste') if which is 86
         else
           ipc.send 'terminal-data', data
-
       @term.element.style.color = this.openColor
       @term.cursorHidden = false
 
@@ -101,6 +88,9 @@ class TerminalView extends View
       'core:paste': => atom.commands.dispatch(@element, 'learn-ide:paste')
       'learn-ide:copy': => @copy()
       'learn-ide:paste': => @paste()
+      'learn-ide:increase-font-size': => @increaseFontSize()
+      'learn-ide:decrease-font-size': => @decreaseFontSize()
+      'learn-ide:reset-font-size': => @resetFontSize()
 
   openLab: (path = @openPath)->
     if path
@@ -114,43 +104,47 @@ class TerminalView extends View
   resizeStopped: =>
     $(document).off('mousemove', @resize)
     $(document).off('mouseup', @resizeStopped)
-    @resizeTerminal()
+    @fitTerminal()
 
   resize: ({pageY, which}) =>
     return @resizeStopped() unless which is 1
     @height(@outerHeight() + @offset().top - pageY)
 
-  resizeTerminal: ->
-    {cols, rows} = @getDimensions()
-    @term.resize(cols, rows)
+  fitTerminal: ->
+    @term.resize(@term.cols, @visibleRowCount())
 
-  getDimensions: ->
-    terminal = @find('.terminal')
-    rows = Math.floor(terminal.height() / terminal.children().height())
-    cols = @term.cols
+  visibleRowCount: ->
+    Math.floor(@$termEl.height() / @$termEl.children().height())
 
-    {cols, rows}
+  currentFontSize: ->
+    parseInt @$termEl.css 'font-size'
 
-  newTerminalRowCount: ->
-    Math.floor($('.learn-terminal').height() / $('.terminal div').height())
+  increaseFontSize: ->
+    currentFontSize = @currentFontSize()
+    return if @isTerminalWindow and currentFontSize > 16
+    return if not @isTerminalWindow and currentFontSize > 24
 
-  resizeTermForFontSizeChange: ->
-    @term.resize(80, @newTerminalRowCount())
+    @changeFontSize currentFontSize + 2
 
-  adjustTermFontSize: (key) ->
-    $termDiv = $('.terminal')
-    currentFontSize = parseInt($('.terminal').css('font-size'))
+  decreaseFontSize: ->
+    currentFontSize = @currentFontSize()
+    return if currentFontSize < 10
 
-    if key == 187 || key == 38
-      if (!@isTerminalWindow && currentFontSize < 26) || (@isTerminalWindow && currentFontSize < 18)
-        $termDiv.css('font-size', currentFontSize + 2)
-    else if key == 189 || key == 40
-      if currentFontSize > 8
-        $termDiv.css('font-size', currentFontSize - 2)
+    @changeFontSize currentFontSize - 2
 
-    @resizeTermForFontSizeChange()
+  resetFontSize: ->
+    defaultSize = atom.config.get('integrated-learn-environment.defaultFontSize')
+    @changeFontSize defaultSize
+
+  persistFontSize: (fontSize = @currentFontSize()) ->
+    atom.config.set('integrated-learn-environment.currentFontSize', fontSize)
+
+  changeFontSize: (fontSize) ->
+    @$termEl.css 'font-size', fontSize
+    @persistFontSize fontSize
+    @fitTerminal()
     @term.focus()
-    $('.terminal').focus()
+    @$termEl.focus()
 
   copy: ->
     Clipboard.writeText(getSelection().toString())
@@ -158,7 +152,7 @@ class TerminalView extends View
   paste: ->
     text = Clipboard.readText().replace(/\n/g, "\r")
 
-    if !!process.platform.match(/^win/)
+    if process.platform isnt 'darwin'
       ipc.send 'terminal-data', text
     else
       @term.emit 'data', text
@@ -171,4 +165,4 @@ class TerminalView extends View
 
       if focus
         @term.focus()
-        $('.terminal').focus()
+        @$termEl.focus()
