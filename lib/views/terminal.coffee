@@ -68,12 +68,6 @@ class TerminalView extends View
 
     @terminal.on 'terminal-session-opened', () =>
       @term.off 'data'
-      @term.on 'data', (data) =>
-        if !!process.platform.match(/^win/) and event? and event.altKey
-          console.log 'Saved from alt key disaster!'
-        else
-          ipc.send 'terminal-data', data
-
       @term.element.style.color = this.openColor
       @term.cursorHidden = false
 
