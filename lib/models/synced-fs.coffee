@@ -22,7 +22,6 @@ class SyncedFS
       @connectionState = state
 
     @handleEvents()
-    @treeViewEventQueue = []
 
   expandTreeView: ->
     workspaceView = atom.views.getView(atom.workspace)
@@ -33,31 +32,33 @@ class SyncedFS
       editor.onDidSave => @onSave()
       editor.onDidChangePath -> console.log 'PATH CHANGED'
 
+    atom.workspace.onDidOpen ({uri, item, pane, index}) =>
+      console.log 'OPENED ' + uri
+      @onOpen(uri)
+
     atom.commands.onDidDispatch ({type}) =>
       console.log type
-      @onCancel() if type is 'core:cancel'
-      @onConfirm(e) if type is 'core:confirm'
 
     atom.commands.add atom.views.getView(atom.workspace),
       'tree-view:remove': ({target}) => @onRemove(target)
-      'tree-view:add-file': (e) => @queueTreeViewEvent(e)
-      'tree-view:move': (e) => @queueTreeViewEvent(e)
 
   sendSave: (project, file, buffer) ->
     ipc.send 'fs-local-save', JSON.stringify(
       action: 'local_save'
       project:
-        path: this.formatFilePath(project.getPaths()[0])
+        path: @formatFilePath(project.getPaths()[0])
       file:
-        path: this.formatFilePath(file.path)
+        path: @formatFilePath(file.path)
         digest: file.digest,
       buffer:
         content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
       )
 
   formatFilePath: (path) ->
-    return path.replace(/(.*:\\)/, '/').replace(/\\/g, '/') if path.match(/:\\/)
-    path
+    if path.match(/:\\/)
+      path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
+    else
+      path
 
   onRemove: (target) ->
     if target.attributes['data-path']
@@ -68,25 +69,10 @@ class SyncedFS
     ipc.send 'fs-local-delete', JSON.stringify(
       action: 'local_delete'
       project:
-        path: this.formatFilePath atom.project.getPaths()[0]
+        path: @formatFilePath(atom.project.getPaths()[0])
       file:
-        path: this.formatFilePath path
+        path: @formatFilePath(path)
       )
-
-  onConfirm: (e) =>
-    confirmedEvent = @treeViewEventQueue.shift()
-    return unless confirmedEvent?
-
-    {event, type} = confirmedEvent
-    if type is 'tree-view:move'
-      from = event.target.getAttribute('data-name')
-      fromPath = event.target.getAttribute('data-path')
-    if type is 'tree-view:add-file'
-      window.confirmedEvent = event
-      true
-
-  onCancel: =>
-    @treeViewEventQueue = []
 
   onSave: (editor) =>
     editorElement = atom.views.getView(editor)
@@ -101,8 +87,14 @@ class SyncedFS
     @popupNoConnectionWarning() if @connectionState is 'closed'
     @sendSave(editor.project, buffer.file, buffer)
 
-  queueTreeViewEvent: (event) =>
-    @treeViewEventQueue.push(type: event.type, event: event)
+  onOpen: (filePath) =>
+    ipc.send 'fs-local-open', JSON.stringify(
+      action: 'local_open'
+      project:
+        path: @formatFilePath(atom.project.getPaths()[0])
+      file:
+        path: @formatFilePath(filePath)
+      )
 
   popupNoConnectionWarning: ->
     noConnectionPopup = document.createElement 'div'
