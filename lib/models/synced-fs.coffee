@@ -30,59 +30,79 @@ class SyncedFS
 
   handleEvents: ->
     atom.workspace.observeTextEditors (editor) =>
-      project = editor.project
-      buffer = editor.buffer
-      file = buffer.file
-      editorElement = atom.views.getView(editor)
+      editor.onDidSave => @onSave()
+      editor.onDidChangePath -> console.log 'PATH CHANGED'
 
-      editor.onDidSave =>
-        atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
-        console.log 'Saving: Path - ' + this.formatFilePath(buffer.file.path) + ' Matches? - ' + !!this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
-        if @formatFilePath(buffer.file.path).match(/\.atom\/code/)
-          if @connectionState == 'closed'
-            @popupNoConnectionWarning()
+    atom.commands.onDidDispatch ({type}) =>
+      console.log type
+      @onCancel() if type is 'core:cancel'
+      @onConfirm(e) if type is 'core:confirm'
 
-          @sendSave(editor.project, buffer.file, buffer)
+    atom.commands.add atom.views.getView(atom.workspace),
+      'tree-view:remove': ({target}) => @onRemove(target)
+      'tree-view:add-file': (e) => @queueTreeViewEvent(e)
+      'tree-view:move': (e) => @queueTreeViewEvent(e)
 
-      editor.onDidChangePath =>
-        console.log('PATH CHANGED')
+  sendSave: (project, file, buffer) ->
+    ipc.send 'fs-local-save', JSON.stringify(
+      action: 'local_save'
+      project:
+        path: this.formatFilePath(project.getPaths()[0])
+      file:
+        path: this.formatFilePath(file.path)
+        digest: file.digest,
+      buffer:
+        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
+      )
 
-    atom.commands.onDidDispatch (e) =>
-      if e.type == 'tree-view:remove'
-        if e.target.attributes['data-path']
-          path = e.target.attributes['data-path'].nodeValue
-        else
-          path = e.target.file.path
+  formatFilePath: (path) ->
+    return path.replace(/(.*:\\)/, '/').replace(/\\/g, '/') if path.match(/:\\/)
+    path
 
-        ipc.send 'fs-local-delete', JSON.stringify({
-          action: 'local_delete',
-          project: {
-            path: this.formatFilePath(atom.project.getPaths()[0])
-          },
-          file: {
-            path: this.formatFilePath(path)
-          }
-        })
-      else if e.type == 'tree-view:add-file' || e.type == 'tree-view:move'
-        @treeViewEventQueue.push
-          type: e.type
-          event: e
-      else if e.type == 'core:cancel'
-        @treeViewEventQueue = []
-      else if e.type == 'core:confirm'
-        confirmedEvent = @treeViewEventQueue.shift()
-        if confirmedEvent
-          event = confirmedEvent.event
+  onRemove: (target) ->
+    if target.attributes['data-path']
+      path = target.attributes['data-path'].nodeValue
+    else
+      path = target.file.path
 
-          switch confirmedEvent.type
-            when 'tree-view:move'
-              from = event.target.getAttribute('data-name')
-              fromPath = event.target.getAttribute('data-path')
-            when 'tree-view:add-file'
-              window.confirmedEvent = event
-              true
-      else
-        console.log(e.type)
+    ipc.send 'fs-local-delete', JSON.stringify(
+      action: 'local_delete'
+      project:
+        path: this.formatFilePath atom.project.getPaths()[0]
+      file:
+        path: this.formatFilePath path
+      )
+
+  onConfirm: (e) =>
+    confirmedEvent = @treeViewEventQueue.shift()
+    return unless confirmedEvent?
+
+    {event, type} = confirmedEvent
+    if type is 'tree-view:move'
+      from = event.target.getAttribute('data-name')
+      fromPath = event.target.getAttribute('data-path')
+    if type is 'tree-view:add-file'
+      window.confirmedEvent = event
+      true
+
+  onCancel: =>
+    @treeViewEventQueue = []
+
+  onSave: (editor) =>
+    editorElement = atom.views.getView(editor)
+    atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
+
+    {project, buffer} = editor
+    {file} = buffer
+    inCodeDir = !!@formatFilePath(buffer.file.path).match(/\.atom\/code/)
+    console.log 'Saving: Path - ' + @formatFilePath buffer.file.path + ' Matches? - ' + inCodeDir
+    return unless inCodeDir
+
+    @popupNoConnectionWarning() if @connectionState is 'closed'
+    @sendSave(editor.project, buffer.file, buffer)
+
+  queueTreeViewEvent: (event) =>
+    @treeViewEventQueue.push(type: event.type, event: event)
 
   popupNoConnectionWarning: ->
     noConnectionPopup = document.createElement 'div'
@@ -104,30 +124,3 @@ class SyncedFS
 
     noConnectionButton.addEventListener 'click', (e) =>
       panel.destroy()
-
-  sendSave: (project, file, buffer) ->
-    ipc.send 'fs-local-save', JSON.stringify({
-      action: 'local_save',
-      project: {
-        path: this.formatFilePath(project.getPaths()[0])
-      },
-      file: {
-        path: this.formatFilePath(file.path)
-        digest: file.digest,
-      },
-      buffer: {
-        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
-      }
-    })
-
-  #formattedText: (text) ->
-    #try
-      #window.btoa(text)
-    #catch
-      #window.btoa(unescape(encodeURIComponent(text)))
-
-  formatFilePath: (path) ->
-    if path.match(/:\\/)
-      return path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
-    else
-      return path
