@@ -1,4 +1,5 @@
 ipc = require 'ipc'
+TreeList = require './tree-list'
 
 module.exports =
 class SyncedFS
@@ -21,6 +22,8 @@ class SyncedFS
     ipc.on 'connection-state', (state) =>
       @connectionState = state
 
+    @projectPath = atom.project.getPaths()[0]
+    @treeList = new TreeList(@projectPath)
     @handleEvents()
 
   expandTreeView: ->
@@ -71,38 +74,45 @@ class SyncedFS
     @sendSave(editor.project, buffer.file, buffer)
 
   onMutation: (mutations) ->
-    @parseMutation(mutation) for mutation in mutations
+    parse = new Promise (resolve, reject) =>
+      @parseMutation(mutation) for mutation in mutations
+      resolve
+
+    parse.then(@treeList.reload)
 
   parseMutation: (mutation) ->
     @parseAddedNode(node) for node in mutation.addedNodes
 
   parseAddedNode: (node) ->
-    switch node.getAttribute('is')
-      when 'tree-view-file'
-        @sendAddFile(node.getPath())
-      when 'tree-view-directory'
-        node.expand() # nested nodes are added to DOM only on expansion
-        @sendAddFolder(node.getPath())
+    path = node.getPath()
+
+    unless @treeList.has(path)
+      switch node.getAttribute('is')
+        when 'tree-view-file'
+          @sendAddFile(path)
+        when 'tree-view-directory'
+          node.expand() # nested nodes are added to DOM only on expansion
+          @sendAddFolder(path)
 
   onRemove: (node) ->
     @sendRemove(node.dataset.path || node.firstChild.dataset.path)
 
-  sendAddFile: (filePath) =>
+  sendAddFile: (path) =>
     ipc.send 'fs-local-add-file', JSON.stringify(
       action: 'local_add_file'
       project:
-        path: @formatFilePath(atom.project.getPaths()[0])
+        path: @formatFilePath(@projectPath)
       file:
-        path: @formatFilePath(filePath)
+        path: @formatFilePath(path)
       )
 
-  sendAddFolder: (folderPath) =>
+  sendAddFolder: (path) =>
     ipc.send 'fs-local-add-folder', JSON.stringify(
       action: 'local_add_folder'
       project:
-        path: @formatFilePath(atom.project.getPaths()[0])
+        path: @formatFilePath(@projectPath)
       file:
-        path: @formatFilePath(folderPath)
+        path: @formatFilePath(path)
       )
 
   sendSave: (project, file, buffer) ->
@@ -121,7 +131,7 @@ class SyncedFS
     ipc.send 'fs-local-delete', JSON.stringify(
       action: 'local_delete'
       project:
-        path: @formatFilePath(atom.project.getPaths()[0])
+        path: @formatFilePath(@projectPath)
       file:
         path: @formatFilePath(path)
       )
