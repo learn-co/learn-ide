@@ -28,51 +28,34 @@ class SyncedFS
     atom.commands.dispatch(workspaceView, 'tree-view:reveal-active-file')
 
   handleEvents: ->
+    @observeTreeView()
+
     atom.workspace.observeTextEditors (editor) =>
-      editor.onDidSave => @onSave()
-      editor.onDidChangePath -> console.log 'PATH CHANGED'
+      editor.onDidSave =>
+        @onSave()
+      editor.onDidChangePath ->
+        console.log 'PATH CHANGED'
 
-    atom.workspace.onDidOpen ({uri, item, pane, index}) =>
+    atom.workspace.onDidOpen ({uri, item, pane, index}) ->
       console.log 'OPENED ' + uri
-      @onOpen(uri)
 
-    atom.commands.onDidDispatch ({type}) =>
+    atom.commands.onDidDispatch ({type}) ->
       console.log type
 
     atom.commands.add atom.views.getView(atom.workspace),
       'tree-view:remove': ({target}) => @onRemove(target)
+      'tree-view:toggle': => @observeTreeView()
+      'learn-ide:mutation': ({detail}) => @onMutation(detail)
 
-  sendSave: (project, file, buffer) ->
-    ipc.send 'fs-local-save', JSON.stringify(
-      action: 'local_save'
-      project:
-        path: @formatFilePath(project.getPaths()[0])
-      file:
-        path: @formatFilePath(file.path)
-        digest: file.digest,
-      buffer:
-        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
-      )
+  observeTreeView: ->
+    treeViewEl = document.getElementsByClassName('tree-view')[0]
+    return unless treeViewEl?
 
-  formatFilePath: (path) ->
-    if path.match(/:\\/)
-      path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
-    else
-      path
+    mutationObserver = new MutationObserver (mutations) ->
+      workspaceView = atom.views.getView(atom.workspace)
+      atom.commands.dispatch(workspaceView, 'learn-ide:mutation', mutations)
 
-  onRemove: (target) ->
-    if target.attributes['data-path']
-      path = target.attributes['data-path'].nodeValue
-    else
-      path = target.file.path
-
-    ipc.send 'fs-local-delete', JSON.stringify(
-      action: 'local_delete'
-      project:
-        path: @formatFilePath(atom.project.getPaths()[0])
-      file:
-        path: @formatFilePath(path)
-      )
+    mutationObserver.observe(treeViewEl, {subtree: true, childList: true})
 
   onSave: (editor) =>
     editorElement = atom.views.getView(editor)
@@ -87,14 +70,67 @@ class SyncedFS
     @popupNoConnectionWarning() if @connectionState is 'closed'
     @sendSave(editor.project, buffer.file, buffer)
 
-  onOpen: (filePath) =>
-    ipc.send 'fs-local-open', JSON.stringify(
-      action: 'local_open'
+  onMutation: (mutations) ->
+    @parseMutation(mutation) for mutation in mutations
+
+  parseMutation: (mutation) ->
+    @parseAddedNode(node) for node in mutation.addedNodes
+
+  parseAddedNode: (node) ->
+    switch node.getAttribute('is')
+      when 'tree-view-file'
+        @sendAddFile(node.getPath())
+      when 'tree-view-directory'
+        node.expand() # nested nodes are added to DOM only on expansion
+        @sendAddFolder(node.getPath())
+
+  onRemove: (node) ->
+    @sendRemove(node.dataset.path || node.firstChild.dataset.path)
+
+  sendAddFile: (filePath) =>
+    ipc.send 'fs-local-add-file', JSON.stringify(
+      action: 'local_add_file'
       project:
         path: @formatFilePath(atom.project.getPaths()[0])
       file:
         path: @formatFilePath(filePath)
       )
+
+  sendAddFolder: (folderPath) =>
+    ipc.send 'fs-local-add-folder', JSON.stringify(
+      action: 'local_add_folder'
+      project:
+        path: @formatFilePath(atom.project.getPaths()[0])
+      file:
+        path: @formatFilePath(folderPath)
+      )
+
+  sendSave: (project, file, buffer) ->
+    ipc.send 'fs-local-save', JSON.stringify(
+      action: 'local_save'
+      project:
+        path: @formatFilePath(project.getPaths()[0])
+      file:
+        path: @formatFilePath(file.path)
+        digest: file.digest,
+      buffer:
+        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
+      )
+
+  sendRemove: (path) ->
+    ipc.send 'fs-local-delete', JSON.stringify(
+      action: 'local_delete'
+      project:
+        path: @formatFilePath(atom.project.getPaths()[0])
+      file:
+        path: @formatFilePath(path)
+      )
+
+  formatFilePath: (path) ->
+    if path.match(/:\\/)
+      path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
+    else
+      path
 
   popupNoConnectionWarning: ->
     noConnectionPopup = document.createElement 'div'
