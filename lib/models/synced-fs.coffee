@@ -1,5 +1,6 @@
 ipc = require 'ipc'
-TreeList = require './tree-list'
+FileSystemTree = require './file-system-tree'
+_ = require 'underscore-plus'
 
 module.exports =
 class SyncedFS
@@ -22,13 +23,13 @@ class SyncedFS
     ipc.on 'connection-state', (state) =>
       @connectionState = state
 
+    @workspaceView = atom.views.getView(atom.workspace)
     @projectPath = atom.project.getPaths()[0]
-    @treeList = new TreeList(@projectPath)
+    @filesystemTree = new FileSystemTree(@projectPath)
     @handleEvents()
 
   expandTreeView: ->
-    workspaceView = atom.views.getView(atom.workspace)
-    atom.commands.dispatch(workspaceView, 'tree-view:reveal-active-file')
+    atom.commands.dispatch(@workspaceView, 'tree-view:reveal-active-file')
 
   handleEvents: ->
     @observeTreeView()
@@ -48,15 +49,15 @@ class SyncedFS
     atom.commands.add atom.views.getView(atom.workspace),
       'tree-view:remove': ({target}) => @onRemove(target)
       'tree-view:toggle': => @observeTreeView()
-      'learn-ide:mutation': ({detail}) => @onMutation(detail)
+      'learn-ide:tree-view-mutation': ({detail}) => @onTreeViewMutation(detail)
+      'learn-ide:tree-view-add': => @onTreeViewAdd()
 
   observeTreeView: ->
     treeViewEl = document.getElementsByClassName('tree-view')[0]
     return unless treeViewEl?
 
-    mutationObserver = new MutationObserver (mutations) ->
-      workspaceView = atom.views.getView(atom.workspace)
-      atom.commands.dispatch(workspaceView, 'learn-ide:mutation', mutations)
+    mutationObserver = new MutationObserver (mutations) =>
+      atom.commands.dispatch(@workspaceView, 'learn-ide:tree-view-mutation', mutations)
 
     mutationObserver.observe(treeViewEl, {subtree: true, childList: true})
 
@@ -73,26 +74,22 @@ class SyncedFS
     @popupNoConnectionWarning() if @connectionState is 'closed'
     @sendSave(editor.project, buffer.file, buffer)
 
-  onMutation: (mutations) ->
-    parse = new Promise (resolve, reject) =>
-      @parseMutation(mutation) for mutation in mutations
-      resolve
+  onTreeViewMutation: (mutations) ->
+    domNodesAdded = _.any(mutations, (m) -> not _.isEmpty(m.addedNodes))
 
-    parse.then(@treeList.reload)
+    if domNodesAdded
+      atom.commands.dispatch(@workspaceView, 'learn-ide:tree-view-add')
+    else
+      @filesystemTree.reload()
 
-  parseMutation: (mutation) ->
-    @parseAddedNode(node) for node in mutation.addedNodes
+  onTreeViewAdd: ->
+    prevEntries = _.clone(@filesystemTree.entries)
+    newEntries = _.difference(@filesystemTree.reload(), prevEntries)
+    return if _.isEmpty(newEntries)
 
-  parseAddedNode: (node) ->
-    path = node.getPath()
-
-    unless @treeList.has(path)
-      switch node.getAttribute('is')
-        when 'tree-view-file'
-          @sendAddFile(path)
-        when 'tree-view-directory'
-          node.expand() # nested nodes are added to DOM only on expansion
-          @sendAddFolder(path)
+    deepestPath = _.max(newEntries, (path) -> path.length)
+    @sendAddFile(deepestPath) if @filesystemTree.isFile(deepestPath)
+    @sendAddFolder(deepestPath) if @filesystemTree.isDirectory(deepestPath)
 
   onRemove: (node) ->
     @sendRemove(node.dataset.path || node.firstChild.dataset.path)
