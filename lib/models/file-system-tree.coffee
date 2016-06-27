@@ -3,10 +3,10 @@ fs = require 'fs-plus'
 module.exports =
 class FileSystemTree
   constructor: (@path) ->
-    @_loadEntries()
+    @entries = @loadEntries()
 
   reload: ->
-    @_loadEntries()
+    @entries = @loadEntries()
 
   isFile: (path) ->
     fs.isFileSync(path)
@@ -14,5 +14,5 @@ class FileSystemTree
   isDirectory: (path) ->
     fs.isDirectorySync(path)
 
-  _loadEntries: ->
-    @entries = fs.listTreeSync(@path)
+  loadEntries: ->
+    fs.listTreeSync(@path)
