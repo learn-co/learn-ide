@@ -24,12 +24,14 @@
     "atom-space-pen-views": "^2.1.0",
     "base-64": "^0.1.0",
     "cross-spawn": "^2.1.5",
+    "fs-plus": "^2.9.1",
     "http-proxy": "^1.13.3",
     "mkdirp": "^0.5.1",
     "rimraf": "2.1",
     "rmdir": "^1.2.0",
     "socket.io-client": "1.3.7",
     "term.js": "learn-co/term.js",
+    "underscore-plus": "^1.6.6",
     "utf8": "^2.1.1"
   }
 }

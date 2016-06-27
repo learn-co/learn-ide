@@ -1,4 +1,6 @@
 ipc = require 'ipc'
+FileSystemTree = require './file-system-tree'
+_ = require 'underscore-plus'
 
 module.exports =
 class SyncedFS
@@ -21,68 +23,110 @@ class SyncedFS
     ipc.on 'connection-state', (state) =>
       @connectionState = state
 
+    @workspaceView = atom.views.getView(atom.workspace)
+    @projectPath = atom.project.getPaths()[0]
+    @filesystemTree = new FileSystemTree(@projectPath)
     @handleEvents()
-    @treeViewEventQueue = []
 
   expandTreeView: ->
-    workspaceView = atom.views.getView(atom.workspace)
-    atom.commands.dispatch(workspaceView, 'tree-view:reveal-active-file')
+    atom.commands.dispatch(@workspaceView, 'tree-view:reveal-active-file')
 
   handleEvents: ->
+    atom.commands.onDidDispatch ({type, target}) =>
+      console.log type
+      switch type
+        when 'core:confirm' then @onCoreConfirm()
+        when 'tree-view:remove' then @onTreeViewRemove(target)
+
     atom.workspace.observeTextEditors (editor) =>
-      project = editor.project
-      buffer = editor.buffer
-      file = buffer.file
-      editorElement = atom.views.getView(editor)
-
       editor.onDidSave =>
-        atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
-        console.log 'Saving: Path - ' + this.formatFilePath(buffer.file.path) + ' Matches? - ' + !!this.formatFilePath(buffer.file.path).match(/\.atom\/code/)
-        if @formatFilePath(buffer.file.path).match(/\.atom\/code/)
-          if @connectionState == 'closed'
-            @popupNoConnectionWarning()
+        @onSave()
+      editor.onDidChangePath ->
+        console.log 'PATH CHANGED'
 
-          @sendSave(editor.project, buffer.file, buffer)
+    atom.workspace.onDidOpen ({uri, item, pane, index}) ->
+      console.log 'OPENED ' + uri
 
-      editor.onDidChangePath =>
-        console.log('PATH CHANGED')
+  onSave: (editor) =>
+    editorElement = atom.views.getView(editor)
+    atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
 
-    atom.commands.onDidDispatch (e) =>
-      if e.type == 'tree-view:remove'
-        if e.target.attributes['data-path']
-          path = e.target.attributes['data-path'].nodeValue
-        else
-          path = e.target.file.path
+    {project, buffer} = editor
+    {file} = buffer
+    inCodeDir = !!@formatPath(buffer.file.path).match(/\.atom\/code/)
+    console.log 'Saving: Path - ' + @formatPath buffer.file.path + ' Matches? - ' + inCodeDir
+    return unless inCodeDir
 
-        ipc.send 'fs-local-delete', JSON.stringify({
-          action: 'local_delete',
-          project: {
-            path: this.formatFilePath(atom.project.getPaths()[0])
-          },
-          file: {
-            path: this.formatFilePath(path)
-          }
-        })
-      else if e.type == 'tree-view:add-file' || e.type == 'tree-view:move'
-        @treeViewEventQueue.push
-          type: e.type
-          event: e
-      else if e.type == 'core:cancel'
-        @treeViewEventQueue = []
-      else if e.type == 'core:confirm'
-        confirmedEvent = @treeViewEventQueue.shift()
-        if confirmedEvent
-          event = confirmedEvent.event
+    @popupNoConnectionWarning() if @connectionState is 'closed'
+    @sendSave(editor.project, buffer.file, buffer)
 
-          switch confirmedEvent.type
-            when 'tree-view:move'
-              from = event.target.getAttribute('data-name')
-              fromPath = event.target.getAttribute('data-path')
-            when 'tree-view:add-file'
-              window.confirmedEvent = event
-              true
-      else
-        console.log(e.type)
+  onCoreConfirm: ->
+    @syncAdditions()
+
+  syncAdditions: ->
+    prevEntries = _.clone(@filesystemTree.entries)
+    newEntries = _.difference(@filesystemTree.reload(), prevEntries)
+    return if _.isEmpty(newEntries)
+
+    deepestPath = _.max(newEntries, (entry) -> entry.length)
+    @sendAddFile(deepestPath) if @filesystemTree.isFile(deepestPath)
+    @sendAddFolder(deepestPath) if @filesystemTree.isDirectory(deepestPath)
+
+  onTreeViewRemove: (node) ->
+    @syncRemovals()
+
+  syncRemovals: ->
+    prevEntries = _.clone(@filesystemTree.entries)
+    removedEntries = _.difference(prevEntries, @filesystemTree.reload())
+    return if _.isEmpty(removedEntries)
+
+    shallowPath = _.min(removedEntries, (entry) -> entry.length)
+    @sendRemove(shallowPath)
+
+  sendAddFile: (path) ->
+    ipc.send 'fs-local-add-file', JSON.stringify(
+      action: 'local_add_file'
+      project:
+        path: @formatPath(@projectPath)
+      file:
+        path: @formatPath(path)
+      )
+
+  sendAddFolder: (path) ->
+    ipc.send 'fs-local-add-folder', JSON.stringify(
+      action: 'local_add_folder'
+      project:
+        path: @formatPath(@projectPath)
+      file:
+        path: @formatPath(path)
+      )
+
+  sendSave: (project, file, buffer) ->
+    ipc.send 'fs-local-save', JSON.stringify(
+      action: 'local_save'
+      project:
+        path: @formatPath(project.getPaths()[0])
+      file:
+        path: @formatPath(file.path)
+        digest: file.digest,
+      buffer:
+        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
+      )
+
+  sendRemove: (path) ->
+    ipc.send 'fs-local-delete', JSON.stringify(
+      action: 'local_delete'
+      project:
+        path: @formatPath(@projectPath)
+      file:
+        path: @formatPath(path)
+      )
+
+  formatPath: (path) ->
+    if path.match(/:\\/)
+      path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
+    else
+      path
 
   popupNoConnectionWarning: ->
     noConnectionPopup = document.createElement 'div'
@@ -104,30 +148,3 @@ class SyncedFS
 
     noConnectionButton.addEventListener 'click', (e) =>
       panel.destroy()
-
-  sendSave: (project, file, buffer) ->
-    ipc.send 'fs-local-save', JSON.stringify({
-      action: 'local_save',
-      project: {
-        path: this.formatFilePath(project.getPaths()[0])
-      },
-      file: {
-        path: this.formatFilePath(file.path)
-        digest: file.digest,
-      },
-      buffer: {
-        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
-      }
-    })
-
-  #formattedText: (text) ->
-    #try
-      #window.btoa(text)
-    #catch
-      #window.btoa(unescape(encodeURIComponent(text)))
-
-  formatFilePath: (path) ->
-    if path.match(/:\\/)
-      return path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
-    else
-      return path
