@@ -32,7 +32,11 @@ class SyncedFS
     atom.commands.dispatch(@workspaceView, 'tree-view:reveal-active-file')
 
   handleEvents: ->
-    @observeTreeView()
+    atom.commands.onDidDispatch ({type, target}) =>
+      console.log type
+      switch type
+        when 'core:confirm' then @onCoreConfirm()
+        when 'tree-view:remove' then @onRemove(target)
 
     atom.workspace.observeTextEditors (editor) =>
       editor.onDidSave =>
@@ -43,46 +47,23 @@ class SyncedFS
     atom.workspace.onDidOpen ({uri, item, pane, index}) ->
       console.log 'OPENED ' + uri
 
-    atom.commands.onDidDispatch ({type}) ->
-      console.log type
-
-    atom.commands.add atom.views.getView(atom.workspace),
-      'tree-view:remove': ({target}) => @onRemove(target)
-      'tree-view:toggle': => @observeTreeView()
-      'learn-ide:tree-view-mutation': ({detail}) => @onTreeViewMutation(detail)
-      'learn-ide:tree-view-add': => @onTreeViewAdd()
-
-  observeTreeView: ->
-    treeViewEl = document.getElementsByClassName('tree-view')[0]
-    return unless treeViewEl?
-
-    mutationObserver = new MutationObserver (mutations) =>
-      atom.commands.dispatch(@workspaceView, 'learn-ide:tree-view-mutation', mutations)
-
-    mutationObserver.observe(treeViewEl, {subtree: true, childList: true})
-
   onSave: (editor) =>
     editorElement = atom.views.getView(editor)
     atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
 
     {project, buffer} = editor
     {file} = buffer
-    inCodeDir = !!@formatFilePath(buffer.file.path).match(/\.atom\/code/)
-    console.log 'Saving: Path - ' + @formatFilePath buffer.file.path + ' Matches? - ' + inCodeDir
+    inCodeDir = !!@formatPath(buffer.file.path).match(/\.atom\/code/)
+    console.log 'Saving: Path - ' + @formatPath buffer.file.path + ' Matches? - ' + inCodeDir
     return unless inCodeDir
 
     @popupNoConnectionWarning() if @connectionState is 'closed'
     @sendSave(editor.project, buffer.file, buffer)
 
-  onTreeViewMutation: (mutations) ->
-    domNodesAdded = _.any(mutations, (m) -> not _.isEmpty(m.addedNodes))
+  onCoreConfirm: ->
+    @syncAdditions()
 
-    if domNodesAdded
-      atom.commands.dispatch(@workspaceView, 'learn-ide:tree-view-add')
-    else
-      @filesystemTree.reload()
-
-  onTreeViewAdd: ->
+  syncAdditions: ->
     prevEntries = _.clone(@filesystemTree.entries)
     newEntries = _.difference(@filesystemTree.reload(), prevEntries)
     return if _.isEmpty(newEntries)
@@ -94,31 +75,31 @@ class SyncedFS
   onRemove: (node) ->
     @sendRemove(node.dataset.path || node.firstChild.dataset.path)
 
-  sendAddFile: (path) =>
+  sendAddFile: (path) ->
     ipc.send 'fs-local-add-file', JSON.stringify(
       action: 'local_add_file'
       project:
-        path: @formatFilePath(@projectPath)
+        path: @formatPath(@projectPath)
       file:
-        path: @formatFilePath(path)
+        path: @formatPath(path)
       )
 
-  sendAddFolder: (path) =>
+  sendAddFolder: (path) ->
     ipc.send 'fs-local-add-folder', JSON.stringify(
       action: 'local_add_folder'
       project:
-        path: @formatFilePath(@projectPath)
+        path: @formatPath(@projectPath)
       file:
-        path: @formatFilePath(path)
+        path: @formatPath(path)
       )
 
   sendSave: (project, file, buffer) ->
     ipc.send 'fs-local-save', JSON.stringify(
       action: 'local_save'
       project:
-        path: @formatFilePath(project.getPaths()[0])
+        path: @formatPath(project.getPaths()[0])
       file:
-        path: @formatFilePath(file.path)
+        path: @formatPath(file.path)
         digest: file.digest,
       buffer:
         content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
@@ -128,12 +109,12 @@ class SyncedFS
     ipc.send 'fs-local-delete', JSON.stringify(
       action: 'local_delete'
       project:
-        path: @formatFilePath(@projectPath)
+        path: @formatPath(@projectPath)
       file:
-        path: @formatFilePath(path)
+        path: @formatPath(path)
       )
 
-  formatFilePath: (path) ->
+  formatPath: (path) ->
     if path.match(/:\\/)
       path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
     else
