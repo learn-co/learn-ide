@@ -36,7 +36,7 @@ class SyncedFS
       console.log type
       switch type
         when 'core:confirm' then @onCoreConfirm()
-        when 'tree-view:remove' then @onRemove(target)
+        when 'tree-view:remove' then @onTreeViewRemove(target)
 
     atom.workspace.observeTextEditors (editor) =>
       editor.onDidSave =>
@@ -68,12 +68,20 @@ class SyncedFS
     newEntries = _.difference(@filesystemTree.reload(), prevEntries)
     return if _.isEmpty(newEntries)
 
-    deepestPath = _.max(newEntries, (path) -> path.length)
+    deepestPath = _.max(newEntries, (entry) -> entry.length)
     @sendAddFile(deepestPath) if @filesystemTree.isFile(deepestPath)
     @sendAddFolder(deepestPath) if @filesystemTree.isDirectory(deepestPath)
 
-  onRemove: (node) ->
-    @sendRemove(node.dataset.path || node.firstChild.dataset.path)
+  onTreeViewRemove: (node) ->
+    @syncRemovals()
+
+  syncRemovals: ->
+    prevEntries = _.clone(@filesystemTree.entries)
+    removedEntries = _.difference(prevEntries, @filesystemTree.reload())
+    return if _.isEmpty(removedEntries)
+
+    shallowPath = _.min(removedEntries, (entry) -> entry.length)
+    @sendRemove(shallowPath)
 
   sendAddFile: (path) ->
     ipc.send 'fs-local-add-file', JSON.stringify(
