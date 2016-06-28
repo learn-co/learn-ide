@@ -47,6 +47,9 @@ class SyncedFS
     atom.workspace.onDidOpen ({uri, item, pane, index}) ->
       console.log 'OPENED ' + uri
 
+    treeViewEl = document.getElementsByClassName('tree-view')[0]
+    treeViewEl.addEventListener 'drop', (e) => @onTreeViewDrop(e)
+
   onSave: (editor) =>
     editorElement = atom.views.getView(editor)
     atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
@@ -82,6 +85,14 @@ class SyncedFS
 
     shallowPath = _.min(removedEntries, (entry) -> entry.length)
     @sendRemove(shallowPath)
+
+  onTreeViewDrop: (e) ->
+    if true
+      e.preventDefault()
+      e.stopPropagation()
+      alert 'Uh oh. The Learn IDE doesn\'t support this just yet.\n\n' +
+            'To add an existing file, please right-click the folder you are ' +
+            'adding it to, and select "Import File"'
 
   sendAddFile: (path) ->
     ipc.send 'fs-local-add-file', JSON.stringify(
