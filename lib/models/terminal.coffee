@@ -1,4 +1,4 @@
-term = require 'term.js'
+Term = require './term-wrapper'
 ipc  = require 'ipc'
 {EventEmitter} = require 'events'
 
@@ -6,7 +6,7 @@ module.exports =
 class Terminal extends EventEmitter
   constructor: (ws_url, isTermView=false) ->
     rows = if isTermView then 26 else 18
-    @term = new term.Terminal(cols: 80, rows: rows, useStyle: no, screenKeys: no, scrollback: yes)
+    @term = new Term(cols: 80, rows: rows, useStyle: no, screenKeys: no, scrollback: yes)
     window.term = @term
     ipc.send 'register-new-terminal', ws_url
     this.setListeners()

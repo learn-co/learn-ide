@@ -32,13 +32,13 @@ class SyncedFSView extends View
 
     ipc.on 'terminal-popped-in', (state) =>
       console.log 'popped in!'
-      if @termPoppedOut == 1
+      if @termPoppedOut is 1
         @emitter.emit 'toggleTerminal', true
         @termPoppedOut = 0
         @togglePopoutIcon()
 
     @popoutIcon().addEventListener 'click', =>
-      if @termPoppedOut == 0
+      if @termPoppedOut is 0
         workspaceView = atom.views.getView(atom.workspace)
         atom.commands.dispatch(workspaceView, 'application:new-popout-terminal')
         @termPoppedOut = 1
@@ -53,12 +53,8 @@ class SyncedFSView extends View
         atom.commands.dispatch(workspaceView, 'integrated-learn-environment:reset')
 
   togglePopoutIcon: =>
-    if @popoutIcon().classList.contains('inactive')
-      @popoutIcon().classList.remove('inactive')
-      @popoutIcon().classList.add('active')
-    else
-      @popoutIcon().classList.remove('active')
-      @popoutIcon().classList.add('inactive')
+    @popoutIcon().classList.toggle('inactive')
+    @popoutIcon().classList.toggle('active')
 
   statusIcon: =>
     @element.getElementsByClassName('learn-status-icon')[0]
