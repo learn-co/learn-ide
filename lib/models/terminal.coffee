@@ -1,25 +1,25 @@
-term = require 'term.js'
-ipc  = require 'ipc'
+Xterm = require './xterm-wrapper'
+ipc = require 'ipc'
 {EventEmitter} = require 'events'
 
 module.exports =
 class Terminal extends EventEmitter
   constructor: (ws_url, isTermView=false) ->
     rows = if isTermView then 26 else 18
-    @term = new term.Terminal(cols: 80, rows: rows, useStyle: no, screenKeys: no, scrollback: yes)
+    @term = new Xterm(cursorBlink: true)
     window.term = @term
     ipc.send 'register-new-terminal', ws_url
-    this.setListeners()
+    @setListeners()
 
   updateConnectionState: (state) ->
     if state == 'closed'
-      this.emit 'terminal-session-closed'
+      @emit 'terminal-session-closed'
     else
-      this.emit 'terminal-session-opened'
+      @emit 'terminal-session-opened'
 
   setListeners: () ->
     ipc.on 'terminal-message', (message) =>
-      this.emit 'terminal-message-received', message
+      @emit 'terminal-message-received', message
 
     ipc.on 'request-terminal-view', (request) =>
       ipc.send 'terminal-view-response',
@@ -46,7 +46,7 @@ class Terminal extends EventEmitter
 
       if sanitizedText
         for char in sanitizedText
-          this.emit 'raw-terminal-char-copy-received', char
+          @emit 'raw-terminal-char-copy-received', char
 
       # Sadly, this doesn't work yet...but it's a start
       #swapNode = existingNodes[0]
@@ -57,4 +57,4 @@ class Terminal extends EventEmitter
         #swapNode.parentNode.insertBefore(lastNode, swapNode)
 
       @term.showCursor()
-      this.emit 'raw-terminal-char-copy-done'
+      @emit 'raw-terminal-char-copy-done'

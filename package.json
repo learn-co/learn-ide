@@ -30,8 +30,8 @@
     "rimraf": "2.1",
     "rmdir": "^1.2.0",
     "socket.io-client": "1.3.7",
-    "term.js": "learn-co/term.js",
     "underscore-plus": "^1.6.6",
-    "utf8": "^2.1.1"
+    "utf8": "^2.1.1",
+    "xterm": "^0.33.0"
   }
 }
