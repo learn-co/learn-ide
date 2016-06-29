@@ -32,11 +32,11 @@ class SyncedFS
     atom.commands.dispatch(@workspaceView, 'tree-view:reveal-active-file')
 
   handleEvents: ->
-    atom.commands.onDidDispatch ({type, target}) =>
-      console.log type
-      switch type
-        when 'core:confirm' then @onCoreConfirm()
-        when 'tree-view:remove' then @onTreeViewRemove(target)
+    atom.commands.onDidDispatch (event) =>
+      console.log event.type
+      switch event.type
+        when 'core:confirm' then @onCoreConfirm(event)
+        when 'tree-view:remove' then @onTreeViewRemove(event)
 
     atom.workspace.observeTextEditors (editor) =>
       editor.onDidSave =>
@@ -53,12 +53,12 @@ class SyncedFS
 
     {project, buffer} = editor
     {file} = buffer
-    inCodeDir = !!@formatPath(buffer.file.path).match(/\.atom\/code/)
-    console.log 'Saving: Path - ' + @formatPath buffer.file.path + ' Matches? - ' + inCodeDir
+    inCodeDir = !!@formatPath(file.path).match(/\.atom\/code/)
+    console.log "Saving: Path - #{@formatPath file.path} Matches? - #{inCodeDir}"
     return unless inCodeDir
 
     @popupNoConnectionWarning() if @connectionState is 'closed'
-    @sendSave(editor.project, buffer.file, buffer)
+    @sendSave(editor.project, file, buffer)
 
   onCoreConfirm: ->
     @syncAdditions()
