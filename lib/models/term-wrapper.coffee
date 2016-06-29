@@ -1,12 +1,16 @@
 {Terminal} = require 'term.js'
 
-###
-* This wraps term js with some of the nicer features of xterm, until we migrate
-###
-
 module.exports =
 class TermWrapper extends Terminal
-  proposeGeometry: ->
+  fit: ->
+    {cols, rows} = @_proposeGeometry()
+    @_resize(cols, rows)
+
+  ###
+  * Private methods pulled from https://github.com/sourcelair/xterm.js
+  ###
+
+  _proposeGeometry: ->
     parentElementStyle = window.getComputedStyle(@element.parentElement)
     parentElementHeight = parseInt(parentElementStyle.getPropertyValue('height'))
     parentElementWidth = parseInt(parentElementStyle.getPropertyValue('width'))
@@ -30,11 +34,7 @@ class TermWrapper extends Terminal
 
     {cols, rows}
 
-  fit: ->
-    {cols, rows} = @proposeGeometry()
-    @resize(cols, rows)
-
-  resize: (x, y) ->
+  _resize: (x, y) ->
     return if x == @cols and y == @rows
     x = 1 if x < 1
     y = 1 if y < 1
@@ -78,7 +78,7 @@ class TermWrapper extends Terminal
             # are blank lines after the cursor
             @lines.push @blankLine()
         if @children.length < y
-          @insertRow()
+          @_insertRow()
     else
       # (j > y)
       while j-- > y
@@ -113,7 +113,7 @@ class TermWrapper extends Terminal
       cols: x
       rows: y
 
-  insertRow: (row) ->
+  _insertRow: (row) ->
     row = document.createElement('div') if typeof row isnt 'object'
     @element.appendChild row
     @children.push row

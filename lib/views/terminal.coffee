@@ -165,5 +165,6 @@ class TerminalView extends View
       @panel.show()
 
       if focus
+        @fitTerminal()
         @term.focus()
         @$termEl.focus()
