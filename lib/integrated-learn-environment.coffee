@@ -18,7 +18,7 @@ module.exports =
     currentFontSize:
       type: 'integer'
       title: 'Current Terminal Font Size'
-      description: 'This is used to maintain any font size adjustment you\'ve made'
+      description: "This is used to maintain any font size adjustment you've made"
       default: 14
     oauthToken:
       type: 'string'
@@ -44,7 +44,7 @@ module.exports =
 
     isTerminalWindow = atom.isTerminalWindow
 
-    @term = new Terminal("wss://ile.learn.co:443/go_terminal_server?token=" + @oauthToken, isTerminalWindow)
+    @term = new Terminal("wss://ile.learn.co:443/go_terminal_server?token=#{@oauthToken}", isTerminalWindow)
     @termView = new TerminalView(state, @term, openPath, isTerminalWindow)
 
     if isTerminalWindow
@@ -54,7 +54,7 @@ module.exports =
       workspaceView = atom.views.getView(atom.workspace)
       atom.commands.dispatch(workspaceView, 'tree-view:toggle')
 
-    @fs = new SyncedFS("wss://ile.learn.co:443/fs_server?token=" + @oauthToken, isTerminalWindow)
+    @fs = new SyncedFS("wss://ile.learn.co:443/fs_server?token=#{@oauthToken}", isTerminalWindow)
     @fsViewEmitter = new EventEmitter
     @fsView = new SyncedFSView(state, @fs, @fsViewEmitter, isTerminalWindow)
 

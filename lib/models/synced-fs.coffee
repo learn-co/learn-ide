@@ -1,5 +1,5 @@
 ipc = require 'ipc'
-FileSystemTree = require './file-system-tree'
+fs = require 'fs-plus'
 _ = require 'underscore-plus'
 
 module.exports =
@@ -25,13 +25,17 @@ class SyncedFS
 
     @workspaceView = atom.views.getView(atom.workspace)
     @projectPath = atom.project.getPaths()[0]
-    @filesystemTree = new FileSystemTree(@projectPath)
     @handleEvents()
 
   expandTreeView: ->
     atom.commands.dispatch(@workspaceView, 'tree-view:reveal-active-file')
 
   handleEvents: ->
+    atom.commands.onWillDispatch (event) =>
+      switch event.type
+        when 'tree-view:add-file', 'tree-view:add-folder'
+          @onTreeViewAdd(event)
+
     atom.commands.onDidDispatch (event) =>
       console.log event.type
       switch event.type
@@ -40,7 +44,7 @@ class SyncedFS
 
     atom.workspace.observeTextEditors (editor) =>
       editor.onDidSave =>
-        @onSave()
+        @onSave(editor)
       editor.onDidChangePath ->
         console.log 'PATH CHANGED'
 
@@ -48,8 +52,7 @@ class SyncedFS
       console.log 'OPENED ' + uri
 
   onSave: (editor) =>
-    editorElement = atom.views.getView(editor)
-    atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
+    @convertLineEndings(editor)
 
     {project, buffer} = editor
     {file} = buffer
@@ -60,28 +63,26 @@ class SyncedFS
     @popupNoConnectionWarning() if @connectionState is 'closed'
     @sendSave(editor.project, file, buffer)
 
-  onCoreConfirm: ->
+  onCoreConfirm: (event) ->
     @syncAdditions()
 
   syncAdditions: ->
-    prevEntries = _.clone(@filesystemTree.entries)
-    newEntries = _.difference(@filesystemTree.reload(), prevEntries)
+    newEntries = _.difference(fs.listTreeSync(@projectPath), @listTreeAtAdd)
     return if _.isEmpty(newEntries)
 
     deepestPath = _.max(newEntries, (entry) -> entry.length)
-    @sendAddFile(deepestPath) if @filesystemTree.isFile(deepestPath)
-    @sendAddFolder(deepestPath) if @filesystemTree.isDirectory(deepestPath)
+    @sendAddFile(deepestPath) if fs.isFileSync(deepestPath)
+    @sendAddFolder(deepestPath) if fs.isDirectorySync(deepestPath)
 
-  onTreeViewRemove: (node) ->
-    @syncRemovals()
+  onTreeViewRemove: (event) ->
+    {target} = event
+    path = target.dataset.path || target.firstChild.dataset.path
+    return if fs.existsSync(path)
 
-  syncRemovals: ->
-    prevEntries = _.clone(@filesystemTree.entries)
-    removedEntries = _.difference(prevEntries, @filesystemTree.reload())
-    return if _.isEmpty(removedEntries)
+    @sendRemove(path)
 
-    shallowPath = _.min(removedEntries, (entry) -> entry.length)
-    @sendRemove(shallowPath)
+  onTreeViewAdd: (event) =>
+    @listTreeAtAdd = fs.listTreeSync(@projectPath)
 
   sendAddFile: (path) ->
     ipc.send 'fs-local-add-file', JSON.stringify(
@@ -127,6 +128,11 @@ class SyncedFS
       path.replace(/(.*:\\)/, '/').replace(/\\/g, '/')
     else
       path
+
+  convertLineEndings: (editor) ->
+    editorElement = atom.views.getView(editor)
+    atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
+
 
   popupNoConnectionWarning: ->
     noConnectionPopup = document.createElement 'div'
