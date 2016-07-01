@@ -26,18 +26,13 @@ class SyncedFS
     @workspaceView = atom.views.getView(atom.workspace)
     @projectPath = atom.project.getPaths()[0]
     @handleEvents()
-    @recentTreeViewCommand = null
 
   expandTreeView: ->
     atom.commands.dispatch(@workspaceView, 'tree-view:reveal-active-file')
 
   handleEvents: ->
     atom.commands.onWillDispatch (event) =>
-      switch event.type
-        when 'tree-view:add-file', 'tree-view:add-folder'
-          @onTreeViewAdd(event)
-        when 'tree-view:move'
-          @onTreeViewMove(event)
+      @onTreeViewWillDispatch(event) if event.type.match(/^tree-view/)
 
     atom.commands.onDidDispatch (event) =>
       console.log event.type
@@ -46,13 +41,7 @@ class SyncedFS
         when 'tree-view:remove' then @onTreeViewRemove(event)
 
     atom.workspace.observeTextEditors (editor) =>
-      editor.onDidSave =>
-        @onSave(editor)
-      editor.onDidChangePath ->
-        console.log 'PATH CHANGED'
-
-    atom.workspace.onDidOpen ({uri, item, pane, index}) ->
-      console.log 'OPENED ' + uri
+      editor.onDidSave => @onSave(editor)
 
   onSave: (editor) =>
     @convertLineEndings(editor)
@@ -67,32 +56,42 @@ class SyncedFS
     @sendLocalEvent @localSave(editor.project, file, buffer)
 
   onCoreConfirm: (event) ->
-    @syncAdditions()
-    @syncMoves()
+    setTimeout =>
+      @syncAdditions()
+      @syncMoves()
+      @syncDuplication()
+    , 10
 
-  onTreeViewRemove: (event) ->
-    {target} = event
-    path = target.dataset.path || target.firstChild.dataset.path
-    return if fs.existsSync(path)
+  onTreeViewRemove: (event) =>
+    @syncRemovals()
 
-    @sendLocalEvent @localRemove(path)
+  onTreeViewWillDispatch: (event) =>
+    {type, target} = event
+    @pathAtWillDispatch = target.dataset.path || target.firstChild.dataset.path
+    @willDispatchCommand = type
+    @entriesAtWillDispatch = fs.listTreeSync(@projectPath)
 
-  onTreeViewAdd: (event) =>
-    @recentTreeViewCommand = event.type
-    @listTreeAtAdd = fs.listTreeSync(@projectPath)
+  purgeTreeViewEvent: =>
+    @pathAtWillDispatch = null
+    @willDispatchCommand = null
+    @entriesAtWillDispatch = null
 
-  onTreeViewMove: (event) =>
-    {target, type} = event
-    @recentTreeViewCommand = type
-    @listTreeAtMove = fs.listTreeSync(@projectPath)
-    @pathAtMove = target.dataset.path || target.firstChild.dataset.path
+  syncRemovals: =>
+    prevEntries = @entriesAtWillDispatch
 
-  syncAdditions: ->
-    prevEntries = @listTreeAtAdd
-    @listTreeAtAdd = null
+    return unless @willDispatchCommand is 'tree-view:remove'
+    @purgeTreeViewEvent()
 
-    return unless @recentTreeViewCommand.match(/tree-view:add/)
-    @recentTreeViewCommand = null
+    removedEntries = _.difference(prevEntries, fs.listTreeSync(@projectPath))
+    return unless removedEntries.length
+
+    _.each removedEntries, (entry) => @sendLocalEvent @localRemove(entry)
+
+  syncAdditions: =>
+    prevEntries = @entriesAtWillDispatch
+
+    return unless @willDispatchCommand?.match(/tree-view:add/)
+    @purgeTreeViewEvent()
 
     return unless prevEntries?
 
@@ -103,27 +102,35 @@ class SyncedFS
     @sendLocalEvent @localAddFile(deepestPath) if fs.isFileSync(deepestPath)
     @sendLocalEvent @localAddFolder(deepestPath) if fs.isDirectorySync(deepestPath)
 
-  syncMoves: ->
-    prevPath = @pathAtMove
-    prevEntries = @listTreeAtMove
-    @pathAtMove = null
-    @listTreeAtMove = null
+  syncMoves: =>
+    source = @pathAtWillDispatch
+    prevEntries = @entriesAtWillDispatch
 
-    debugger
-    return unless @recentTreeViewCommand is 'tree-view:move'
-    @recentTreeViewCommand = null
+    return unless @willDispatchCommand is 'tree-view:move'
+    @purgeTreeViewEvent()
 
-    console.log '>>> 3'
-    return unless prevPath? and prevEntries?
+    return unless source? and prevEntries?
 
-    console.log '>>> 2'
     newEntries = _.difference(fs.listTreeSync(@projectPath), prevEntries)
     return unless newEntries.length
 
-    console.log '>>> 1'
-    deepestPath = _.max(newEntries, (entry) -> entry.length)
-    console.log "prev: #{prevPath} new: #{deepestPath}"
-    @sendLocalEvent @localMove(prevPath, deepestPath)
+    target = _.max(newEntries, (entry) -> entry.length)
+    @sendLocalEvent @localMove(source, target)
+
+  syncDuplication: =>
+    source = @pathAtWillDispatch
+    prevEntries = @entriesAtWillDispatch
+
+    return unless @willDispatchCommand is 'tree-view:duplicate'
+    @purgeTreeViewEvent()
+
+    return unless source? and prevEntries?
+
+    newEntries = _.difference(fs.listTreeSync(@projectPath), prevEntries)
+    return unless newEntries.length
+
+    target = _.max(newEntries, (entry) -> entry.length)
+    @sendLocalEvent @localDuplicate(source, target)
 
   sendLocalEvent: (payload) ->
     ipc.send 'fs-local-event', JSON.stringify(payload)
@@ -160,8 +167,15 @@ class SyncedFS
       path: @formatPath(path)
 
   localMove: (source, target) ->
-    console.log '>>> 0'
     action: 'local_move'
+    project:
+      path: @formatPath(@projectPath)
+    file:
+      path: @formatPath(target)
+    from: @formatPath(source)
+
+  localDuplicate: (source, target) ->
+    action: 'local_duplicate'
     project:
       path: @formatPath(@projectPath)
     file:
