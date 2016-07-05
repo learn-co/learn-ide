@@ -32,9 +32,7 @@ class SyncedFS
 
   handleEvents: ->
     atom.commands.onWillDispatch (event) =>
-      switch event.type
-        when 'tree-view:add-file', 'tree-view:add-folder'
-          @onTreeViewAdd(event)
+      @onTreeViewWillDispatch(event) if event.type.match(/^tree-view/)
 
     atom.commands.onDidDispatch (event) =>
       console.log event.type
@@ -43,13 +41,7 @@ class SyncedFS
         when 'tree-view:remove' then @onTreeViewRemove(event)
 
     atom.workspace.observeTextEditors (editor) =>
-      editor.onDidSave =>
-        @onSave(editor)
-      editor.onDidChangePath ->
-        console.log 'PATH CHANGED'
-
-    atom.workspace.onDidOpen ({uri, item, pane, index}) ->
-      console.log 'OPENED ' + uri
+      editor.onDidSave => @onSave(editor)
 
   onSave: (editor) =>
     @convertLineEndings(editor)
@@ -61,67 +53,139 @@ class SyncedFS
     return unless inCodeDir
 
     @popupNoConnectionWarning() if @connectionState is 'closed'
-    @sendSave(editor.project, file, buffer)
+    @sendLocalEvent @localSave(editor.project, file, buffer)
 
   onCoreConfirm: (event) ->
-    @syncAdditions()
+    setTimeout =>
+      @syncAdditions()
+      @syncMoves()
+      @syncDuplication()
+    , 10
 
-  syncAdditions: ->
-    newEntries = _.difference(fs.listTreeSync(@projectPath), @listTreeAtAdd)
-    return if _.isEmpty(newEntries)
+  onTreeViewRemove: (event) =>
+    @syncRemovals()
+
+  onTreeViewWillDispatch: (event) =>
+    {type, target} = event
+    @pathAtWillDispatch = target.dataset.path || target.firstChild.dataset.path
+    @willDispatchCommand = type
+    @entriesAtWillDispatch = fs.listTreeSync(@projectPath)
+
+  purgeTreeViewEvent: =>
+    @pathAtWillDispatch = null
+    @willDispatchCommand = null
+    @entriesAtWillDispatch = null
+
+  syncRemovals: =>
+    prevEntries = @entriesAtWillDispatch
+
+    return unless @willDispatchCommand is 'tree-view:remove'
+    @purgeTreeViewEvent()
+
+    removedEntries = _.difference(prevEntries, fs.listTreeSync(@projectPath))
+    return unless removedEntries.length
+
+    sorted = _.sortBy(removedEntries, 'length').reverse()
+    _.each(sorted, (entry) => @sendLocalEvent @localRemove(entry))
+
+  syncAdditions: =>
+    prevEntries = @entriesAtWillDispatch
+
+    return unless @willDispatchCommand?.match(/tree-view:add/)
+    @purgeTreeViewEvent()
+
+    return unless prevEntries?
+
+    newEntries = _.difference(fs.listTreeSync(@projectPath), prevEntries)
+    return unless newEntries.length
 
     deepestPath = _.max(newEntries, (entry) -> entry.length)
-    @sendAddFile(deepestPath) if fs.isFileSync(deepestPath)
-    @sendAddFolder(deepestPath) if fs.isDirectorySync(deepestPath)
+    @sendLocalEvent @localAddFile(deepestPath) if fs.isFileSync(deepestPath)
+    @sendLocalEvent @localAddFolder(deepestPath) if fs.isDirectorySync(deepestPath)
 
-  onTreeViewRemove: (event) ->
-    {target} = event
-    path = target.dataset.path || target.firstChild.dataset.path
-    return if fs.existsSync(path)
+  syncMoves: =>
+    source = @pathAtWillDispatch
+    prevEntries = @entriesAtWillDispatch
 
-    @sendRemove(path)
+    return unless @willDispatchCommand is 'tree-view:move'
+    @purgeTreeViewEvent()
 
-  onTreeViewAdd: (event) =>
-    @listTreeAtAdd = fs.listTreeSync(@projectPath)
+    return unless prevEntries?
 
-  sendAddFile: (path) ->
-    ipc.send 'fs-local-add-file', JSON.stringify(
-      action: 'local_add_file'
-      project:
-        path: @formatPath(@projectPath)
-      file:
-        path: @formatPath(path)
-      )
+    unless source?
+      oldEntries = _.difference(prevEntries, fs.listTreeSync(@projectPath))
+      source = _.min(oldEntries, (entry) -> entry.length)
 
-  sendAddFolder: (path) ->
-    ipc.send 'fs-local-add-folder', JSON.stringify(
-      action: 'local_add_folder'
-      project:
-        path: @formatPath(@projectPath)
-      file:
-        path: @formatPath(path)
-      )
+    newEntries = _.difference(fs.listTreeSync(@projectPath), prevEntries)
+    return unless newEntries.length
 
-  sendSave: (project, file, buffer) ->
-    ipc.send 'fs-local-save', JSON.stringify(
-      action: 'local_save'
-      project:
-        path: @formatPath(project.getPaths()[0])
-      file:
-        path: @formatPath(file.path)
-        digest: file.digest,
-      buffer:
-        content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
-      )
+    target = _.max(newEntries, (entry) -> entry.length)
+    @sendLocalEvent @localMove(source, target)
 
-  sendRemove: (path) ->
-    ipc.send 'fs-local-delete', JSON.stringify(
-      action: 'local_delete'
-      project:
-        path: @formatPath(@projectPath)
-      file:
-        path: @formatPath(path)
-      )
+  syncDuplication: =>
+    source = @pathAtWillDispatch
+    prevEntries = @entriesAtWillDispatch
+
+    return unless @willDispatchCommand is 'tree-view:duplicate'
+    @purgeTreeViewEvent()
+
+    return unless source? and prevEntries?
+
+    newEntries = _.difference(fs.listTreeSync(@projectPath), prevEntries)
+    return unless newEntries.length
+
+    target = _.max(newEntries, (entry) -> entry.length)
+    @sendLocalEvent @localDuplicate(source, target)
+
+  sendLocalEvent: (payload) ->
+    ipc.send 'fs-local-event', JSON.stringify(payload)
+
+  localAddFile: (path) ->
+    action: 'local_add_file'
+    project:
+      path: @formatPath(@projectPath)
+    file:
+      path: @formatPath(path)
+
+  localAddFolder: (path) ->
+    action: 'local_add_folder'
+    project:
+      path: @formatPath(@projectPath)
+    file:
+      path: @formatPath(path)
+
+  localSave: (project, file, buffer) ->
+    action: 'local_save'
+    project:
+      path: @formatPath(project.getPaths()[0])
+    file:
+      path: @formatPath(file.path)
+      digest: file.digest,
+    buffer:
+      content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
+
+  localRemove: (path) ->
+    action: 'local_delete'
+    project:
+      path: @formatPath(@projectPath)
+    file:
+      path: @formatPath(path)
+
+  localMove: (source, target) ->
+    action: 'local_move'
+    project:
+      path: @formatPath(@projectPath)
+    file:
+      path: @formatPath(target)
+    from: @formatPath(source)
+
+  localDuplicate: (source, target) ->
+    action: 'local_duplicate'
+    project:
+      path: @formatPath(@projectPath)
+    file:
+      path: @formatPath(target)
+    from: @formatPath(source)
 
   formatPath: (path) ->
     if path.match(/:\\/)
@@ -132,7 +196,6 @@ class SyncedFS
   convertLineEndings: (editor) ->
     editorElement = atom.views.getView(editor)
     atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
-
 
   popupNoConnectionWarning: ->
     noConnectionPopup = document.createElement 'div'
