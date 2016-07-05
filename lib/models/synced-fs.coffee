@@ -85,7 +85,8 @@ class SyncedFS
     removedEntries = _.difference(prevEntries, fs.listTreeSync(@projectPath))
     return unless removedEntries.length
 
-    _.each removedEntries, (entry) => @sendLocalEvent @localRemove(entry)
+    sorted = _.sortBy(removedEntries, 'length').reverse()
+    _.each(sorted, (entry) => @sendLocalEvent @localRemove(entry))
 
   syncAdditions: =>
     prevEntries = @entriesAtWillDispatch
@@ -109,7 +110,11 @@ class SyncedFS
     return unless @willDispatchCommand is 'tree-view:move'
     @purgeTreeViewEvent()
 
-    return unless source? and prevEntries?
+    return unless prevEntries?
+
+    unless source?
+      oldEntries = _.difference(prevEntries, fs.listTreeSync(@projectPath))
+      source = _.min(oldEntries, (entry) -> entry.length)
 
     newEntries = _.difference(fs.listTreeSync(@projectPath), prevEntries)
     return unless newEntries.length
