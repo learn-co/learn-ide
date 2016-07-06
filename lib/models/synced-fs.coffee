@@ -31,6 +31,9 @@ class SyncedFS
     atom.commands.dispatch(@workspaceView, 'tree-view:reveal-active-file')
 
   handleEvents: ->
+    atom.commands.add @workspaceView,
+      'learn-ide:resync': (event) => @onResync(event)
+
     atom.commands.onWillDispatch (event) =>
       @onTreeViewWillDispatch(event) if event.type.match(/^tree-view/)
 
@@ -61,6 +64,12 @@ class SyncedFS
       @syncMoves()
       @syncDuplication()
     , 10
+
+  onResync: (event) ->
+    {target} = event
+    path = target.dataset.path || target.firstChild.dataset.path
+    fs.removeSync(path)
+    @sendLocalEvent @localresync(path)
 
   onTreeViewRemove: (event) =>
     @syncRemovals()
@@ -186,6 +195,13 @@ class SyncedFS
     file:
       path: @formatPath(target)
     from: @formatPath(source)
+
+  localresync: (path) ->
+    action: 'local_resync'
+    project:
+      path: @formatPath(@projectPath)
+    file:
+      path: @formatPath(path)
 
   formatPath: (path) ->
     if path.match(/:\\/)

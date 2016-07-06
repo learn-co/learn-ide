@@ -50,7 +50,7 @@ class SyncedFSView extends View
     @statusIcon().addEventListener 'click', (e) ->
       if e.target.dataset.status is 'bad'
         workspaceView = atom.views.getView(atom.workspace)
-        atom.commands.dispatch(workspaceView, 'integrated-learn-environment:reset')
+        atom.commands.dispatch(workspaceView, 'learn-ide:reset')
 
   togglePopoutIcon: =>
     @popoutIcon().classList.toggle('inactive')
