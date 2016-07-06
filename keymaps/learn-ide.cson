@@ -1,5 +1,6 @@
 '.platform-darwin':
   'cmd-i': 'integrated-learn-environment:toggleTerminal'
+  'cmd-;': 'learn-ide:toggle-focus'
 
 '.platform-darwin .learn-terminal':
   'cmd-c': 'learn-ide:copy'

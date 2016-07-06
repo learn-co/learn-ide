@@ -143,6 +143,22 @@ class TerminalView extends View
   changeFontSize: (fontSize) ->
     @$termEl.css 'font-size', fontSize
     @persistFontSize fontSize
+    @fullFocus()
+
+  unfocus: ->
+    @term.blur()
+    atom.workspace.getActivePane().activate()
+
+  hasFocus: ->
+    @$termEl.is(':focus') or document.activeElement is @$termEl[0]
+
+  toggleFocus: ->
+    if @hasFocus()
+      @unfocus()
+    else
+      @fullFocus()
+
+  fullFocus: ->
     @fitTerminal()
     @term.focus()
     @$termEl.focus()
@@ -165,6 +181,4 @@ class TerminalView extends View
       @panel.show()
 
       if focus
-        @fitTerminal()
-        @term.focus()
-        @$termEl.focus()
+        @fullFocus()

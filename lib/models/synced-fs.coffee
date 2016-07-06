@@ -33,11 +33,12 @@ class SyncedFS
   handleEvents: ->
     atom.commands.onWillDispatch (event) =>
       @onTreeViewWillDispatch(event) if event.type.match(/^tree-view/)
+      @onCoreConfirmWillDispatch(event) if event.type is 'core:confirm'
 
     atom.commands.onDidDispatch (event) =>
       console.log event.type
       switch event.type
-        when 'core:confirm' then @onCoreConfirm(event)
+        when 'core:confirm' then @onCoreConfirmDidDispatch(event)
         when 'tree-view:remove' then @onTreeViewRemove(event)
 
     atom.workspace.observeTextEditors (editor) =>
@@ -55,7 +56,11 @@ class SyncedFS
     @popupNoConnectionWarning() if @connectionState is 'closed'
     @sendLocalEvent @localSave(editor.project, file, buffer)
 
-  onCoreConfirm: (event) ->
+  onCoreConfirmWillDispatch: (event) =>
+    return unless @willDispatchCommand
+    @newPathOnCoreConfirm = "#{@projectPath}/#{@getTreeViewDialogText()}"
+
+  onCoreConfirmDidDispatch: (event) =>
     setTimeout =>
       @syncAdditions()
       @syncMoves()
@@ -67,14 +72,17 @@ class SyncedFS
 
   onTreeViewWillDispatch: (event) =>
     {type, target} = event
-    @pathAtWillDispatch = target.dataset.path || target.firstChild.dataset.path
     @willDispatchCommand = type
     @entriesAtWillDispatch = fs.listTreeSync(@projectPath)
+    @pathAtWillDispatch = target.dataset.path || target.firstChild?.dataset.path
+    unless @pathAtWillDispatch?
+      @pathAtWillDispatch = @getTreeViewSelectedPath()
 
   purgeTreeViewEvent: =>
     @pathAtWillDispatch = null
     @willDispatchCommand = null
     @entriesAtWillDispatch = null
+    @newPathOnCoreConfirm = null
 
   syncRemovals: =>
     prevEntries = @entriesAtWillDispatch
@@ -105,39 +113,28 @@ class SyncedFS
 
   syncMoves: =>
     source = @pathAtWillDispatch
-    prevEntries = @entriesAtWillDispatch
+    target = @newPathOnCoreConfirm
 
     return unless @willDispatchCommand is 'tree-view:move'
     @purgeTreeViewEvent()
 
-    return unless prevEntries?
+    return unless source? and target?
 
-    unless source?
-      oldEntries = _.difference(prevEntries, fs.listTreeSync(@projectPath))
-      source = _.min(oldEntries, (entry) -> entry.length)
-
-    newEntries = _.difference(fs.listTreeSync(@projectPath), prevEntries)
-    return unless newEntries.length
-
-    target = _.max(newEntries, (entry) -> entry.length)
     @sendLocalEvent @localMove(source, target)
 
   syncDuplication: =>
     source = @pathAtWillDispatch
-    prevEntries = @entriesAtWillDispatch
+    target = @newPathOnCoreConfirm
 
     return unless @willDispatchCommand is 'tree-view:duplicate'
     @purgeTreeViewEvent()
 
-    return unless source? and prevEntries?
+    return unless source? and target?
 
-    newEntries = _.difference(fs.listTreeSync(@projectPath), prevEntries)
-    return unless newEntries.length
-
-    target = _.max(newEntries, (entry) -> entry.length)
     @sendLocalEvent @localDuplicate(source, target)
 
   sendLocalEvent: (payload) ->
+    console.log payload
     ipc.send 'fs-local-event', JSON.stringify(payload)
 
   localAddFile: (path) ->
@@ -196,6 +193,20 @@ class SyncedFS
   convertLineEndings: (editor) ->
     editorElement = atom.views.getView(editor)
     atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
+
+  getTreeViewDialogText: ->
+    dialog = document.querySelectorAll('.tree-view-dialog atom-text-editor.mini')[0]
+    textContainer = dialog.shadowRoot.querySelector('.text.plain')
+
+    return null unless dialog? and textContainer?
+    textContainer.innerText
+
+  getTreeViewSelectedPath: ->
+    treeView = document.getElementsByClassName('tree-view full-menu')[0]
+    selectedEntry = treeView.querySelector('.selected')
+
+    return null unless selectedEntry?
+    selectedEntry.getPath()
 
   popupNoConnectionWarning: ->
     noConnectionPopup = document.createElement 'div'
