@@ -31,6 +31,10 @@ class SyncedFS
     atom.commands.dispatch(@workspaceView, 'tree-view:reveal-active-file')
 
   handleEvents: ->
+    @treeViewEl().addEventListener 'drag', (event) => @onTreeViewDrag(event)
+    @treeViewEl().addEventListener 'drop', (event) => @onTreeViewDrop(event)
+    @treeViewEl().addEventListener 'dragend', (event) => @onTreeViewDragEnd(event)
+
     atom.commands.onWillDispatch (event) =>
       @onTreeViewWillDispatch(event) if event.type.match(/^tree-view/)
       @onCoreConfirmWillDispatch(event) if event.type is 'core:confirm'
@@ -61,11 +65,9 @@ class SyncedFS
     @newPathOnCoreConfirm = "#{@projectPath}/#{@getTreeViewDialogText()}"
 
   onCoreConfirmDidDispatch: (event) =>
-    setTimeout =>
-      @syncAdditions()
-      @syncMoves()
-      @syncDuplication()
-    , 10
+    @syncAdditions()
+    @syncMoves()
+    @syncDuplication()
 
   onTreeViewRemove: (event) =>
     @syncRemovals()
@@ -74,9 +76,19 @@ class SyncedFS
     {type, target} = event
     @willDispatchCommand = type
     @entriesAtWillDispatch = fs.listTreeSync(@projectPath)
-    @pathAtWillDispatch = target.dataset.path || target.firstChild?.dataset.path
-    unless @pathAtWillDispatch?
-      @pathAtWillDispatch = @getTreeViewSelectedPath()
+    @pathAtWillDispatch = @getPath(target) || @getTreeViewSelectedPath()
+
+  onTreeViewDragEnd: (event) =>
+    @dragTargetPath = null
+
+  onTreeViewDrag: (event) =>
+    @dragTargetPath = @getPath(event.target)
+
+  onTreeViewDrop: (event) =>
+    destination = @getPath(event.target)
+
+    return unless @dragTargetPath? and destination?
+    @sendLocalEvent @localMove(@dragTargetPath, destination)
 
   purgeTreeViewEvent: =>
     @pathAtWillDispatch = null
@@ -194,6 +206,9 @@ class SyncedFS
     editorElement = atom.views.getView(editor)
     atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
 
+  treeViewEl: ->
+    document.getElementsByClassName('tree-view full-menu')[0]
+
   getTreeViewDialogText: ->
     dialog = document.querySelectorAll('.tree-view-dialog atom-text-editor.mini')[0]
     textContainer = dialog.shadowRoot.querySelector('.text.plain')
@@ -202,11 +217,20 @@ class SyncedFS
     textContainer.innerText
 
   getTreeViewSelectedPath: ->
-    treeView = document.getElementsByClassName('tree-view full-menu')[0]
-    selectedEntry = treeView.querySelector('.selected')
+    selectedEntry = @treeViewEl().querySelector('.selected')
 
     return null unless selectedEntry?
-    selectedEntry.getPath()
+    @getPath(selectedEntry)
+
+  getPath: (el) ->
+    if el.getPath?
+      el.getPath()
+    else if el.dataset.path?
+      el.dataset.path
+    else if el.firstChild?
+      el.firstChild.dataset.path
+    else
+      undefined
 
   popupNoConnectionWarning: ->
     noConnectionPopup = document.createElement 'div'

@@ -40,16 +40,13 @@ class TerminalView extends View
     @openColor = @term.element.style.color
 
   handleEvents: ->
-    @on 'focus', =>
-      @fitTerminal()
-    @on 'mousedown', '.terminal-view-resize-handle', (e) =>
-      @resizeStarted(e)
+    @on 'focus', => @fitTerminal()
+    @on 'mousedown', '.terminal-view-resize-handle', (e) => @resizeStarted(e)
 
-    @$termEl.on 'focus', (e) =>
-      @term.focus()
+    @$termEl.on 'blur', (e) =>
+    @$termEl.on 'focus', (e) => @term.focus()
 
-    @term.on 'data', (data) =>
-      ipc.send 'terminal-data', data
+    @term.on 'data', (data) => ipc.send 'terminal-data', data
 
     @terminal.on 'terminal-message-received', (message) =>
       @term.write(utf8.decode(window.atob(message)))
@@ -146,6 +143,7 @@ class TerminalView extends View
     @fullFocus()
 
   unfocus: ->
+    @blur()
     @term.blur()
     atom.workspace.getActivePane().activate()
 
