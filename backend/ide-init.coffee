@@ -61,7 +61,7 @@ getTokenAndVMPort = ->
           atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
           win.destroy()
 
-          atom.commands.dispatch(workspaceView, 'integrated-learn-environment:toggleTerminal')
+          atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
 
   promptManualEntry() unless win.loadUrl('https://learn.co/ide/token?ide_config=true')
 
@@ -104,7 +104,7 @@ promptManualEntry = ->
           atom.config.set('integrated-learn-environment.oauthToken', input.value)
           atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
           panel.destroy()
-          atom.commands.dispatch(workspaceView, 'integrated-learn-environment:toggleTerminal')
+          atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
           return true
         else
           invalidLabel.setAttribute 'style', 'color: red; opacity: 100;'
@@ -113,7 +113,7 @@ getVMPort = ->
   confirmOauthToken(existingToken).then (res) ->
     if res
       atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
-      atom.commands.dispatch(workspaceView, 'integrated-learn-environment:toggleTerminal')
+      atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
       return true
 
 # TODO: Remove this temporary helper eventually...
@@ -130,5 +130,5 @@ if !existingToken
 else if !vmPort
   getVMPort()
 else
-  atom.commands.dispatch(workspaceView, 'integrated-learn-environment:toggleTerminal')
+  atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
   confirmOauthToken(existingToken)

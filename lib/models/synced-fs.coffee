@@ -35,6 +35,9 @@ class SyncedFS
     @treeViewEl().addEventListener 'drop', (event) => @onTreeViewDrop(event)
     @treeViewEl().addEventListener 'dragend', (event) => @onTreeViewDragEnd(event)
 
+    atom.commands.add @workspaceView,
+      'learn-ide:resync': (event) => @onResync(event)
+
     atom.commands.onWillDispatch (event) =>
       @onTreeViewWillDispatch(event) if event.type.match(/^tree-view/)
       @onCoreConfirmWillDispatch(event) if event.type is 'core:confirm'
@@ -68,6 +71,11 @@ class SyncedFS
     @syncAdditions()
     @syncMoves()
     @syncDuplication()
+
+  onResync: (event) ->
+    path = @getPath(event.target)
+    fs.removeSync(path)
+    @sendLocalEvent @localresync(path)
 
   onTreeViewRemove: (event) =>
     @syncRemovals()
@@ -195,6 +203,13 @@ class SyncedFS
     file:
       path: @formatPath(target)
     from: @formatPath(source)
+
+  localresync: (path) ->
+    action: 'local_resync'
+    project:
+      path: @formatPath(@projectPath)
+    file:
+      path: @formatPath(path)
 
   formatPath: (path) ->
     if path.match(/:\\/)

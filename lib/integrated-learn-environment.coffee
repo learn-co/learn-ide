@@ -59,20 +59,15 @@ module.exports =
     @fsView = new SyncedFSView(state, @fs, @fsViewEmitter, isTerminalWindow)
 
     @subscriptions = new CompositeDisposable
-    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:open': (e) =>
-      openPath = e.detail.path
-      @termView.openLab openPath
-    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:toggleTerminal': =>
-      @termView.toggle()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'integrated-learn-environment:reset': =>
-      @term.term.write('\n\rReconnecting...\r')
-      ipc.send 'reset-connection'
-      ipc.send 'connection-state-request'
-    @subscriptions.add atom.commands.add 'atom-workspace', 'application:update-ile': =>
-      updater = new LearnUpdater
-      updater.checkForUpdate()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'learn-ide:toggle-focus': =>
-      @termView.toggleFocus()
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'learn-ide:open': (e) => @termView.openLab(e.detail.path)
+      'learn-ide:toggle-terminal': => @termView.toggle()
+      'learn-ide:toggle-focus': => @termView.toggleFocus()
+      'learn-ide:reset': =>
+        @term.term.write('\n\rReconnecting...\r')
+        ipc.send 'reset-connection'
+        ipc.send 'connection-state-request'
+      'application:update-ile': -> (new LearnUpdater).checkForUpdate()
 
     @passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
     @failingIcon = 'http://i.imgbox.com/vVZZG1Gx.png'

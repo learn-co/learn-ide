@@ -6,7 +6,7 @@
   "description": "Learn meets Atom",
   "keywords": [],
   "activationCommands": {
-    "atom-workspace": "integrated-learn-environment:toggleTerminal"
+    "atom-workspace": "learn-ide:toggle-terminal"
   },
   "repository": "https://github.com/atom/integrated-learn-environment",
   "license": "Pending",

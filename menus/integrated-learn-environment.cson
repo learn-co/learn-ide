@@ -1,8 +1,8 @@
 'context-menu':
   'atom-text-editor': [
     {
-      'label': 'Toggle Learn.co Terminal'
-      'command': 'integrated-learn-environment:toggleTerminal'
+      'label': 'Toggle Learn IDE Terminal'
+      'command': 'learn-ide:toggle-terminal'
     }
   ]
   '.learn-terminal': [
@@ -14,6 +14,16 @@
       'label': 'Paste'
       'command': 'learn-ide:paste'
     }
+    {
+      'label': 'Hide Learn IDE Terminal'
+      'command': 'learn-ide:toggle-terminal'
+    }
+  ]
+  '.tree-view.full-menu > .project-root > .entries > .directory > .entries > .directory > .header > [data-path*="/.atom/code/labs/"]': [
+    {
+      'label': 'Resync with Learn IDE Server'
+      'command': 'learn-ide:resync'
+    }
   ]
 'menu': [
   {
@@ -22,12 +32,16 @@
       'label': 'Learn.co'
       'submenu': [
         {
+          'label': 'Focus Terminal'
+          'command': 'learn-ide:toggle-focus'
+        }
+        {
           'label': 'Toggle Terminal'
-          'command': 'integrated-learn-environment:toggleTerminal'
+          'command': 'learn-ide:toggle-terminal'
         }
         {
           'label': 'Reconnect'
-          'command': 'integrated-learn-environment:reset'
+          'command': 'learn-ide:reset'
         }
       ]
     ]
