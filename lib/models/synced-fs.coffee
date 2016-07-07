@@ -73,8 +73,7 @@ class SyncedFS
     @syncDuplication()
 
   onResync: (event) ->
-    {target} = event
-    path = target.dataset.path || target.firstChild.dataset.path
+    path = @getPath(event.target)
     fs.removeSync(path)
     @sendLocalEvent @localresync(path)
 

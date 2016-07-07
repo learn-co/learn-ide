@@ -54,7 +54,7 @@ module.exports =
       workspaceView = atom.views.getView(atom.workspace)
       atom.commands.dispatch(workspaceView, 'tree-view:toggle')
 
-    @fs = new SyncedFS("ws://ile.learn.co:3304/local_resync?token=#{@oauthToken}", isTerminalWindow)
+    @fs = new SyncedFS("wss://ile.learn.co:443/fs_server?token=#{@oauthToken}", isTerminalWindow)
     @fsViewEmitter = new EventEmitter
     @fsView = new SyncedFSView(state, @fs, @fsViewEmitter, isTerminalWindow)
 
@@ -62,11 +62,12 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace',
       'learn-ide:open': (e) => @termView.openLab(e.detail.path)
       'learn-ide:toggle-terminal': => @termView.toggle()
+      'learn-ide:toggle-focus': => @termView.toggleFocus()
       'learn-ide:reset': =>
         @term.term.write('\n\rReconnecting...\r')
         ipc.send 'reset-connection'
         ipc.send 'connection-state-request'
-      'application:update-ile': -> (new LearnUpdater).checkForUpdate
+      'application:update-ile': -> (new LearnUpdater).checkForUpdate()
 
     @passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
     @failingIcon = 'http://i.imgbox.com/vVZZG1Gx.png'
