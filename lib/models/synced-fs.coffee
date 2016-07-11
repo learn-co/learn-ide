@@ -31,9 +31,7 @@ class SyncedFS
     atom.commands.dispatch(@workspaceView, 'tree-view:reveal-active-file')
 
   handleEvents: ->
-    @treeViewEl().addEventListener 'drag', (event) => @onTreeViewDrag(event)
-    @treeViewEl().addEventListener 'drop', (event) => @onTreeViewDrop(event)
-    @treeViewEl().addEventListener 'dragend', (event) => @onTreeViewDragEnd(event)
+    @addTreeViewListeners()
 
     atom.commands.add @workspaceView,
       'learn-ide:resync': (event) => @onResync(event)
@@ -47,9 +45,19 @@ class SyncedFS
       switch event.type
         when 'core:confirm' then @onCoreConfirmDidDispatch(event)
         when 'tree-view:remove' then @onTreeViewRemove(event)
+        when 'tree-view:toggle' then @addTreeViewListeners(event)
 
     atom.workspace.observeTextEditors (editor) =>
       editor.onDidSave => @onSave(editor)
+
+  addTreeViewListeners: ->
+    el = @treeViewEl()
+
+    if el? and not @didAddTreeViewListeners?
+      @didAddTreeViewListeners = true
+      el.addEventListener 'drag', (event) => @onTreeViewDrag(event)
+      el.addEventListener 'drop', (event) => @onTreeViewDrop(event)
+      el.addEventListener 'dragend', (event) => @onTreeViewDragEnd(event)
 
   onSave: (editor) =>
     @convertLineEndings(editor)
@@ -232,7 +240,7 @@ class SyncedFS
     textContainer.innerText
 
   getTreeViewSelectedPath: ->
-    selectedEntry = @treeViewEl().querySelector('.selected')
+    selectedEntry = @treeViewEl()?.querySelector('.selected')
 
     return null unless selectedEntry?
     @getPath(selectedEntry)
