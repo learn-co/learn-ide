@@ -172,11 +172,10 @@ class TerminalView extends View
     else
       @term.emit 'data', text
 
-  toggle: (focus) ->
-    if @panel.isVisible()
-      @panel.hide()
-    else
+  toggle: (focus, event) ->
+    if event?.detail?.show
       @panel.show()
+    else
+      if @panel.isVisible() then @panel.hide() else @panel.show()
 
-      if focus
-        @fullFocus()
+    @fullFocus() if focus and @panel.isVisible()
