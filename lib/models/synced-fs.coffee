@@ -60,7 +60,6 @@ class SyncedFS
       el.addEventListener 'dragend', (event) => @onTreeViewDragEnd(event)
 
   onSave: (editor) =>
-    @convertLineEndings(editor)
 
     {project, buffer} = editor
     {file} = buffer
@@ -187,7 +186,7 @@ class SyncedFS
       path: @formatPath(file.path)
       digest: file.digest,
     buffer:
-      content: window.btoa(unescape(encodeURIComponent(buffer.getText())))
+      content: window.btoa(unescape(encodeURIComponent(@convertLineEndings(buffer.getText()))))
 
   localRemove: (path) ->
     action: 'local_delete'
@@ -225,9 +224,8 @@ class SyncedFS
     else
       path
 
-  convertLineEndings: (editor) ->
-    editorElement = atom.views.getView(editor)
-    atom.commands.dispatch(editorElement, 'line-ending-selector:convert-to-LF')
+  convertLineEndings: (text) ->
+    text.replace(/\r\n|\n|\r/g, '\n')
 
   treeViewEl: ->
     document.getElementsByClassName('tree-view full-menu')[0]

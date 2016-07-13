@@ -62,7 +62,7 @@ module.exports =
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace',
       'learn-ide:open': (e) => @termView.openLab(e.detail.path)
-      'learn-ide:toggle-terminal': (e) => @termView.toggle(null, e)
+      'learn-ide:toggle-terminal': () => @termView.toggle()
       'learn-ide:toggle-focus': => @termView.toggleFocus()
       'learn-ide:reset': =>
         @term.term.write('\n\rReconnecting...\r')
