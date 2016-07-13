@@ -8,12 +8,15 @@ class BrowserWindowWrapper
     options.show ?= false
     options.width ?= 400
     options.height ?= 600
+    options.skipTaskbar ?= true
+    options.menuBarVisible ?= false
 
     @win = new BrowserWindow(options)
     @webContents = @win.webContents
+    forceBrowserWindowOptions(@win, options)
 
     @handleEvents()
-    @win.loadUrl(url)
+    @win.loadUrl(url) # TODO: handle failed load
 
   handleEvents: =>
     @webContents.on 'did-finish-load', =>
@@ -24,3 +27,11 @@ class BrowserWindowWrapper
         e.preventDefault()
         @win.destroy()
         shell.openExternal(url)
+
+  forceBrowserWindowConfigurations: (win, options) ->
+    # these options fail as arguments to the BrowserWindor constructor
+    {skipTaskbar, menuBarVisible, title} = options
+
+    win.setTitle(title) if title?
+    win.setSkipTaskbar(skipTaskbar)
+    win.setMenuBarVisibility(menuBarVisible)
