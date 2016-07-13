@@ -43,10 +43,10 @@ class TerminalView extends View
     @on 'focus', => @fitTerminal()
     @on 'mousedown', '.terminal-view-resize-handle', (e) => @resizeStarted(e)
 
-    @$termEl.on 'blur', (e) =>
     @$termEl.on 'focus', (e) => @term.focus()
+    @$termEl.on 'blur', (e) => @onBlur(e)
 
-    @term.on 'data', (data) => ipc.send 'terminal-data', data
+    @term.on 'data', (data) -> ipc.send 'terminal-data', data
 
     @terminal.on 'terminal-message-received', (message) =>
       @term.write(utf8.decode(window.atob(message)))
@@ -80,6 +80,8 @@ class TerminalView extends View
     ipc.on 'connection-state', (state) =>
       @terminal.updateConnectionState(state)
 
+    atom.commands.onDidDispatch (e) => @updateFocus(e)
+
     atom.commands.add @element,
       'core:copy': => atom.commands.dispatch(@element, 'learn-ide:copy')
       'core:paste': => atom.commands.dispatch(@element, 'learn-ide:paste')
@@ -93,6 +95,13 @@ class TerminalView extends View
     if path
       ipc.send 'terminal-data', 'learn open ' + path.toString() + '\r'
       @openPath = null
+
+  onBlur: (e) ->
+    {relatedTarget} = e
+    @unfocus() if relatedTarget? and relatedTarget isnt @term.element
+
+  updateFocus: (e) ->
+    if document.activeElement is @term.element then @focus() else @unfocus()
 
   resizeStarted: ->
     $(document).on('mousemove', @resize)
@@ -112,7 +121,7 @@ class TerminalView extends View
     @height(newHeight)
 
   fitTerminal: ->
-    @term.fit()
+    @term.fit() if @panel.isVisible()
 
   currentFontSize: ->
     parseInt @$termEl.css 'font-size'
@@ -145,14 +154,17 @@ class TerminalView extends View
   unfocus: ->
     @blur()
     @term.blur()
+
+  transferFocus: ->
+    @unfocus()
     atom.workspace.getActivePane().activate()
 
   hasFocus: ->
-    @$termEl.is(':focus') or document.activeElement is @$termEl[0]
+    @$termEl.is(':focus') or document.activeElement is @term.element
 
   toggleFocus: ->
     if @hasFocus()
-      @unfocus()
+      @transferFocus()
     else
       @fullFocus()
 
@@ -172,10 +184,8 @@ class TerminalView extends View
     else
       @term.emit 'data', text
 
-  toggle: (focus, event) ->
-    if event?.detail?.show
-      @panel.show()
-    else
-      if @panel.isVisible() then @panel.hide() else @panel.show()
+  toggle: () ->
+    return @panel.hide() if @panel.isVisible()
 
-    @fullFocus() if focus and @panel.isVisible()
+    @panel.show()
+    @fullFocus()

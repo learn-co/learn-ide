@@ -98,7 +98,7 @@ window.learnSignIn = ->
       win.destroy()
       githubLogin()
 
-  win.loadUrl('http://localhost:3000/ide/sign_in')
+  win.loadUrl('https://learn.co/ide/sign_in?ide_onboard=true')
 
 promptManualEntry = ->
   oauthPrompt = document.createElement 'div'
@@ -154,12 +154,12 @@ getVMPort = ->
 window.BrowserWindow = BrowserWindow
 
 # TODO: Remove this temporary helper eventually...
-window.githubLogout = ->
+githubLogout = ->
   win = new BrowserWindow(show: false)
   win.webContents.on 'did-finish-load', -> win.show()
   win.loadUrl('https://github.com/logout')
 
-window.learnLogout = ->
+learnLogout = ->
   win = new BrowserWindow(show: false)
   win.webContents.on 'did-finish-load', -> win.destroy()
   win.loadUrl('http://localhost:3000/sign_out')

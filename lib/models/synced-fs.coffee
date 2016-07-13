@@ -234,7 +234,7 @@ class SyncedFS
 
   getTreeViewDialogText: ->
     dialog = document.querySelectorAll('.tree-view-dialog atom-text-editor.mini')[0]
-    textContainer = dialog.shadowRoot.querySelector('.text.plain')
+    textContainer = dialog?.shadowRoot?.querySelector('.text.plain')
 
     return null unless dialog? and textContainer?
     textContainer.innerText
