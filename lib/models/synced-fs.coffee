@@ -1,5 +1,6 @@
 ipc = require 'ipc'
 fs = require 'fs-plus'
+pathUtil = require 'path'
 _ = require 'underscore-plus'
 
 module.exports =
@@ -44,8 +45,10 @@ class SyncedFS
       console.log event.type
       switch event.type
         when 'core:confirm' then @onCoreConfirmDidDispatch(event)
+        when 'core:copy', 'core:cut' then @onCoreCopyOrCut(event)
         when 'tree-view:remove' then @onTreeViewRemove(event)
         when 'tree-view:toggle' then @addTreeViewListeners(event)
+        when 'tree-view:paste' then @onTreeViewPaste(event)
 
     atom.workspace.observeTextEditors (editor) =>
       editor.onDidSave => @onSave(editor)
@@ -60,7 +63,6 @@ class SyncedFS
       el.addEventListener 'dragend', (event) => @onTreeViewDragEnd(event)
 
   onSave: (editor) =>
-
     {project, buffer} = editor
     {file} = buffer
     inCodeDir = !!@formatPath(file.path).match(/\.atom\/code/)
@@ -68,7 +70,7 @@ class SyncedFS
     return unless inCodeDir
 
     @popupNoConnectionWarning() if @connectionState is 'closed'
-    @sendLocalEvent @localSave(editor.project, file, buffer)
+    @sendLocalEvent @localSave(project, file, buffer)
 
   onCoreConfirmWillDispatch: (event) =>
     return unless @willDispatchCommand
@@ -79,6 +81,9 @@ class SyncedFS
     @syncMoves()
     @syncDuplication()
 
+  onCoreCopyOrCut: (event) =>
+    @treeViewCopiedPath = null
+
   onResync: (event) ->
     path = @getPath(event.target)
     fs.removeSync(path)
@@ -87,8 +92,19 @@ class SyncedFS
   onTreeViewRemove: (event) =>
     @syncRemovals()
 
+  onTreeViewPaste: (event) =>
+    return unless @treeViewCopiedPath?
+    source = @treeViewCopiedPath
+    target = @pathAtWillDispatch
+    @sendLocalEvent @localDuplicate(source, target)
+
   onTreeViewWillDispatch: (event) =>
     {type, target} = event
+
+    if type is 'tree-view:copy' or type is 'tree-view:cut'
+      @treeViewCopiedPath = @getPath(target) || @getTreeViewSelectedPath()
+      return
+
     @willDispatchCommand = type
     @entriesAtWillDispatch = fs.listTreeSync(@projectPath)
     @pathAtWillDispatch = @getPath(target) || @getTreeViewSelectedPath()
@@ -145,9 +161,10 @@ class SyncedFS
     return unless @willDispatchCommand is 'tree-view:move'
     @purgeTreeViewEvent()
 
-    return unless source? and target?
+    return unless source? and target? and target isnt "#{@projectPath}/"
 
-    @sendLocalEvent @localMove(source, target)
+    if pathUtil.resolve(target).startsWith(@projectPath)
+      @sendLocalEvent @localMove(source, target)
 
   syncDuplication: =>
     source = @pathAtWillDispatch
@@ -156,9 +173,10 @@ class SyncedFS
     return unless @willDispatchCommand is 'tree-view:duplicate'
     @purgeTreeViewEvent()
 
-    return unless source? and target?
+    return unless source? and target? and target isnt "#{@projectPath}/"
 
-    @sendLocalEvent @localDuplicate(source, target)
+    if pathUtil.resolve(target).startsWith(@projectPath)
+      @sendLocalEvent @localDuplicate(source, target)
 
   sendLocalEvent: (payload) ->
     console.log payload
@@ -234,7 +252,7 @@ class SyncedFS
     dialog = document.querySelectorAll('.tree-view-dialog atom-text-editor.mini')[0]
     textContainer = dialog?.shadowRoot?.querySelector('.text.plain')
 
-    return null unless dialog? and textContainer?
+    return '' unless dialog? and textContainer?
     textContainer.innerText
 
   getTreeViewSelectedPath: ->
