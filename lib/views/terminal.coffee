@@ -174,10 +174,10 @@ class TerminalView extends View
     @$termEl.focus()
 
   copy: ->
-    Clipboard.writeText(getSelection().toString())
+    Clipboard.writeText(getSelection().toString().replace(/\u00A0/g, ' '))
 
   paste: ->
-    text = Clipboard.readText().replace(/\n/g, "\r")
+    text = Clipboard.readText().replace(/\n/g, '\r')
 
     if process.platform isnt 'darwin'
       ipc.send 'terminal-data', text

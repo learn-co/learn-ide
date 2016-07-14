@@ -98,7 +98,9 @@ window.learnSignIn = ->
       win.destroy()
       githubLogin()
 
-  win.loadUrl('https://learn.co/ide/sign_in?ide_onboard=true')
+  if not win.loadUrl('https://learn.co/ide/sign_in?ide_onboard=true')
+    win.destroy()
+    githubLogin()
 
 promptManualEntry = ->
   oauthPrompt = document.createElement 'div'
