@@ -1,6 +1,7 @@
 url = require 'url'
 https = require 'https'
 remote = require 'remote'
+shell = require 'shell'
 BrowserWindow = remote.require('browser-window')
 
 workspaceView = atom.views.getView(atom.workspace)
@@ -36,8 +37,8 @@ confirmOauthToken = (token) ->
           resolve false
   )
 
-getTokenAndVMPort = ->
-  win = new BrowserWindow(show: false, width: 1040, height: 660)
+githubLogin = ->
+  win = new BrowserWindow(show: false, width: 440, height: 660)
   webContents = win.webContents
 
   win.setSkipTaskbar(true)
@@ -49,21 +50,57 @@ getTokenAndVMPort = ->
 
   # hide window immediately after login
   webContents.on 'will-navigate', (e, url) ->
-    if url.match(/learn\.co\/users\/auth\/github\/callback/)
-      win.hide()
+    win.hide() if url.match(/learn\.co\/users\/auth\/github\/callback/)
+
+  webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
+    return unless newURL.match(/ide_token/)
+    token = url.parse(newURL, true).query.ide_token
+    confirmOauthToken(token).then (res) ->
+      return unless res?
+      atom.config.set('integrated-learn-environment.oauthToken', token)
+      atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
+      win.destroy()
+
+      atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
+
+  if not win.loadUrl('https://learn.co/ide/token?ide_config=true')
+    promptManualEntry()
+
+window.learnSignIn = ->
+  win = new BrowserWindow(show: false, width: 400, height: 600)
+  {webContents} = win
+
+  win.setSkipTaskbar(true)
+  win.setMenuBarVisibility(false)
+  win.setTitle('Welcome to the Learn IDE')
+
+  webContents.on 'did-finish-load', -> win.show()
+
+  webContents.on 'new-window', (e, url) ->
+    e.preventDefault()
+    win.destroy()
+    shell.openExternal(url)
+
+  webContents.on 'will-navigate', (e, url) ->
+    if url.match(/github_sign_in/)
+      win.destroy()
+      githubLogin()
 
   webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
     if newURL.match(/ide_token/)
       token = url.parse(newURL, true).query.ide_token
       confirmOauthToken(token).then (res) ->
-        if res
-          atom.config.set('integrated-learn-environment.oauthToken', token)
-          atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
-          win.destroy()
+        return unless res
+        atom.config.set('integrated-learn-environment.oauthToken', token)
+        atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
+        atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal', show: true)
+    if newURL.match(/github_sign_in/)
+      win.destroy()
+      githubLogin()
 
-          atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
-
-  promptManualEntry() unless win.loadUrl('https://learn.co/ide/token?ide_config=true')
+  if not win.loadUrl('https://learn.co/ide/sign_in?ide_onboard=true')
+    win.destroy()
+    githubLogin()
 
 promptManualEntry = ->
   oauthPrompt = document.createElement 'div'
@@ -116,17 +153,30 @@ getVMPort = ->
       atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
       return true
 
+window.BrowserWindow = BrowserWindow
+
 # TODO: Remove this temporary helper eventually...
-window.githubLogout = ->
+githubLogout = ->
   win = new BrowserWindow(show: false)
   win.webContents.on 'did-finish-load', -> win.show()
   win.loadUrl('https://github.com/logout')
+
+learnLogout = ->
+  win = new BrowserWindow(show: false)
+  win.webContents.on 'did-finish-load', -> win.destroy()
+  win.loadUrl('http://localhost:3000/sign_out')
+
+window.logout = ->
+  atom.config.unset('integrated-learn-environment.oauthToken')
+  atom.config.unset('integrated-learn-environment.vm_port')
+  learnLogout()
+  githubLogout()
 
 existingToken = atom.config.get('integrated-learn-environment.oauthToken')
 vmPort = atom.config.get('integrated-learn-environment.vm_port')
 
 if !existingToken
-  getTokenAndVMPort()
+  learnSignIn()
 else if !vmPort
   getVMPort()
 else

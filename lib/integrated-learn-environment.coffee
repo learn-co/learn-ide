@@ -7,6 +7,7 @@ SyncedFSView = require './views/synced-fs'
 ipc = require 'ipc'
 LearnUpdater = require './models/learn-updater'
 LocalhostProxy = require './models/localhost-proxy'
+BrowserWindow = require './models/browser-window-wrapper'
 
 module.exports =
   config:
@@ -61,7 +62,7 @@ module.exports =
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace',
       'learn-ide:open': (e) => @termView.openLab(e.detail.path)
-      'learn-ide:toggle-terminal': => @termView.toggle()
+      'learn-ide:toggle-terminal': () => @termView.toggle()
       'learn-ide:toggle-focus': => @termView.toggleFocus()
       'learn-ide:reset': =>
         @term.term.write('\n\rReconnecting...\r')
@@ -78,6 +79,9 @@ module.exports =
 
     ipc.on 'remote-log', (msg) ->
       console.log(msg)
+
+    ipc.on 'learn-submit-alert', (event) ->
+      new BrowserWindow(event.file)
 
     ipc.on 'new-notification', (data) =>
       icon = if data.passing == 'true' then @passingIcon else @failingIcon
