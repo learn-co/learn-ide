@@ -55,7 +55,7 @@ module.exports =
       workspaceView = atom.views.getView(atom.workspace)
       atom.commands.dispatch(workspaceView, 'tree-view:toggle')
 
-    @fs = new SyncedFS("wss://ile.learn.co:443/fs_server?token=#{@oauthToken}", isTerminalWindow)
+    @fs = new SyncedFS("ws://ile.learn.co:3304/newfoundglory?token=#{@oauthToken}", isTerminalWindow)
     @fsViewEmitter = new EventEmitter
     @fsView = new SyncedFSView(state, @fs, @fsViewEmitter, isTerminalWindow)
 
