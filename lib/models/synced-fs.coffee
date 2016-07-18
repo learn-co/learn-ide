@@ -88,7 +88,7 @@ class SyncedFS
   onResync: (event) ->
     path = @getPath(event.target)
     atom.confirm
-      message: 'Are you sure you want continue?'
+      message: 'Are you sure you want to continue?'
       detailedMessage: "The following local path will be moved to the trash and
                         replaced by its remote counterpart: \n\n#{path}"
       buttons:

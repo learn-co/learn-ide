@@ -2,13 +2,13 @@
   "name": "integrated-learn-environment",
   "main": "./lib/integrated-learn-environment",
   "urlMain": "./lib/url-handler",
-  "version": "1.0.0",
-  "description": "Learn meets Atom",
+  "version": "1.9.0",
+  "description": "An integrated development environment for use with Learn.co",
   "keywords": [],
   "activationCommands": {
     "atom-workspace": "learn-ide:toggle-terminal"
   },
-  "repository": "https://github.com/atom/integrated-learn-environment",
+  "repository": "https://github.com/flatiron-labs/integrated-learn-environment",
   "license": "Pending",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"

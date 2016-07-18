@@ -153,9 +153,6 @@ getVMPort = ->
       atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
       return true
 
-window.BrowserWindow = BrowserWindow
-
-# TODO: Remove this temporary helper eventually...
 githubLogout = ->
   win = new BrowserWindow(show: false)
   win.webContents.on 'did-finish-load', -> win.show()
@@ -164,7 +161,7 @@ githubLogout = ->
 learnLogout = ->
   win = new BrowserWindow(show: false)
   win.webContents.on 'did-finish-load', -> win.destroy()
-  win.loadUrl('http://localhost:3000/sign_out')
+  win.loadUrl('https://learn.co/sign_out')
 
 window.logout = ->
   atom.config.unset('integrated-learn-environment.oauthToken')
