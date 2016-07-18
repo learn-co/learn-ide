@@ -19,7 +19,7 @@
       'command': 'learn-ide:toggle-terminal'
     }
   ]
-  '.tree-view.full-menu > .project-root > .entries > .directory > .entries > .directory > .header > [data-path*="/.atom/code/labs/"]': [
+  '.tree-view.full-menu .project-root .entries .directory > .header': [
     {
       'label': 'Resync with Learn IDE Server'
       'command': 'learn-ide:resync'

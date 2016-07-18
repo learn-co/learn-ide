@@ -1,5 +1,6 @@
 ipc = require 'ipc'
 fs = require 'fs-plus'
+shell = require 'shell'
 pathUtil = require 'path'
 _ = require 'underscore-plus'
 
@@ -86,8 +87,15 @@ class SyncedFS
 
   onResync: (event) ->
     path = @getPath(event.target)
-    fs.removeSync(path)
-    @sendLocalEvent @localresync(path)
+    atom.confirm
+      message: 'Are you sure you want continue?'
+      detailedMessage: "The following local path will be moved to the trash and
+                        replaced by its remote counterpart: \n\n#{path}"
+      buttons:
+        "Perform resync": =>
+          shell.moveItemToTrash(path)
+          @sendLocalEvent @localresync(path)
+        "Cancel": null
 
   onTreeViewRemove: (event) =>
     @syncRemovals()
