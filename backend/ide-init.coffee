@@ -29,7 +29,7 @@ confirmOauthToken = (token) ->
           parsed = JSON.parse(body)
           console.log parsed
 
-          if parsed.username
+          if parsed.email
             resolve parsed
           else
             resolve false
@@ -89,11 +89,13 @@ window.learnSignIn = ->
   webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
     if newURL.match(/ide_token/)
       token = url.parse(newURL, true).query.ide_token
-      confirmOauthToken(token).then (res) ->
-        return unless res
-        atom.config.set('integrated-learn-environment.oauthToken', token)
-        atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
-        atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal', show: true)
+      if token?.length
+        confirmOauthToken(token).then (res) ->
+          console.log "res: #{res}"
+          return unless res
+          atom.config.set('integrated-learn-environment.oauthToken', token)
+          atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
+          atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal', show: true)
     if newURL.match(/github_sign_in/)
       win.destroy()
       githubLogin()

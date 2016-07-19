@@ -13,7 +13,7 @@ class BrowserWindowWrapper
 
     @win = new BrowserWindow(options)
     @webContents = @win.webContents
-    forceBrowserWindowOptions(@win, options)
+    @forceBrowserWindowOptions(@win, options)
 
     @handleEvents()
     @win.loadUrl(url) # TODO: handle failed load
@@ -28,7 +28,7 @@ class BrowserWindowWrapper
         @win.destroy()
         shell.openExternal(url)
 
-  forceBrowserWindowConfigurations: (win, options) ->
+  forceBrowserWindowOptions: (win, options) ->
     # these options fail as arguments to the BrowserWindor constructor
     {skipTaskbar, menuBarVisible, title} = options
 
