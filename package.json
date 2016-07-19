@@ -33,5 +33,31 @@
     "term.js": "learn-co/term.js",
     "underscore-plus": "^1.6.6",
     "utf8": "^2.1.1"
+  },
+  "configSchema": {
+    "defaultFontSize": {
+      "type": "integer",
+      "default": 14,
+      "title": "Default Terminal Font Size",
+      "description": "Resetting your font size will fall back to this default"
+    },
+    "currentFontSize": {
+      "type": "integer",
+      "default": 14,
+      "title": "Current Terminal Font Size",
+      "description": "This is used to maintain any font size adjustment you've made"
+    },
+    "oauthToken": {
+      "type": "string",
+      "default": "Paste your learn.co oauth token here",
+      "title": "OAuth Token",
+      "description": "Your learn.co oauth token"
+    },
+    "vmPort": {
+      "type": "integer",
+      "default": null,
+      "title": "Remote Port",
+      "description": "The remote port available to you via the IDE terminal"
+    }
   }
 }
