@@ -2,7 +2,7 @@
   "name": "integrated-learn-environment",
   "main": "./lib/integrated-learn-environment",
   "urlMain": "./lib/url-handler",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "description": "An integrated development environment for use with Learn.co",
   "keywords": [],
   "activationCommands": {
