@@ -7,7 +7,7 @@ SyncedFSView = require './views/synced-fs'
 ipc = require 'ipc'
 LearnUpdater = require './models/learn-updater'
 LocalhostProxy = require './models/localhost-proxy'
-BrowserWindow = require './models/browser-window-wrapper'
+WebWindow = require './models/web-window'
 
 module.exports =
   termViewState: null
@@ -60,7 +60,7 @@ module.exports =
       console.log(msg)
 
     ipc.on 'learn-submit-alert', (event) ->
-      new BrowserWindow(event.file)
+      new WebWindow(event.file, resizable: false)
 
     ipc.on 'new-notification', (data) =>
       icon = if data.passing == 'true' then @passingIcon else @failingIcon

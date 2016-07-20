@@ -3,7 +3,7 @@ shell = require 'shell'
 BrowserWindow = remote.require('browser-window')
 
 module.exports =
-class BrowserWindowWrapper
+class WebWindow
   constructor: (url, options = {}, @openNewWindowExternally = true) ->
     options.show ?= false
     options.width ?= 400
@@ -13,7 +13,7 @@ class BrowserWindowWrapper
 
     @win = new BrowserWindow(options)
     @webContents = @win.webContents
-    @forceBrowserWindowOptions(@win, options)
+    @forceBrowserWindowOptions(options)
 
     @handleEvents()
     @win.loadUrl(url) # TODO: handle failed load
@@ -28,10 +28,10 @@ class BrowserWindowWrapper
         @win.destroy()
         shell.openExternal(url)
 
-  forceBrowserWindowOptions: (win, options) ->
+  forceBrowserWindowOptions: (options) ->
     # these options fail as arguments to the BrowserWindor constructor
     {skipTaskbar, menuBarVisible, title} = options
 
-    win.setTitle(title) if title?
-    win.setSkipTaskbar(skipTaskbar)
-    win.setMenuBarVisibility(menuBarVisible)
+    @win.setTitle(title) if title?
+    @win.setSkipTaskbar(skipTaskbar)
+    @win.setMenuBarVisibility(menuBarVisible)

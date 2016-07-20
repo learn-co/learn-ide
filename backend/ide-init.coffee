@@ -38,7 +38,7 @@ confirmOauthToken = (token) ->
   )
 
 githubLogin = ->
-  win = new BrowserWindow(show: false, width: 440, height: 660)
+  win = new BrowserWindow(show: false, width: 440, height: 660, resizable: false)
   webContents = win.webContents
 
   win.setSkipTaskbar(true)
@@ -67,7 +67,7 @@ githubLogin = ->
     promptManualEntry()
 
 window.learnSignIn = ->
-  win = new BrowserWindow(show: false, width: 400, height: 600)
+  win = new BrowserWindow(show: false, width: 400, height: 600, resizable: false)
   {webContents} = win
 
   win.setSkipTaskbar(true)
