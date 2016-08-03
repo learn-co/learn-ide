@@ -47,6 +47,18 @@
       "title": "Current Terminal Font Size",
       "description": "This is used to maintain any font size adjustment you've made"
     },
+    "terminalFontColor": {
+      "type": "string",
+      "default": "#ffffff",
+      "title": "Terminal Font Color",
+      "description": "A valid CSS color value which will be used to style your terminal's font"
+    },
+    "terminalBackgroundColor": {
+      "type": "string",
+      "default": "#000000",
+      "title": "Terminal Background Color",
+      "description": "A valid CSS color value which will be used to style your terminal's background"
+    },
     "oauthToken": {
       "type": "string",
       "default": "Paste your learn.co oauth token here",

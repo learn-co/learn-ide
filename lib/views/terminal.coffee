@@ -33,11 +33,10 @@ class TerminalView extends View
 
   applyEditorStyling: ->
     @term.element.style.height = '100%'
-    @term.element.style.fontFamily = ->
-      atom.config.get('editor.fontFamily') or "monospace"
-    recentFontSize = atom.config.get('integrated-learn-environment.currentFontSize')
-    @term.element.style.fontSize = recentFontSize + 'px'
-    @openColor = @term.element.style.color
+    @term.element.style.fontFamily = -> atom.config.get('editor.fontFamily') or "monospace"
+    @term.element.style.fontSize = "#{atom.config.get('integrated-learn-environment.currentFontSize')}px"
+    @openColor = atom.config.get('integrated-learn-environment.terminalFontColor')
+    @openBackgroundColor = atom.config.get('integrated-learn-environment.terminalBackgroundColor')
 
   handleEvents: ->
     @on 'focus', => @fitTerminal()
@@ -74,7 +73,8 @@ class TerminalView extends View
           atom.commands.dispatch(@element, 'learn-ide:paste') if which is 86
         else
           ipc.send 'terminal-data', data
-      @term.element.style.color = this.openColor
+      @term.element.style.color = @openColor
+      @term.element.style.backgroundColor = @openBackgroundColor
       @term.cursorHidden = false
 
     ipc.on 'connection-state', (state) =>
