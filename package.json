@@ -61,7 +61,7 @@
     },
     "oauthToken": {
       "type": "string",
-      "default": "Paste your learn.co oauth token here",
+      "default": null,
       "title": "OAuth Token",
       "description": "Your learn.co oauth token"
     },
