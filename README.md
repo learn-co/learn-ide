@@ -4,20 +4,22 @@
 
 ## Project Structure
 
-The project is composed of multiple repositories, which can be divided into two areas of responsibility the **front end** and the **back end**:
+This project is composed of multiple repositories, which can be divided into two areas of responsibility the **front end** and the **back end**:
 
 ### Front End
 
-- **[Atom ILE](https://github.com/flatiron-labs/atom-ile)**
-- **[Tree View](https://github.com/learn-co/tree-view/)**
-- **[Learn IDE Windows Packager](https://github.com/flatiron-labs/learn-ide-windows-packager)**
-- **[Learn IDE Mac Packager](https://github.com/flatiron-labs/learn-ide-mac-packager)**
+- **[Integrated Learn Environment](https://github.com/flatiron-labs/integrated-learn-environment)** - This repo, currently holds the main entry to the project and various modules and resources used our Atom fork.
+- **[Atom ILE](https://github.com/flatiron-labs/atom-ile)** - Our fork of Atom.
+- **[Tree View](https://github.com/learn-co/tree-view/)** - Our fork of Atom's [tree view](https://github.com/atom/tree-view).
+
+- **[Learn IDE Windows Packager](https://github.com/flatiron-labs/learn-ide-windows-packager)** - Scripts for packaging releases for Windows
+- **[Learn IDE Mac Packager](https://github.com/flatiron-labs/learn-ide-mac-packager)** - Scripts for packaging releases for Mac
 
 ### Back End
 
-- **[FS Server](https://github.com/flatiron-labs/fs_server)**
-- **[Go Terminal Server](https://github.com/flatiron-labs/go_terminal_server)**
-- **[Students Chef Repo](https://github.com/flatiron-labs/students-chef-repo)**
+- **[FS Server](https://github.com/flatiron-labs/fs_server)** - Syncs the local file system with our remote host through a websocket. Written in Ruby.
+- **[Go Terminal Server](https://github.com/flatiron-labs/go_terminal_server)** - Runs terminal commands from the client and returns the output to the client through a websocket. Written in Go.
+- **[Students Chef Repo](https://github.com/flatiron-labs/students-chef-repo)** - Chef server that automates student Unix account creation on our back end VMs.
 
 ## Design Principles
 
