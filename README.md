@@ -1,4 +1,25 @@
-# Integrated Learn Environment Package
+# Learn IDE
+
+[Learn IDE](https://learn.co/ide) is a fully featured text editor for [Learn](https://learn.co). It provides a remote development environment to allow users to get started coding using real tools without the pain of setting up a local development environment. It is built on top of Github's open source [Atom editor](https://atom.io/).
+
+## Project Structure
+
+The project is composed of multiple repositories, which can be divided into two areas of responsibility the **front end** and the **back end**:
+
+### Front End
+
+- **[Atom ILE](https://github.com/flatiron-labs/atom-ile)**
+- **[Tree View](https://github.com/learn-co/tree-view/)**
+- **[Learn IDE Windows Packager](https://github.com/flatiron-labs/learn-ide-windows-packager)**
+- **[Learn IDE Mac Packager](https://github.com/flatiron-labs/learn-ide-mac-packager)**
+
+### Back End
+
+- **[FS Server](https://github.com/flatiron-labs/fs_server)**
+- **[Go Terminal Server](https://github.com/flatiron-labs/go_terminal_server)**
+- **[Students Chef Repo](https://github.com/flatiron-labs/students-chef-repo)**
+
+## Design Principles
 
 <img align="right" src="diagram.png" />
 
