@@ -21,3 +21,14 @@ This project is composed of multiple repositories, which can be divided into two
 - **[Students Chef Repo](https://github.com/flatiron-labs/students-chef-repo)** - Chef server that automates student Unix account creation on our back end VMs.
 
 ## Getting Started
+
+1. Build our [fork of Atom](https://github.com/flatiron-labs/atom-ile)
+2. `apm link` - This will create a sym link to your .atom directory, making the plugin available for use.
+3. `bundle install`
+4. `npm install`
+5. Start fs and terminal server on `vm02.students.learn.co` and update local code (development sandbox)
+  - `ssh vm02.students.learn.co`
+  - `sudo su - deployer`
+  - `websocketd --port=4463 --dir=/home/deployer/websocketd_scripts`
+  - Update your socket connections in [lib/integrated-learn-environment.coffee](lib/integrated-learn-environment.coffee)
+6. Open the Learn IDE
