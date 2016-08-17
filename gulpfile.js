@@ -24,10 +24,7 @@ gulp.task('clone', function() {
   _.map(repos, function(repo) {
     var name = _.last(repo.split('/'));
     var cmd = 'git clone git@github.com:' + repo + '.git --progress ../' + name;
-
-    return new Promise(function(resolve, reject) {
-      exec(cmd, {name: name, async: true}, resolve);
-    });
+    exec(cmd, {name: name, async: true});
   })
 });
 
