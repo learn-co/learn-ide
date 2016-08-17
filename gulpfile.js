@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({silent: true});
 const _ = require('underscore-plus');
 const gulp = require('gulp');
 const gutil = require('gulp-util');
@@ -9,6 +9,10 @@ const os = require('os');
 const path = require('path');
 
 gulp.task('default', ['ws:start']);
+
+gulp.task('setup', function() {
+  shell.cp('./.env.example', './.env');
+});
 
 gulp.task('clone', function() {
   log('Cloning down all Learn IDE repositories...');
@@ -32,14 +36,14 @@ gulp.task('clone', function() {
 gulp.task('ws:start', function(done) {
   var conn = new Client();
   var host = process.env.IDE_WS_HOST || 'vm02.students.learn.co';
-  var port = process.env.IDE_WS_PORT || 4463;
+  var port = process.env.IDE_WS_PORT || 1337;
   var cmd = 'sudo su -c \"websocketd --port=' + port + ' --dir=/home/deployer/websocketd_scripts\" deployer\n'
 
   log('Connecting to ' + host + ' on port ' + port);
 
   conn.on('ready', function() {
     log('SSH client ready...');
-    log('Executing: ' + gutil.colors.yellow(cmd));
+    log('Executing ' + gutil.colors.yellow(cmd.replace('\n', '')) + ' on ' + gutil.colors.magenta(host));
 
     conn.exec(cmd, function(err, stream) {
       if (err) { throw err; }
@@ -68,9 +72,9 @@ gulp.task('ws:start', function(done) {
         gutil.log('SSH stream closed with code ' + code);
         conn.end();
       }).on('data', function(data) {
-        process.stdout.write(gutil.colors.blue(data));
+        process.stdout.write('[' + gutil.colors.magenta(host) + '] ' + gutil.colors.blue(data));
       }).stderr.on('data', function(data) {
-        process.stderr.write(gutil.colors.red(data));
+        process.stderr.write('[' + gutil.colors.magenta(host) + '] ' + gutil.colors.red(data));
       });
     })
   }).connect({
