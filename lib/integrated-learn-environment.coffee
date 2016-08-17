@@ -1,13 +1,35 @@
+_ = require 'underscore-plus'
+path = require 'path'
+ipc = require 'ipc'
 {CompositeDisposable} = require 'atom'
 Terminal = require './models/terminal'
 SyncedFS = require './models/synced-fs'
 TerminalView = require './views/terminal'
 SyncedFSView = require './views/synced-fs'
 {EventEmitter} = require 'events'
-ipc = require 'ipc'
 LearnUpdater = require './models/learn-updater'
 LocalhostProxy = require './models/localhost-proxy'
 BrowserWindow = require './models/browser-window-wrapper'
+
+require('dotenv').config({
+  path: path.join(__dirname, '../.env'),
+  silent: true
+});
+
+WS_SERVER_URL = (->
+  config = _.defaults
+    host: process.env['IDE_WS_HOST'],
+    port: process.env['IDE_WS_PORT']
+  ,
+    host: 'ile.learn.co',
+    port: 443,
+    protocol: 'wss'
+
+  if config.port != 443
+    config.protocol = 'ws'
+
+  return config.protocol + '://' + config.host + ':' + config.port;
+)()
 
 module.exports =
   config:
@@ -45,7 +67,7 @@ module.exports =
 
     isTerminalWindow = atom.isTerminalWindow
 
-    @term = new Terminal("wss://ile.learn.co:443/go_terminal_server?token=#{@oauthToken}", isTerminalWindow)
+    @term = new Terminal("#{WS_SERVER_URL}/go_terminal_server?token=#{@oauthToken}", isTerminalWindow)
     @termView = new TerminalView(state, @term, openPath, isTerminalWindow)
 
     if isTerminalWindow
@@ -55,7 +77,7 @@ module.exports =
       workspaceView = atom.views.getView(atom.workspace)
       atom.commands.dispatch(workspaceView, 'tree-view:toggle')
 
-    @fs = new SyncedFS("wss://ile.learn.co:443/fs_server?token=#{@oauthToken}", isTerminalWindow)
+    @fs = new SyncedFS("#{WS_SERVER_URL}/fs_server?token=#{@oauthToken}", isTerminalWindow)
     @fsViewEmitter = new EventEmitter
     @fsView = new SyncedFSView(state, @fs, @fsViewEmitter, isTerminalWindow)
 
