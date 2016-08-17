@@ -1,3 +1,4 @@
+require('dotenv').config();
 const _ = require('underscore-plus');
 const gulp = require('gulp');
 const gutil = require('gulp-util');
@@ -29,11 +30,12 @@ gulp.task('clone', function() {
 });
 
 gulp.task('ws:start', function(done) {
-  log('Connecting to vm02');
-
   var conn = new Client();
-  var port = 4463
+  var host = process.env.IDE_WS_HOST || 'vm02.students.learn.co';
+  var port = process.env.IDE_WS_PORT || 4463;
   var cmd = 'sudo su -c \"websocketd --port=' + port + ' --dir=/home/deployer/websocketd_scripts\" deployer\n'
+
+  log('Connecting to ' + host + ' on port ' + port);
 
   conn.on('ready', function() {
     log('SSH client ready...');
@@ -72,7 +74,7 @@ gulp.task('ws:start', function(done) {
       });
     })
   }).connect({
-    host: 'vm02.students.learn.co',
+    host: host,
     username: process.env['USER'],
     agent: process.env.SSH_AUTH_SOCK
   });
