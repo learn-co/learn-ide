@@ -38,7 +38,7 @@ confirmOauthToken = (token) ->
   )
 
 githubLogin = ->
-  win = new BrowserWindow(show: false, width: 440, height: 660)
+  win = new BrowserWindow(show: false, width: 440, height: 660, resizable: false)
   webContents = win.webContents
 
   win.setSkipTaskbar(true)
@@ -58,7 +58,7 @@ githubLogin = ->
     confirmOauthToken(token).then (res) ->
       return unless res?
       atom.config.set('integrated-learn-environment.oauthToken', token)
-      atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
+      atom.config.set('integrated-learn-environment.vmPort', res.vm_uid)
       win.destroy()
 
       atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
@@ -67,7 +67,7 @@ githubLogin = ->
     promptManualEntry()
 
 window.learnSignIn = ->
-  win = new BrowserWindow(show: false, width: 400, height: 600)
+  win = new BrowserWindow(show: false, width: 400, height: 600, resizable: false)
   {webContents} = win
 
   win.setSkipTaskbar(true)
@@ -94,7 +94,7 @@ window.learnSignIn = ->
           console.log "res: #{res}"
           return unless res
           atom.config.set('integrated-learn-environment.oauthToken', token)
-          atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
+          atom.config.set('integrated-learn-environment.vmPort', res.vm_uid)
           atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal', show: true)
     if newURL.match(/github_sign_in/)
       win.destroy()
@@ -141,7 +141,7 @@ promptManualEntry = ->
       confirmOauthToken(token).then (res) ->
         if res
           atom.config.set('integrated-learn-environment.oauthToken', input.value)
-          atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
+          atom.config.set('integrated-learn-environment.vmPort', res.vm_uid)
           panel.destroy()
           atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
           return true
@@ -151,7 +151,7 @@ promptManualEntry = ->
 getVMPort = ->
   confirmOauthToken(existingToken).then (res) ->
     if res
-      atom.config.set('integrated-learn-environment.vm_port', res.vm_uid)
+      atom.config.set('integrated-learn-environment.vmPort', res.vm_uid)
       atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
       return true
 
@@ -167,12 +167,12 @@ learnLogout = ->
 
 window.logout = ->
   atom.config.unset('integrated-learn-environment.oauthToken')
-  atom.config.unset('integrated-learn-environment.vm_port')
+  atom.config.unset('integrated-learn-environment.vmPort')
   learnLogout()
   githubLogout()
 
 existingToken = atom.config.get('integrated-learn-environment.oauthToken')
-vmPort = atom.config.get('integrated-learn-environment.vm_port')
+vmPort = atom.config.get('integrated-learn-environment.vmPort')
 
 if !existingToken
   learnSignIn()

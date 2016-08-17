@@ -9,7 +9,7 @@ SyncedFSView = require './views/synced-fs'
 {EventEmitter} = require 'events'
 LearnUpdater = require './models/learn-updater'
 LocalhostProxy = require './models/localhost-proxy'
-BrowserWindow = require './models/browser-window-wrapper'
+WebWindow = require './models/web-window'
 
 require('dotenv').config({
   path: path.join(__dirname, '../.env'),
@@ -32,34 +32,13 @@ WS_SERVER_URL = (->
 )()
 
 module.exports =
-  config:
-    defaultFontSize:
-      type: 'integer'
-      title: 'Default Terminal Font Size'
-      description: 'Resetting your font size will fall back to this default'
-      default: 14
-    currentFontSize:
-      type: 'integer'
-      title: 'Current Terminal Font Size'
-      description: "This is used to maintain any font size adjustment you've made"
-      default: 14
-    oauthToken:
-      type: 'string'
-      title: 'OAuth Token'
-      description: 'Your learn.co oauth token'
-      default: "Paste your learn.co oauth token here"
-    vm_port:
-      type: 'integer'
-      title: 'Remote Port'
-      description: 'The remote port available to you via the IDE terminal'
-
   termViewState: null
   fsViewState: null
   subscriptions: null
 
   activate: (state) ->
     @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
-    @vm_port = atom.config.get('integrated-learn-environment.vm_port')
+    @vmPort = atom.config.get('integrated-learn-environment.vmPort')
     @progressBarPopup = null
     openPath = atom.blobStore.get('learnOpenUrl', 'learn-open-url-key')
     atom.blobStore.delete('learnOpenUrl')
@@ -103,7 +82,7 @@ module.exports =
       console.log(msg)
 
     ipc.on 'learn-submit-alert', (event) ->
-      new BrowserWindow(event.file)
+      new WebWindow(event.file, resizable: false)
 
     ipc.on 'new-notification', (data) =>
       icon = if data.passing == 'true' then @passingIcon else @failingIcon
@@ -145,7 +124,7 @@ module.exports =
     autoUpdater.checkForUpdate()
 
   startLocalhostProxy: ->
-    @localhostProxy = new LocalhostProxy(@vm_port)
+    @localhostProxy = new LocalhostProxy(@vmPort)
     @localhostProxy.start()
 
   deactivate: ->
