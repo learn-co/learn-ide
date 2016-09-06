@@ -1,6 +1,7 @@
 Term = require './term-wrapper'
 ipc  = require 'ipc'
 {EventEmitter} = require 'events'
+SingleSocket = require 'single-socket'
 
 module.exports =
 class Terminal extends EventEmitter
@@ -8,26 +9,37 @@ class Terminal extends EventEmitter
     rows = if isTermView then 26 else 18
     @term = new Term(cols: 80, rows: rows, useStyle: no, screenKeys: no, scrollback: yes)
     window.term = @term
-    ipc.send 'register-new-terminal', ws_url
-    this.setListeners()
 
-  updateConnectionState: (state) ->
-    if state == 'closed'
-      this.emit 'terminal-session-closed'
-    else
-      this.emit 'terminal-session-opened'
+    @ws_url = ws_url
+    @connect()
+    @setListeners()
+
+  connect: () ->
+    @socket = new SingleSocket @ws_url,
+      onopen: () ->
+        console.log('opened socket for terminal')
+      onmessage: (msg) =>
+        @emit 'terminal-message-received', msg
+      onclose: () ->
+        console.log('connection closed')
+      onerror: (e) ->
+        console.log('error on terminal connection')
+        console.error(e)
+
+  # updateConnectionState: (state) ->
+    # if state == 'closed'
+      # this.emit 'terminal-session-closed'
+    # else
+      # this.emit 'terminal-session-opened'
 
   setListeners: () ->
-    ipc.on 'terminal-message', (message) =>
-      this.emit 'terminal-message-received', message
-
     ipc.on 'request-terminal-view', (request) =>
       ipc.send 'terminal-view-response',
         index: request.index
         html: document.getElementsByClassName('terminal')[0].innerHTML
 
-    ipc.on 'connection-state', (state) =>
-      @updateConnectionState(state)
+    # ipc.on 'connection-state', (state) =>
+      # @updateConnectionState(state)
 
     ipc.on 'update-terminal-view', (newHtml) =>
       parser = new DOMParser()
@@ -47,14 +59,6 @@ class Terminal extends EventEmitter
       if sanitizedText
         for char in sanitizedText
           this.emit 'raw-terminal-char-copy-received', char
-
-      # Sadly, this doesn't work yet...but it's a start
-      #swapNode = existingNodes[0]
-      #if swapNode && lastNode
-        #swapNode.style.display = 'inline'
-        #lastNode.style.display = 'inline'
-        #lastNode.innerHTML = lastNode.innerHTML.replace(/(&nbsp;)+$/, '')
-        #swapNode.parentNode.insertBefore(lastNode, swapNode)
 
       @term.showCursor()
       this.emit 'raw-terminal-char-copy-done'
