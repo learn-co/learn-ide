@@ -45,10 +45,15 @@ class TerminalView extends View
     @$termEl.on 'focus', (e) => @term.focus()
     @$termEl.on 'blur', (e) => @onBlur(e)
 
-    @term.on 'data', (data) -> ipc.send 'terminal-data', data
+    @term.on 'data', (data) =>
+      console.log('data::::', data)
+      @terminal.send(data)
 
     @terminal.on 'terminal-message-received', (message) =>
-      @term.write(utf8.decode(window.atob(message)))
+      console.log('message receieved', message)
+      decoded = utf8.decode(window.atob(message))
+      console.log('message decoded', decoded)
+      @term.write(decoded)
       @openLab()
 
     @terminal.on 'raw-terminal-char-copy-received', (message) =>
@@ -65,6 +70,7 @@ class TerminalView extends View
     @terminal.on 'terminal-session-opened', =>
       @fitTerminal()
       @term.off 'data'
+      self = @
       @term.on 'data', (data) ->
         # TODO: handle non-darwin copy/paste shortcut in keymaps
         {ctrlKey, shiftKey, which} = event if event
@@ -72,7 +78,7 @@ class TerminalView extends View
           atom.commands.dispatch(@element, 'learn-ide:copy') if which is 67
           atom.commands.dispatch(@element, 'learn-ide:paste') if which is 86
         else
-          ipc.send 'terminal-data', data
+          self.send data
       @term.element.style.color = @openColor
       @term.element.style.backgroundColor = @openBackgroundColor
       @term.cursorHidden = false
@@ -93,7 +99,7 @@ class TerminalView extends View
 
   openLab: (path = @openPath)->
     if path
-      ipc.send 'terminal-data', 'learn open ' + path.toString() + '\r'
+      @terminal.send('learn open ' + path.toString() + '\r')
       @openPath = null
 
   onBlur: (e) ->
@@ -180,7 +186,7 @@ class TerminalView extends View
     text = Clipboard.readText().replace(/\n/g, '\r')
 
     if process.platform isnt 'darwin'
-      ipc.send 'terminal-data', text
+      @terminal.send text
     else
       @term.emit 'data', text
 
