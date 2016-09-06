@@ -8,9 +8,6 @@
     "start": "./node_modules/gulp/bin/gulp.js"
   },
   "keywords": [],
-  "activationCommands": {
-    "atom-workspace": "learn-ide:toggle-terminal"
-  },
   "repository": "https://github.com/flatiron-labs/integrated-learn-environment",
   "license": "Pending",
   "engines": {

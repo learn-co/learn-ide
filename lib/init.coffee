@@ -3,10 +3,19 @@ https = require 'https'
 remote = require 'remote'
 shell = require 'shell'
 BrowserWindow = remote.require('browser-window')
+path = require('path')
+mkdirp = require('mkdirp')
+
+# TODO: better location for this (extracted from atom-ile core)
+getUserWorkingDirPath = ->
+  configDirPath = atom.getConfigDirPath()
+  workingDirPath = path.join(configDirPath, 'code')
+  mkdirp(workingDirPath)
+  return workingDirPath
 
 workspaceView = atom.views.getView(atom.workspace)
 atom.commands.dispatch(workspaceView, 'tree-view:show')
-atom.project.setPaths([atom.getUserWorkingDirPath()])
+atom.project.setPaths([getUserWorkingDirPath()])
 
 confirmOauthToken = (token) ->
   return new Promise((resolve, reject) ->

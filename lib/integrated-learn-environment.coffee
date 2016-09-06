@@ -37,6 +37,9 @@ module.exports =
   subscriptions: null
 
   activate: (state) ->
+    require('./init.coffee')
+
+  activateIDE: (state) ->
     @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
     @vmPort = atom.config.get('integrated-learn-environment.vmPort')
     @progressBarPopup = null
@@ -135,6 +138,8 @@ module.exports =
     ipc.send 'deactivate-listener'
 
   consumeStatusBar: (statusBar) ->
+    # TODO: does everything in activateIDE need to run everytime a window is opened?
+    @activateIDE()
     @statusBarTile = statusBar.addRightTile(item: @fsView, priority: 5000)
 
   serialize: ->
