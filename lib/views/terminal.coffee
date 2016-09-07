@@ -78,7 +78,7 @@ class TerminalView extends View
           atom.commands.dispatch(@element, 'learn-ide:copy') if which is 67
           atom.commands.dispatch(@element, 'learn-ide:paste') if which is 86
         else
-          self.send data
+          self.terminal.send data
       @term.element.style.color = @openColor
       @term.element.style.backgroundColor = @openBackgroundColor
       @term.cursorHidden = false
