@@ -16,28 +16,28 @@ class Terminal extends EventEmitter
     @setListeners()
 
   connect: () ->
-    @socket = new Websocket @ws_url
-
-    @socket.onopen = () =>
-      console.log('opened socket for terminal')
-      @emit 'terminal-session-opened'
-
-
-    @socket.onmessage = (msg) =>
-      console.log('message from singlesocket')
-      console.log(msg)
-      @emit 'terminal-message-received', msg.data
-
-    @socket.onclose = () =>
-      console.log('connection closed')
-      @emit 'terminal-session-closed'
-
-    @socket.onerror = (e) ->
-      console.log('error on terminal connection')
-      console.error(e)
+    @socket = new SingleSocket @ws_url,
+      onopen: () ->
+        console.log('opened socket for terminal')
+      onmessage: (msg) =>
+        console.log('message from singlesocket')
+        console.log(msg)
+        @emit 'terminal-message-received', msg
+      onclose: () ->
+        console.log('connection closed')
+      onerror: (e) ->
+        console.log('error on terminal connection')
+        console.error(e)
 
   send: (data) ->
+    console.log('sending:::', data)
     @socket.send(data)
+
+  # updateConnectionState: (state) ->
+    # if state == 'closed'
+      # this.emit 'terminal-session-closed'
+    # else
+      # this.emit 'terminal-session-opened'
 
   setListeners: () ->
     ipc.on 'request-terminal-view', (request) =>
