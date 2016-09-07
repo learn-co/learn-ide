@@ -50,9 +50,7 @@ class TerminalView extends View
       @terminal.send(data)
 
     @terminal.on 'terminal-message-received', (message) =>
-      console.log('message receieved', message)
       decoded = utf8.decode(window.atob(message))
-      console.log('message decoded', decoded)
       @term.write(decoded)
       @openLab()
 

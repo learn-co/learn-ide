@@ -1,5 +1,6 @@
 Term = require './term-wrapper'
 ipc  = require 'ipc'
+utf8      = require 'utf8'
 {EventEmitter} = require 'events'
 SingleSocket = require 'single-socket'
 Websocket = require('websocket').w3cwebsocket
@@ -16,22 +17,44 @@ class Terminal extends EventEmitter
     @setListeners()
 
   connect: () ->
-    @socket = new SingleSocket @ws_url,
+    @socket = new Websocket @ws_url
+
+    @socket.onopen = () ->
+      console.log('opened socket for terminal')
+
+    @socket.onmessage = (msg) =>
+      console.log('websocket encoded: ', {msg: msg.data})
+      decoded = utf8.decode(window.atob(msg.data))
+      console.log('websocket decoded: ', {decoded: decoded})
+      @emit 'terminal-message-received', msg.data
+
+    @socket.onclose = () ->
+      console.log('connection closed')
+
+    @socket.onerror = (e) ->
+      console.log('error on terminal connection')
+      console.error(e)
+
+      
+    @singleSocket = new SingleSocket @ws_url,
       onopen: () ->
-        console.log('opened socket for terminal')
+        console.log('opened socket for single socket')
       onmessage: (msg) =>
-        console.log('message from singlesocket')
-        console.log(msg)
-        @emit 'terminal-message-received', msg
+        console.log('singlesocket encoded: ', {msg: msg})
+        decoded = utf8.decode(window.atob(msg))
+        console.log('singlesocket decoded: ', {decoded: decoded})
+        # @emit 'terminal-message-received', msg
       onclose: () ->
         console.log('connection closed')
       onerror: (e) ->
         console.log('error on terminal connection')
         console.error(e)
 
+
   send: (data) ->
     console.log('sending:::', data)
     @socket.send(data)
+    @singleSocket.send(data)
 
   # updateConnectionState: (state) ->
     # if state == 'closed'
