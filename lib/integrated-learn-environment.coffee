@@ -37,8 +37,13 @@ module.exports =
   subscriptions: null
 
   activate: (state) ->
-    @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
-    @vmPort = atom.config.get('integrated-learn-environment.vmPort')
+    require('./init.coffee')
+    # TODO: does this need to happen everytime?
+    @activateIDE(state)
+
+  activateIDE: (state) ->
+    @oauthToken = atom.config.get('learn-ide.oauthToken')
+    @vmPort = atom.config.get('learn-ide.vmPort')
     @progressBarPopup = null
     openPath = atom.blobStore.get('learnOpenUrl', 'learn-open-url-key')
     atom.blobStore.delete('learnOpenUrl')

@@ -34,9 +34,9 @@ class TerminalView extends View
   applyEditorStyling: ->
     @term.element.style.height = '100%'
     @term.element.style.fontFamily = -> atom.config.get('editor.fontFamily') or "monospace"
-    @term.element.style.fontSize = "#{atom.config.get('integrated-learn-environment.currentFontSize')}px"
-    @openColor = atom.config.get('integrated-learn-environment.terminalFontColor')
-    @openBackgroundColor = atom.config.get('integrated-learn-environment.terminalBackgroundColor')
+    @term.element.style.fontSize = "#{atom.config.get('learn-ide.currentFontSize')}px"
+    @openColor = atom.config.get('learn-ide.terminalFontColor')
+    @openBackgroundColor = atom.config.get('learn-ide.terminalBackgroundColor')
 
   handleEvents: ->
     @on 'focus', => @fitTerminal()
@@ -140,11 +140,11 @@ class TerminalView extends View
     @changeFontSize currentFontSize - 2
 
   resetFontSize: ->
-    defaultSize = atom.config.get('integrated-learn-environment.defaultFontSize')
+    defaultSize = atom.config.get('learn-ide.defaultFontSize')
     @changeFontSize defaultSize
 
   persistFontSize: (fontSize = @currentFontSize()) ->
-    atom.config.set('integrated-learn-environment.currentFontSize', fontSize)
+    atom.config.set('learn-ide.currentFontSize', fontSize)
 
   changeFontSize: (fontSize) ->
     @$termEl.css 'font-size', fontSize
