@@ -42,8 +42,8 @@ module.exports =
     @activateIDE(state)
 
   activateIDE: (state) ->
-    @oauthToken = atom.config.get('integrated-learn-environment.oauthToken')
-    @vmPort = atom.config.get('integrated-learn-environment.vmPort')
+    @oauthToken = atom.config.get('learn-ide.oauthToken')
+    @vmPort = atom.config.get('learn-ide.vmPort')
     @progressBarPopup = null
     openPath = atom.blobStore.get('learnOpenUrl', 'learn-open-url-key')
     atom.blobStore.delete('learnOpenUrl')
