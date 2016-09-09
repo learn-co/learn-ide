@@ -12,12 +12,16 @@ class Terminal extends EventEmitter
   connect: () ->
     @socket = new SingleSocket @url,
       onopen: () =>
+        console.log('open')
         @emit 'open'
       onmessage: (msg) =>
+        console.log('message', msg)
         @emit 'message', utf8.decode(window.atob(msg))
       onclose: () =>
+        console.log('close')
         @emit 'close'
       onerror: (e) ->
+        console.log('error', e)
         @emit 'error', e
 
   send: (data) ->
