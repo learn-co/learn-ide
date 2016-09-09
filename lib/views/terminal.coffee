@@ -4,7 +4,7 @@ ipc       = require 'ipc'
 Clipboard = require 'clipboard'
 remote    = require 'remote'
 Menu      = remote.require 'menu'
-Term = require '../models/term-wrapper.coffee'
+TerminalWrapper = require './terminal-wrapper.coffee'
 
 module.exports =
 class TerminalView extends View
@@ -14,31 +14,31 @@ class TerminalView extends View
 
   initialize: (terminal, openPath, isTerminalWindow) ->
     rows = if isTerminalWindow then 26 else 18
-    @term = new Term(cols: 80, rows: rows, useStyle: no, screenKeys: no, scrollback: yes)
-    window.term = @term
+    @terminalWrapper = new TerminalWrapper(cols: 80, rows: rows, useStyle: no, screenKeys: no, scrollback: yes)
+    window.term = @terminalWrapper
     @terminal = terminal
     @isTerminalWindow = isTerminalWindow
     @panel = atom.workspace.addBottomPanel(item: this, visible: false, className: 'learn-terminal-view')
     @openPath = openPath
 
-    @term.open(this.get(0))
-    #@term.write('Connecting...\r')
+    @terminalWrapper.open(this.get(0))
+    #@terminalWrapper.write('Connecting...\r')
 
-    @$termEl = $(@term.element)
+    @$termEl = $(@terminalWrapper.element)
 
     ipc.on 'remote-open-event', (file) =>
-      @term.blur()
+      @terminalWrapper.blur()
 
     @applyEditorStyling()
     @handleEvents()
-    @term.restore()
-    @term.showCursor()
+    @terminalWrapper.restore()
+    @terminalWrapper.showCursor()
     @openLab()
 
   applyEditorStyling: ->
-    @term.element.style.height = '100%'
-    @term.element.style.fontFamily = -> atom.config.get('editor.fontFamily') or "monospace"
-    @term.element.style.fontSize = "#{atom.config.get('learn-ide.currentFontSize')}px"
+    @terminalWrapper.element.style.height = '100%'
+    @terminalWrapper.element.style.fontFamily = -> atom.config.get('editor.fontFamily') or "monospace"
+    @terminalWrapper.element.style.fontSize = "#{atom.config.get('learn-ide.currentFontSize')}px"
     @openColor = atom.config.get('learn-ide.terminalFontColor')
     @openBackgroundColor = atom.config.get('learn-ide.terminalBackgroundColor')
 
@@ -46,26 +46,26 @@ class TerminalView extends View
     @on 'focus', => @fitTerminal()
     @on 'mousedown', '.terminal-view-resize-handle', (e) => @resizeStarted(e)
 
-    @$termEl.on 'focus', (e) => @term.focus()
+    @$termEl.on 'focus', (e) => @terminalWrapper.focus()
     @$termEl.on 'blur', (e) => @onBlur(e)
 
-    @term.on 'data', (data) =>
+    @terminalWrapper.on 'data', (data) =>
       @terminal.send(data)
 
     @terminal.on 'message', (message) =>
-      @term.write(message)
+      @terminalWrapper.write(message)
       @openLab()
 
     @terminal.on 'close', () =>
-      @term.off 'data'
-      @term.element.style.color = '#666'
-      @term.cursorHidden = true
+      @terminalWrapper.off 'data'
+      @terminalWrapper.element.style.color = '#666'
+      @terminalWrapper.cursorHidden = true
 
     @terminal.on 'open', =>
       @fitTerminal()
-      @term.off 'data'
+      @terminalWrapper.off 'data'
       self = @
-      @term.on 'data', (data) ->
+      @terminalWrapper.on 'data', (data) ->
         # TODO: handle non-darwin copy/paste shortcut in keymaps
         {ctrlKey, shiftKey, which} = event if event
         if process.platform isnt 'darwin' and event and ctrlKey and shiftKey
@@ -73,9 +73,9 @@ class TerminalView extends View
           atom.commands.dispatch(@element, 'learn-ide:paste') if which is 86
         else
           self.terminal.send data
-      @term.element.style.color = @openColor
-      @term.element.style.backgroundColor = @openBackgroundColor
-      @term.cursorHidden = false
+      @terminalWrapper.element.style.color = @openColor
+      @terminalWrapper.element.style.backgroundColor = @openBackgroundColor
+      @terminalWrapper.cursorHidden = false
 
     atom.commands.onDidDispatch (e) => @updateFocus(e)
 
@@ -95,10 +95,10 @@ class TerminalView extends View
 
   onBlur: (e) ->
     {relatedTarget} = e
-    @unfocus() if relatedTarget? and relatedTarget isnt @term.element
+    @unfocus() if relatedTarget? and relatedTarget isnt @terminalWrapper.element
 
   updateFocus: (e) ->
-    if document.activeElement is @term.element then @focus() else @unfocus()
+    if document.activeElement is @terminalWrapper.element then @focus() else @unfocus()
 
   resizeStarted: ->
     $(document).on('mousemove', @resize)
@@ -118,7 +118,7 @@ class TerminalView extends View
     @height(newHeight)
 
   fitTerminal: ->
-    @term.fit() if @panel.isVisible()
+    @terminalWrapper.fit() if @panel.isVisible()
 
   currentFontSize: ->
     parseInt @$termEl.css 'font-size'
@@ -150,14 +150,14 @@ class TerminalView extends View
 
   unfocus: ->
     @blur()
-    @term.blur()
+    @terminalWrapper.blur()
 
   transferFocus: ->
     @unfocus()
     atom.workspace.getActivePane().activate()
 
   hasFocus: ->
-    @$termEl.is(':focus') or document.activeElement is @term.element
+    @$termEl.is(':focus') or document.activeElement is @terminalWrapper.element
 
   toggleFocus: ->
     if @hasFocus()
@@ -167,7 +167,7 @@ class TerminalView extends View
 
   fullFocus: ->
     @fitTerminal()
-    @term.focus()
+    @terminalWrapper.focus()
     @$termEl.focus()
 
   copy: ->
@@ -179,7 +179,7 @@ class TerminalView extends View
     if process.platform isnt 'darwin'
       @terminal.send text
     else
-      @term.emit 'data', text
+      @terminalWrapper.emit 'data', text
 
   toggle: () ->
     return @panel.hide() if @panel.isVisible()

@@ -2,7 +2,7 @@
 localStorage = require '../local-storage.coffee'
 
 module.exports =
-class TermWrapper extends Terminal
+class TerminalWrapper extends Terminal
   write: (data) ->
     localStorage.set('terminalOut', (localStorage.get('terminalOut') || '') + data)
     Terminal.prototype.write.apply(this, arguments)
