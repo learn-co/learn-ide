@@ -1,7 +1,18 @@
 {Terminal} = require 'term.js'
+localStorage = require '../local-storage.coffee'
 
 module.exports =
 class TermWrapper extends Terminal
+  write: (data) ->
+    localStorage.set('terminalOut', (localStorage.get('terminalOut') || '') + data)
+    Terminal.prototype.write.apply(this, arguments)
+
+  restore: () ->
+    out = localStorage.get('terminalOut')
+
+    if out
+      Terminal.prototype.write.call(this, out)
+
   fit: ->
     {cols, rows} = @_proposeGeometry()
     @_resize(cols, rows)

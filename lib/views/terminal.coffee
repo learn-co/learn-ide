@@ -28,8 +28,9 @@ class TerminalView extends View
 
     @applyEditorStyling()
     @handleEvents()
-
-    ipc.send 'connection-state-request'
+    @term.restore()
+    @term.showCursor()
+    @openLab()
 
   applyEditorStyling: ->
     @term.element.style.height = '100%'
@@ -46,26 +47,18 @@ class TerminalView extends View
     @$termEl.on 'blur', (e) => @onBlur(e)
 
     @term.on 'data', (data) =>
-      console.log('data::::', data)
       @terminal.send(data)
 
-    @terminal.on 'terminal-message-received', (message) =>
-      decoded = utf8.decode(window.atob(message))
-      @term.write(decoded)
-      @openLab()
-
-    @terminal.on 'raw-terminal-char-copy-received', (message) =>
+    @terminal.on 'message', (message) =>
       @term.write(message)
-
-    @terminal.on 'raw-terminal-char-copy-done', () =>
       @openLab()
 
-    @terminal.on 'terminal-session-closed', () =>
+    @terminal.on 'close', () =>
       @term.off 'data'
       @term.element.style.color = '#666'
       @term.cursorHidden = true
 
-    @terminal.on 'terminal-session-opened', =>
+    @terminal.on 'open', =>
       @fitTerminal()
       @term.off 'data'
       self = @
@@ -80,9 +73,6 @@ class TerminalView extends View
       @term.element.style.color = @openColor
       @term.element.style.backgroundColor = @openBackgroundColor
       @term.cursorHidden = false
-
-    ipc.on 'connection-state', (state) =>
-      @terminal.updateConnectionState(state)
 
     atom.commands.onDidDispatch (e) => @updateFocus(e)
 
