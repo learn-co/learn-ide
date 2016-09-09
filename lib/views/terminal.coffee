@@ -4,6 +4,7 @@ ipc       = require 'ipc'
 Clipboard = require 'clipboard'
 remote    = require 'remote'
 Menu      = remote.require 'menu'
+Term = require '../models/term-wrapper.coffee'
 
 module.exports =
 class TerminalView extends View
@@ -11,8 +12,10 @@ class TerminalView extends View
     @div class: 'panel learn-terminal', =>
       @div class: 'terminal-view-resize-handle'
 
-  initialize: (state, terminal, openPath, isTerminalWindow) ->
-    @term = terminal.term
+  initialize: (terminal, openPath, isTerminalWindow) ->
+    rows = if isTerminalWindow then 26 else 18
+    @term = new Term(cols: 80, rows: rows, useStyle: no, screenKeys: no, scrollback: yes)
+    window.term = @term
     @terminal = terminal
     @isTerminalWindow = isTerminalWindow
     @panel = atom.workspace.addBottomPanel(item: this, visible: false, className: 'learn-terminal-view')

@@ -1,4 +1,3 @@
-Term = require './term-wrapper'
 ipc  = require 'ipc'
 utf8      = require 'utf8'
 {EventEmitter} = require 'events'
@@ -6,15 +5,12 @@ SingleSocket = require 'single-socket'
 
 module.exports =
 class Terminal extends EventEmitter
-  constructor: (ws_url, isTermView=false) ->
-    rows = if isTermView then 26 else 18
-    @term = new Term(cols: 80, rows: rows, useStyle: no, screenKeys: no, scrollback: yes)
-    window.term = @term
-    @ws_url = ws_url
+  constructor: (url) ->
+    @url = url
     @connect()
 
   connect: () ->
-    @socket = new SingleSocket @ws_url,
+    @socket = new SingleSocket @url,
       onopen: () =>
         @emit 'open'
       onmessage: (msg) =>

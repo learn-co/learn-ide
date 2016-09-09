@@ -52,8 +52,8 @@ module.exports =
 
     isTerminalWindow = atom.isTerminalWindow
 
-    @term = new Terminal("#{WS_SERVER_URL}/go_terminal_server?token=#{@oauthToken}", isTerminalWindow)
-    @termView = new TerminalView(state, @term, openPath, isTerminalWindow)
+    @term = new Terminal("#{WS_SERVER_URL}/go_terminal_server?token=#{@oauthToken}")
+    @termView = new TerminalView(@term, openPath, isTerminalWindow)
 
     if isTerminalWindow
       document.getElementsByClassName('terminal-view-resize-handle')[0].setAttribute('style', 'display:none;')
