@@ -30,7 +30,7 @@
     "mkdirp": "0.5.1",
     "rimraf": "2.1",
     "rmdir": "1.2.0",
-    "single-socket": "0.0.1",
+    "single-socket": "0.0.2",
     "term.js": "learn-co/term.js",
     "underscore-plus": "1.6.6",
     "utf8": "2.1.1"
