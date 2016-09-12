@@ -1,6 +1,6 @@
 {
   "name": "learn-ide",
-  "main": "./lib/integrated-learn-environment",
+  "main": "./lib/learn-ide",
   "urlMain": "./lib/url-handler",
   "version": "1.9.0",
   "description": "An integrated development environment for use with Learn.co",
