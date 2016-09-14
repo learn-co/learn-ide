@@ -52,6 +52,7 @@ gulp.task('ws:start', function(done) {
       var pidsStr = '';
 
       conn.exec('ps aux | grep \"websocketd --port=' + port + '\" | grep -v grep | awk \'{print $2}\'', function(err, stream) {
+        if (err) { throw err }
         stream.on('data', function(data) {
           pids = _.compact(data.toString().split('\n'))
           pidsStr = pids.join(' ')
