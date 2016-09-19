@@ -48,6 +48,8 @@ module.exports =
     @progressBarPopup = null
     openPath = atom.blobStore.get('learnOpenUrl', 'learn-open-url-key')
     atom.blobStore.delete('learnOpenUrl')
+    console.log('open path yooooo!!!')
+    console.log(openPath)
     atom.blobStore.save()
 
     isTerminalWindow = atom.isTerminalWindow
