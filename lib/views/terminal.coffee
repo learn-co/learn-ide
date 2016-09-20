@@ -89,6 +89,9 @@ class TerminalView extends View
       'learn-ide:reset-font-size': => @resetFontSize()
 
   openLab: (path = @openPath)->
+    console.log('opening lab')
+    console.log(path)
+    console.log('path up')
     if path
       @terminal.send('learn open ' + path.toString() + '\r')
       @openPath = null

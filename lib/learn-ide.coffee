@@ -1,6 +1,7 @@
 _ = require 'underscore-plus'
 path = require 'path'
 ipc = require 'ipc'
+localStorage = require './local-storage'
 {CompositeDisposable} = require 'atom'
 Terminal = require './models/terminal'
 SyncedFS = require './models/synced-fs'
@@ -46,16 +47,12 @@ module.exports =
     @oauthToken = atom.config.get('learn-ide.oauthToken')
     @vmPort = atom.config.get('learn-ide.vmPort')
     @progressBarPopup = null
-    openPath = atom.blobStore.get('learnOpenUrl', 'learn-open-url-key')
-    atom.blobStore.delete('learnOpenUrl')
-    console.log('open path yooooo!!!')
-    console.log(openPath)
-    atom.blobStore.save()
+      
 
     isTerminalWindow = atom.isTerminalWindow
 
     @term = new Terminal("#{WS_SERVER_URL}/go_terminal_server?token=#{@oauthToken}")
-    @termView = new TerminalView(@term, openPath, isTerminalWindow)
+    @termView = new TerminalView(@term, null, isTerminalWindow)
 
     if isTerminalWindow
       document.getElementsByClassName('terminal-view-resize-handle')[0].setAttribute('style', 'display:none;')
@@ -78,6 +75,13 @@ module.exports =
         ipc.send 'reset-connection'
         ipc.send 'connection-state-request'
       'application:update-ile': -> (new LearnUpdater).checkForUpdate()
+
+    openPath = localStorage.get('learnOpenLabSlug')
+    if openPath
+      localStorage.delete('learnOpenLabSlug')
+      console.log('open path yooooo!!!')
+      console.log(openPath)
+      @termView.openLab(openPath)
 
     @passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
     @failingIcon = 'http://i.imgbox.com/vVZZG1Gx.png'

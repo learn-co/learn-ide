@@ -3,3 +3,5 @@ module.exports =
     localStorage[key]
   set: (key, value) ->
     localStorage[key] = value
+  delete: (key) ->
+    delete localStorage[key]
