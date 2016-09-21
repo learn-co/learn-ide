@@ -11,6 +11,7 @@ SyncedFSView = require './views/synced-fs'
 LearnUpdater = require './models/learn-updater'
 LocalhostProxy = require './models/localhost-proxy'
 WebWindow = require './models/web-window'
+bus = require('./event-bus')()
 
 require('dotenv').config({
   path: path.join(__dirname, '../.env'),
@@ -33,15 +34,27 @@ WS_SERVER_URL = (->
 )()
 
 module.exports =
-  termViewState: null
-  fsViewState: null
-  subscriptions: null
-
   activate: (state) ->
     require('./init.coffee')
-
-    # TODO: does this need to happen everytime?
+    @activateEventHandlers()
     @activateIDE(state)
+
+  activateEventHandlers: ->
+    # keep track of the focused window's pid
+    setLastFocusedWindow = ->
+      localStorage.set('lastFocusedWindow', process.pid)
+    setLastFocusedWindow()
+    window.onfocus = setLastFocusedWindow
+
+    # listen for learn:open event from other render processes (url handler):w
+    bus.on 'learn:open', (lab) =>
+      console.log('opening lab from bus')
+      console.log(lab)
+      @termView.openLab(lab.slug)
+
+    # tidy up when the window closes
+    atom.getCurrentWindow().on 'close', =>
+      @cleanup()
 
   activateIDE: (state) ->
     @oauthToken = atom.config.get('learn-ide.oauthToken')
@@ -76,11 +89,11 @@ module.exports =
         ipc.send 'connection-state-request'
       'application:update-ile': -> (new LearnUpdater).checkForUpdate()
 
-    openPath = localStorage.get('learnOpenLabSlug')
+    @termView.toggle()
+
+    openPath = localStorage.get('learnOpenLabOnActivation')
     if openPath
-      localStorage.delete('learnOpenLabSlug')
-      console.log('open path yooooo!!!')
-      console.log(openPath)
+      localStorage.delete('learnOpenLabOnActivation')
       @termView.openLab(openPath)
 
     @passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
@@ -145,6 +158,10 @@ module.exports =
     @subscriptions.dispose()
 
     ipc.send 'deactivate-listener'
+
+  cleanup: ->
+    if parseInt(localStorage.get('lastFocusedWindow')) == process.pid
+      localStorage.delete('lastFocusedWindow')
 
   consumeStatusBar: (statusBar) ->
     @statusBarTile = statusBar.addRightTile(item: @fsView, priority: 5000)

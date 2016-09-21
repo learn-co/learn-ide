@@ -28,6 +28,7 @@
     "fs-plus": "2.9.1",
     "http-proxy": "1.13.3",
     "mkdirp": "0.5.1",
+    "page-bus": "3.0.1",
     "rimraf": "2.1",
     "rmdir": "1.2.0",
     "single-socket": "0.0.2",
