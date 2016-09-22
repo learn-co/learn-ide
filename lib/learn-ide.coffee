@@ -46,11 +46,10 @@ module.exports =
     setLastFocusedWindow()
     window.onfocus = setLastFocusedWindow
 
-    # listen for learn:open event from other render processes (url handler):w
+    # listen for learn:open event from other render processes (url handler)
     bus.on 'learn:open', (lab) =>
-      console.log('opening lab from bus')
-      console.log(lab)
       @termView.openLab(lab.slug)
+      atom.getCurrentWindow().focus()
 
     # tidy up when the window closes
     atom.getCurrentWindow().on 'close', =>
@@ -93,6 +92,7 @@ module.exports =
 
     openPath = localStorage.get('learnOpenLabOnActivation')
     if openPath
+      console.log('opening lab on activation')
       localStorage.delete('learnOpenLabOnActivation')
       @termView.openLab(openPath)
 

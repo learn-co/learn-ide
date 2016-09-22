@@ -33,7 +33,6 @@ class TerminalView extends View
     @handleEvents()
     @terminalWrapper.restore()
     @terminalWrapper.showCursor()
-    @openLab()
 
   applyEditorStyling: ->
     @terminalWrapper.element.style.height = '100%'
@@ -54,7 +53,6 @@ class TerminalView extends View
 
     @terminal.on 'message', (message) =>
       @terminalWrapper.write(message)
-      @openLab()
 
     @terminal.on 'close', () =>
       @terminalWrapper.off 'data'
