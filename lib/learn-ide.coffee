@@ -36,6 +36,12 @@ WS_SERVER_URL = (->
 module.exports =
   activate: (state) ->
     require('./init.coffee')
+    @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
+
+    if @isTerminalWindow
+      window.resizeTo(750, 500)
+      localStorage.delete('popoutTerminal')
+
     @activateEventHandlers()
     @activateIDE(state)
 
@@ -54,32 +60,30 @@ module.exports =
     # tidy up when the window closes
     atom.getCurrentWindow().on 'close', =>
       @cleanup()
+      console.log(@isTerminalWindow)
+      debugger
+      if @isTerminalWindow
+        console.log('popin')
+        bus.emit('learn:terminal:popin', Date.now())
 
   activateIDE: (state) ->
     @oauthToken = atom.config.get('learn-ide.oauthToken')
     @vmPort = atom.config.get('learn-ide.vmPort')
     @progressBarPopup = null
       
-    isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
-
-    if isTerminalWindow
-      window.resizeTo(750, 500)
-      localStorage.delete('popoutTerminal')
-
-
     @term = new Terminal("#{WS_SERVER_URL}/go_terminal_server?token=#{@oauthToken}")
-    @termView = new TerminalView(@term, null, isTerminalWindow)
+    @termView = new TerminalView(@term, null, @isTerminalWindow)
 
-    if isTerminalWindow
+    if @isTerminalWindow
       document.getElementsByClassName('terminal-view-resize-handle')[0].setAttribute('style', 'display:none;')
       # document.getElementsByClassName('inset-panel')[0].setAttribute('style', 'display:none;')
       document.getElementsByClassName('learn-terminal')[0].style.height = '448px'
       workspaceView = atom.views.getView(atom.workspace)
       atom.commands.dispatch(workspaceView, 'tree-view:toggle')
 
-    @fs = new SyncedFS("#{WS_SERVER_URL}/fs_server?token=#{@oauthToken}", isTerminalWindow)
+    @fs = new SyncedFS("#{WS_SERVER_URL}/fs_server?token=#{@oauthToken}", @isTerminalWindow)
     @fsViewEmitter = new EventEmitter
-    @fsView = new SyncedFSView(state, @fs, @fsViewEmitter, isTerminalWindow)
+    @fsView = new SyncedFSView(state, @fs, @fsViewEmitter, @isTerminalWindow)
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace',

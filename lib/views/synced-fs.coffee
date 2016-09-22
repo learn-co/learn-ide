@@ -1,6 +1,7 @@
 {$, View}  = require 'atom-space-pen-views'
 ipc = require 'ipc'
 localStorage = require('../local-storage')
+bus = require('../event-bus')()
 
 module.exports =
 class SyncedFSView extends View
@@ -31,8 +32,7 @@ class SyncedFSView extends View
     ipc.on 'connection-state', (state) =>
       this.updateConnectionState(state)
 
-    ipc.on 'terminal-popped-in', (state) =>
-      console.log 'popped in!'
+    bus.on 'learn:terminal:popin', () =>
       if @termPoppedOut is 1
         @emitter.emit 'toggleTerminal', true
         @termPoppedOut = 0
