@@ -60,15 +60,19 @@ module.exports =
     @vmPort = atom.config.get('learn-ide.vmPort')
     @progressBarPopup = null
       
+    isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
 
-    isTerminalWindow = atom.isTerminalWindow
+    if isTerminalWindow
+      window.resizeTo(750, 500)
+      localStorage.delete('popoutTerminal')
+
 
     @term = new Terminal("#{WS_SERVER_URL}/go_terminal_server?token=#{@oauthToken}")
     @termView = new TerminalView(@term, null, isTerminalWindow)
 
     if isTerminalWindow
       document.getElementsByClassName('terminal-view-resize-handle')[0].setAttribute('style', 'display:none;')
-      document.getElementsByClassName('inset-panel')[0].setAttribute('style', 'display:none;')
+      # document.getElementsByClassName('inset-panel')[0].setAttribute('style', 'display:none;')
       document.getElementsByClassName('learn-terminal')[0].style.height = '448px'
       workspaceView = atom.views.getView(atom.workspace)
       atom.commands.dispatch(workspaceView, 'tree-view:toggle')

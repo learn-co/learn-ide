@@ -1,5 +1,6 @@
 {$, View}  = require 'atom-space-pen-views'
 ipc = require 'ipc'
+localStorage = require('../local-storage')
 
 module.exports =
 class SyncedFSView extends View
@@ -38,19 +39,23 @@ class SyncedFSView extends View
         @togglePopoutIcon()
 
     @popoutIcon().addEventListener 'click', =>
-      if @termPoppedOut is 0
-        workspaceView = atom.views.getView(atom.workspace)
-        atom.commands.dispatch(workspaceView, 'application:new-popout-terminal')
-        @termPoppedOut = 1
-        @togglePopoutIcon()
-        setTimeout =>
-          @emitter.emit 'toggleTerminal'
-        , 100
+      @popoutTerminal()
 
     @statusIcon().addEventListener 'click', (e) ->
       if e.target.dataset.status is 'bad'
         workspaceView = atom.views.getView(atom.workspace)
         atom.commands.dispatch(workspaceView, 'learn-ide:reset')
+
+  popoutTerminal: ->
+    if @termPoppedOut is 0
+      localStorage.set('popoutTerminal', true)
+      ipc.send('command', 'application:new-window')
+
+      @termPoppedOut = 1
+      @togglePopoutIcon()
+      # setTimeout =>
+      @emitter.emit 'toggleTerminal'
+      # , 100
 
   togglePopoutIcon: =>
     @popoutIcon().classList.toggle('inactive')
