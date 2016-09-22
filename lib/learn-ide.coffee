@@ -69,6 +69,13 @@ module.exports =
   activateStatusView: (state) ->
     @statusView = new StatusView state, {isTerminalWindow: @isTerminalWindow}
 
+    bus.on 'terminal:popin', () =>
+      @statusView.onTerminalPopIn()
+      @termView.toggle()
+
+    @statusView.on 'terminal:popout', =>
+      @termView.toggle()
+
   activateEventHandlers: ->
     # keep track of the focused window's pid
     setLastFocusedWindow = ->
@@ -85,7 +92,7 @@ module.exports =
     atom.getCurrentWindow().on 'close', =>
       @cleanup()
       if @isTerminalWindow
-        bus.emit('learn:terminal:popin', Date.now())
+        bus.emit('terminal:popin', Date.now())
 
   activateSubscriptions: ->
     @subscriptions = new CompositeDisposable

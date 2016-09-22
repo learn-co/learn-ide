@@ -1,8 +1,8 @@
 {View} = require 'atom-space-pen-views'
 ipc = require 'ipc'
+{EventEmitter} = require 'events'
 
 localStorage = require '../local-storage'
-bus = require('../event-bus')()
 
 module.exports =
 class StatusView extends View
@@ -15,6 +15,10 @@ class StatusView extends View
     super
     @activatePopoutIcon()
 
+  on: ->
+    @emitter || (@emitter = new EventEmitter)
+    @emitter.on.apply(@emitter, arguments)
+
   activatePopoutIcon: ->
     if @options.isTerminalWindow
       @hidePopoutIcon()
@@ -22,13 +26,11 @@ class StatusView extends View
     @popoutIcon().addEventListener 'click', =>
       @popoutTerminal()
 
-    bus.on 'learn:terminal:popin', () =>
-      @onTerminalPopIn()
-
   popoutTerminal: ->
     localStorage.set('popoutTerminal', true)
     localStorage.set('disableTreeView', true)
     ipc.send('command', 'application:new-window')
+    @emitter.emit 'terminal:popout'
     @hidePopoutIcon()
 
   onTerminalPopIn: ->
