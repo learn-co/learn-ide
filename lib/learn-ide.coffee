@@ -1,6 +1,7 @@
 _ = require 'underscore-plus'
 path = require 'path'
 ipc = require 'ipc'
+localStorage = require './local-storage'
 {CompositeDisposable} = require 'atom'
 Terminal = require './models/terminal'
 SyncedFS = require './models/synced-fs'
@@ -10,6 +11,7 @@ SyncedFSView = require './views/synced-fs'
 LearnUpdater = require './models/learn-updater'
 LocalhostProxy = require './models/localhost-proxy'
 WebWindow = require './models/web-window'
+bus = require('./event-bus')()
 
 require('dotenv').config({
   path: path.join(__dirname, '../.env'),
@@ -32,28 +34,37 @@ WS_SERVER_URL = (->
 )()
 
 module.exports =
-  termViewState: null
-  fsViewState: null
-  subscriptions: null
-
   activate: (state) ->
     require('./init.coffee')
-
-    # TODO: does this need to happen everytime?
+    @activateEventHandlers()
     @activateIDE(state)
+
+  activateEventHandlers: ->
+    # keep track of the focused window's pid
+    setLastFocusedWindow = ->
+      localStorage.set('lastFocusedWindow', process.pid)
+    setLastFocusedWindow()
+    window.onfocus = setLastFocusedWindow
+
+    # listen for learn:open event from other render processes (url handler)
+    bus.on 'learn:open', (lab) =>
+      @termView.openLab(lab.slug)
+      atom.getCurrentWindow().focus()
+
+    # tidy up when the window closes
+    atom.getCurrentWindow().on 'close', =>
+      @cleanup()
 
   activateIDE: (state) ->
     @oauthToken = atom.config.get('learn-ide.oauthToken')
     @vmPort = atom.config.get('learn-ide.vmPort')
     @progressBarPopup = null
-    openPath = atom.blobStore.get('learnOpenUrl', 'learn-open-url-key')
-    atom.blobStore.delete('learnOpenUrl')
-    atom.blobStore.save()
+      
 
     isTerminalWindow = atom.isTerminalWindow
 
     @term = new Terminal("#{WS_SERVER_URL}/go_terminal_server?token=#{@oauthToken}")
-    @termView = new TerminalView(@term, openPath, isTerminalWindow)
+    @termView = new TerminalView(@term, null, isTerminalWindow)
 
     if isTerminalWindow
       document.getElementsByClassName('terminal-view-resize-handle')[0].setAttribute('style', 'display:none;')
@@ -76,6 +87,14 @@ module.exports =
         ipc.send 'reset-connection'
         ipc.send 'connection-state-request'
       'application:update-ile': -> (new LearnUpdater).checkForUpdate()
+
+    @termView.toggle()
+
+    openPath = localStorage.get('learnOpenLabOnActivation')
+    if openPath
+      console.log('opening lab on activation')
+      localStorage.delete('learnOpenLabOnActivation')
+      @termView.openLab(openPath)
 
     @passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
     @failingIcon = 'http://i.imgbox.com/vVZZG1Gx.png'
@@ -139,6 +158,10 @@ module.exports =
     @subscriptions.dispose()
 
     ipc.send 'deactivate-listener'
+
+  cleanup: ->
+    if parseInt(localStorage.get('lastFocusedWindow')) == process.pid
+      localStorage.delete('lastFocusedWindow')
 
   consumeStatusBar: (statusBar) ->
     @statusBarTile = statusBar.addRightTile(item: @fsView, priority: 5000)
