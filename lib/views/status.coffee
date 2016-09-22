@@ -27,6 +27,7 @@ class StatusView extends View
 
   popoutTerminal: ->
     localStorage.set('popoutTerminal', true)
+    localStorage.set('disableTreeView', true)
     ipc.send('command', 'application:new-window')
     @hidePopoutIcon()
 

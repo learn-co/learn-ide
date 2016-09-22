@@ -181,4 +181,4 @@ module.exports =
 
   serialize: ->
     termViewState: @termView.serialize()
-    fsViewState: @fsView.serialize()
+    fsViewState: @statusView.serialize()
