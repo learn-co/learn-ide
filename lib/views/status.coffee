@@ -11,13 +11,31 @@ class StatusView extends View
       @div class: 'learn-status-icon inline-block icon-terminal', id: 'learn-status-icon', ' Learn'
       @div class: 'learn-popout-terminal-icon inline-block icon-link-external', id: 'learn-popout-terminal-icon'
 
-  constructor: (state, @options) ->
+  constructor: (state, termSocket, @options) ->
     super
+    @socket = termSocket
+    @activateEventHandlers()
     @activatePopoutIcon()
 
   on: ->
     @emitter || (@emitter = new EventEmitter)
     @emitter.on.apply(@emitter, arguments)
+
+  activateEventHandlers: ->
+    @socket.on 'open', =>
+      icon = @statusIcon()
+      icon.textContent = ' Learn'
+      icon.dataset.status = 'good'
+
+    @socket.on 'close', =>
+      icon = @statusIcon()
+      icon.textContent = ' Learn...reconnect?'
+      icon.dataset.status = 'bad'
+
+    @statusIcon().addEventListener 'click', (e) =>  
+      # TODO: have this based on the socket state itself instead of the view state
+      if e.target.dataset.status == 'bad'
+        @socket.reset()
 
   activatePopoutIcon: ->
     if @options.isTerminalWindow
