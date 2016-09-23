@@ -67,7 +67,7 @@ module.exports =
     @termView.toggle()
 
   activateStatusView: (state) ->
-    @statusView = new StatusView state, {isTerminalWindow: @isTerminalWindow}
+    @statusView = new StatusView state, @term, {isTerminalWindow: @isTerminalWindow}
 
     bus.on 'terminal:popin', () =>
       @statusView.onTerminalPopIn()
