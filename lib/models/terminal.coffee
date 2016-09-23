@@ -27,6 +27,9 @@ class Terminal extends EventEmitter
           @emit 'error', e
           reject(e)
 
+  reset: () ->
+    @socket.reset()
+
   send: (data) ->
     console.log('sending data over socket', data)
     @waitForSocket.then =>
