@@ -13,6 +13,8 @@ LearnUpdater = require './models/learn-updater'
 LocalhostProxy = require './models/localhost-proxy'
 WebWindow = require './models/web-window'
 bus = require('./event-bus')()
+Notifier = require './notifier.coffee'
+atomHelper = require './atom-helper'
 
 require('dotenv').config({
   path: path.join(__dirname, '../.env'),
@@ -46,6 +48,7 @@ module.exports =
     @activateEventHandlers()
     @activateSubscriptions()
     @activateLocalhostProxy()
+    @activateNotifications()
 
   activateTerminal: ->
     @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
@@ -78,10 +81,8 @@ module.exports =
 
   activateEventHandlers: ->
     # keep track of the focused window's pid
-    setLastFocusedWindow = ->
-      localStorage.set('lastFocusedWindow', process.pid)
-    setLastFocusedWindow()
-    window.onfocus = setLastFocusedWindow
+    atomHelper.setLastFocusedWindow()
+    window.onfocus = atomHelper.setLastFocusedWindow
 
     # listen for learn:open event from other render processes (url handler)
     bus.on 'learn:open', (lab) =>
@@ -113,19 +114,17 @@ module.exports =
       localStorage.delete('learnOpenLabOnActivation')
       @termView.openLab(openPath)
 
-    @passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
-    @failingIcon = 'http://i.imgbox.com/vVZZG1Gx.png'
-
 
   activateLocalhostProxy: ->
     @localhostProxy = new LocalhostProxy(@vmPort)
     @localhostProxy.start()
 
+  activateNotifications: ->
+    @notifier = new Notifier(@oauthToken)
+    @notifier.activate()
 
   activateIDE: ->
     # TODO: to remove, left for reference of remaining logic that needs to be reimplemented
-
-    # ipc.send 'register-for-notifications', @oauthToken
 
     # ipc.on 'remote-log', (msg) ->
       # console.log(msg)
@@ -134,14 +133,6 @@ module.exports =
       # new WebWindow(event.file, resizable: false)
 
     # ipc.on 'new-notification', (data) =>
-      # icon = if data.passing == 'true' then @passingIcon else @failingIcon
-
-      # notif = new Notification data.displayTitle,
-        # body: data.message
-        # icon: icon
-
-      # notif.onclick = ->
-        # notif.close()
 
     # ipc.on 'in-app-notification', (notifData) =>
       # atom.notifications['add' + notifData.type.charAt(0).toUpperCase() + notifData.type.slice(1)] notifData.message, {detail: notifData.detail, dismissable: notifData.dismissable}
@@ -180,7 +171,7 @@ module.exports =
     ipc.send 'deactivate-listener'
 
   cleanup: ->
-    if parseInt(localStorage.get('lastFocusedWindow')) == process.pid
+    if atomHelper.isLastFocusedWindow()
       localStorage.delete('lastFocusedWindow')
 
   consumeStatusBar: (statusBar) ->
