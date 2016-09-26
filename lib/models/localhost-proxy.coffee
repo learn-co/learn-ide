@@ -7,7 +7,7 @@ module.exports = class LocalhostProxy
     @remoteHost = 'http://ile.learn.co'
     @desiredPorts = ['3000', '4000', '4567', '8000', '9292', '9393']
 
-  start: ->
+  activate: ->
     @withAvailablePort((ports) =>
       server = httpProxy.createProxyServer({target: @remoteHost + ':' + @port})
 

@@ -48,7 +48,7 @@ module.exports =
     @activateEventHandlers()
     @activateSubscriptions()
     @activateLocalhostProxy()
-    @activateNotifications()
+    @activateNotifier()
 
   activateTerminal: ->
     @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
@@ -117,9 +117,9 @@ module.exports =
 
   activateLocalhostProxy: ->
     @localhostProxy = new LocalhostProxy(@vmPort)
-    @localhostProxy.start()
+    @localhostProxy.activate()
 
-  activateNotifications: ->
+  activateNotifier: ->
     @notifier = new Notifier(@oauthToken)
     @notifier.activate()
 
