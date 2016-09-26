@@ -4,9 +4,7 @@ ipc = require 'ipc'
 localStorage = require './local-storage'
 {CompositeDisposable} = require 'atom'
 Terminal = require './models/terminal'
-SyncedFS = require './models/synced-fs'
 TerminalView = require './views/terminal'
-SyncedFSView = require './views/synced-fs'
 StatusView = require './views/status'
 {EventEmitter} = require 'events'
 LearnUpdater = require './models/learn-updater'
@@ -126,39 +124,11 @@ module.exports =
   activateIDE: ->
     # TODO: to remove, left for reference of remaining logic that needs to be reimplemented
 
-    # ipc.on 'remote-log', (msg) ->
-      # console.log(msg)
-
     # ipc.on 'learn-submit-alert', (event) ->
       # new WebWindow(event.file, resizable: false)
 
-    # ipc.on 'new-notification', (data) =>
-
     # ipc.on 'in-app-notification', (notifData) =>
       # atom.notifications['add' + notifData.type.charAt(0).toUpperCase() + notifData.type.slice(1)] notifData.message, {detail: notifData.detail, dismissable: notifData.dismissable}
-
-    # ipc.on 'progress-bar-update', (value) =>
-      # atom.getCurrentWindow().setProgressBar(value)
-
-      # if !@progressBarPopup
-        # progressBarContainer = document.createElement 'div'
-        # progressBarInnerDiv = document.createElement 'div'
-        # progressBarInnerDiv.className = 'w3-progress-container w3-round-xlarge w3-dark-grey'
-        # progressBar = document.createElement 'div'
-        # progressBar.className = 'learn-progress-bar w3-progressbar w3-round-xlarge w3-green'
-        # progressBarInnerDiv.appendChild progressBar
-        # progressBarContainer.appendChild progressBarInnerDiv
-
-        # @progressBarPopup = atom.workspace.addModalPanel item: progressBarContainer
-
-      # if value >= 0 && value < 1
-        # @progressBarPopup.item.getElementsByClassName('learn-progress-bar')[0].setAttribute 'style', 'width:' + value * 100 + '%;'
-      # else
-        # @progressBarPopup.destroy()
-        # @progressBarPopup = null
-
-    # @fsViewEmitter.on 'toggleTerminal', (focus) =>
-      # @termView.toggle(focus)
 
     # autoUpdater = new LearnUpdater(true)
     # autoUpdater.checkForUpdate()
