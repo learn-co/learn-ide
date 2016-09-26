@@ -1,10 +1,14 @@
 ipc = require 'ipc'
 https = require 'https'
 {EventEmitter} = require 'events'
+remote = require 'remote'
+BrowserWindow = remote.require 'browser-window'
+version = require '../version'
+shell = require 'shell'
 
-module.exports = class LearnUpdater extends EventEmitter
+module.exports = class Updater extends EventEmitter
   constructor: (autoCheck) ->
-    @currentVersion = atom.appVersion.replace(/\-.*/, '')
+    @currentVersion = version
     @autoCheck = autoCheck
 
   checkForUpdate: =>
@@ -20,6 +24,7 @@ module.exports = class LearnUpdater extends EventEmitter
 
         response.on 'end', =>
           parsed = JSON.parse(body)
+          parsed.version = '2.0.0'
 
           try
             currentVersionNums = @currentVersion.split('.').map((n) -> parseInt(n))
@@ -33,13 +38,29 @@ module.exports = class LearnUpdater extends EventEmitter
             if @autoCheck && !outOfDate
               console.log 'Automatically checked for updates...up to date.'
             else
-              ipc.send 'new-update-window',
+              args =
                 width: 500
                 height: 250
                 show: false
                 title: 'Update Learn IDE'
                 resizable: false
                 outOfDate: outOfDate
+
+              win = new BrowserWindow(args)
+
+              win.on 'closed', ->
+                win = null
+
+              updatePlatform = if process.platform == 'win32' then 'win' else 'mac'
+
+              win.loadUrl('https://learn.co/learn_ide/update_check?out_of_date=' + args.outOfDate + '&platform=' + updatePlatform)
+
+              win.webContents.on 'new-window', (e, url) ->
+                e.preventDefault()
+                shell.openExternal(url)
+
+              win.webContents.on 'did-finish-load', ->
+                win.show()
 
           catch
             console.log 'There was a problem checking for updates.'
