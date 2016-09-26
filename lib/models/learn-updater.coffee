@@ -5,6 +5,7 @@ remote = require 'remote'
 BrowserWindow = remote.require 'browser-window'
 version = require '../version'
 shell = require 'shell'
+path = require 'path'
 
 module.exports = class Updater extends EventEmitter
   constructor: (autoCheck) ->
@@ -53,11 +54,9 @@ module.exports = class Updater extends EventEmitter
 
               updatePlatform = if process.platform == 'win32' then 'win' else 'mac'
 
-              win.loadUrl('https://learn.co/learn_ide/update_check?out_of_date=' + args.outOfDate + '&platform=' + updatePlatform)
+              updatePath = path.resolve(path.join(__dirname, '..', '..', 'static', 'update_check.html'))
 
-              win.webContents.on 'new-window', (e, url) ->
-                e.preventDefault()
-                shell.openExternal(url)
+              win.loadUrl("file://#{ updatePath }")
 
               win.webContents.on 'did-finish-load', ->
                 win.show()

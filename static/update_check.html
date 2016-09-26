@@ -1,0 +1,11 @@
+<h1>Hello World</h1>
+<a onclick="openExternal(event)" href='http://google.com'>Google</a>
+
+<script>
+  var shell = require('electron').shell
+
+  function openExternal (e) {
+    e.preventDefault()
+    shell.openExternal(e.currentTarget.href)
+  }
+</script>
