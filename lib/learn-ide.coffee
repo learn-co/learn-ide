@@ -13,7 +13,8 @@ LearnUpdater = require './models/learn-updater'
 LocalhostProxy = require './models/localhost-proxy'
 WebWindow = require './models/web-window'
 bus = require('./event-bus')()
-Notifications = require './notifications.coffee'
+Notifier = require './notifier.coffee'
+atomHelper = require './atom-helper'
 
 require('dotenv').config({
   path: path.join(__dirname, '../.env'),
@@ -80,10 +81,8 @@ module.exports =
 
   activateEventHandlers: ->
     # keep track of the focused window's pid
-    setLastFocusedWindow = ->
-      localStorage.set('lastFocusedWindow', process.pid)
-    setLastFocusedWindow()
-    window.onfocus = setLastFocusedWindow
+    atomHelper.setLastFocusedWindow()
+    window.onfocus = atomHelper.setLastFocusedWindow
 
     # listen for learn:open event from other render processes (url handler)
     bus.on 'learn:open', (lab) =>
@@ -121,33 +120,8 @@ module.exports =
     @localhostProxy.start()
 
   activateNotifications: ->
-    passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
-    failingIcon = 'http://i.imgbox.com/vVZZG1Gx.png'
-
-    @notifications = new Notifications(@oauthToken)
-
-    @notifications.on 'notification-debug', (msg) ->
-      console.log('msg from notification manager', msg)
-
-    @notifications.on 'new-notification', (data) =>
-      console.log('new notification data', data)
-
-      icon = if data.passing == 'true' then passingIcon else failingIcon
-
-      notif = new Notification data.displayTitle,
-        body: data.message
-        icon: icon
-
-      notif.onclick = ->
-        notif.close()
-
-    @notifications.authenticate()
-      .then => 
-        console.log('authenticated!!!')
-        @notifications.connect()
-      .catch (e) ->
-        console.log('error connecting to notification service')
-        console.error(e)
+    @notifier = new Notifier(@oauthToken)
+    @notifier.activate()
 
   activateIDE: ->
     # TODO: to remove, left for reference of remaining logic that needs to be reimplemented
@@ -197,7 +171,7 @@ module.exports =
     ipc.send 'deactivate-listener'
 
   cleanup: ->
-    if parseInt(localStorage.get('lastFocusedWindow')) == process.pid
+    if atomHelper.isLastFocusedWindow()
       localStorage.delete('lastFocusedWindow')
 
   consumeStatusBar: (statusBar) ->

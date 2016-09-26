@@ -3,14 +3,44 @@ https = require 'https'
 querystring = require 'querystring'
 {EventEmitter} = require 'events'
 WebSocket = require('websocket').w3cwebsocket
+atomHelper = require './atom-helper'
 
 module.exports =
-class LearnNotificationManager extends EventEmitter
+class Notifier extends EventEmitter
   constructor: (authToken) ->
     @authToken     = authToken
     @notifRegistry = []
     @notifTitles = {}
     @notificationTypes = ['submission']
+
+  activate: ->
+
+    @on 'notification-debug', (msg) ->
+      console.log('msg from notification manager', msg)
+
+    @on 'new-notification', (data) =>
+      if atomHelper.isLastFocusedWindow()
+        console.log('new notification data', data)
+
+        notif = new Notification data.displayTitle,
+          body: data.message
+          icon: @getIcon(data)
+
+        notif.onclick = ->
+          notif.close()
+
+    @authenticate()
+      .then => 
+        console.log('authenticated!!!')
+        @connect()
+      .catch (e) ->
+        console.log('error connecting to notification service')
+        console.error(e)
+
+  getIcon: (data) ->
+    passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
+    failingIcon = 'http://i.imgbox.com/vVZZG1Gx.png'
+    if data.passing == 'true' then passingIcon else failingIcon
 
   authenticate: =>
     return new Promise (resolve, reject) =>
