@@ -7,9 +7,8 @@ Terminal = require './models/terminal'
 TerminalView = require './views/terminal'
 StatusView = require './views/status'
 {EventEmitter} = require 'events'
-LearnUpdater = require './models/learn-updater'
+Updater = require './models/learn-updater'
 LocalhostProxy = require './models/localhost-proxy'
-WebWindow = require './models/web-window'
 bus = require('./event-bus')()
 Notifier = require './notifier.coffee'
 atomHelper = require './atom-helper'
@@ -47,6 +46,7 @@ module.exports =
     @activateSubscriptions()
     @activateLocalhostProxy()
     @activateNotifier()
+    @activateUpdater()
 
   activateTerminal: ->
     @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
@@ -104,11 +104,10 @@ module.exports =
         @term.term.write('\n\rReconnecting...\r')
         ipc.send 'reset-connection'
         ipc.send 'connection-state-request'
-      'application:update-ile': -> (new LearnUpdater).checkForUpdate()
+      'application:update-ile': -> (new Updater).checkForUpdate()
 
     openPath = localStorage.get('learnOpenLabOnActivation')
     if openPath
-      console.log('opening lab on activation')
       localStorage.delete('learnOpenLabOnActivation')
       @termView.openLab(openPath)
 
@@ -121,17 +120,9 @@ module.exports =
     @notifier = new Notifier(@oauthToken)
     @notifier.activate()
 
-  activateIDE: ->
-    # TODO: to remove, left for reference of remaining logic that needs to be reimplemented
-
-    # ipc.on 'learn-submit-alert', (event) ->
-      # new WebWindow(event.file, resizable: false)
-
-    # ipc.on 'in-app-notification', (notifData) =>
-      # atom.notifications['add' + notifData.type.charAt(0).toUpperCase() + notifData.type.slice(1)] notifData.message, {detail: notifData.detail, dismissable: notifData.dismissable}
-
-    # autoUpdater = new LearnUpdater(true)
-    # autoUpdater.checkForUpdate()
+  activateUpdater: ->
+    @updater = new Updater(true)
+    @updater.checkForUpdate()
 
   deactivate: ->
     @termView = null

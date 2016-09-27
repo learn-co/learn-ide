@@ -1,5 +1,5 @@
 {Terminal} = require 'term.js'
-localStorage = require '../local-storage.coffee'
+localStorage = require '../local-storage'
 
 module.exports =
 class TerminalWrapper extends Terminal

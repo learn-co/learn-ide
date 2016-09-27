@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <link rel='stylesheet' type='text/css' href='css/main.css'>
+  <head>
+
+  <body>
+    <div id="out-of-date" class="out-of-date-wrapper hidden">
+      <div class="header">
+        <h3>A new version of the Learn IDE is available!</h3>
+      </div>
+      <div class="install">
+        <ol>
+          <li>Download the latest version <a onclick='openExternal(event)' id='download-link' href='' target='_blank'>here</a></li>
+          <li>Quit the Learn IDE</li>
+          <li>Run the new installer</li>
+        </ol>
+      </div>
+
+      <div class="button-wrapper">
+        <button class="button" onclick="window.close()">Ok</button>
+      </div>
+    </div>
+
+    <div id="up-to-date" class="up-to-date-wrapper hidden">
+      <div class="header">
+        <h1>
+          You're up to date!
+        </h1>
+      </div>
+      <div class="button-wrapper">
+        <button class="button" onclick="window.close()">Close</button>
+      </div>
+    </div>
+
+    <script src='js/update_check.js'></script>
+  </body>
+
+</html>

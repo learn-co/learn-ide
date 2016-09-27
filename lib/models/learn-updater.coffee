@@ -1,10 +1,16 @@
 ipc = require 'ipc'
 https = require 'https'
 {EventEmitter} = require 'events'
+remote = require 'remote'
+BrowserWindow = remote.require 'browser-window'
+version = require '../version'
+shell = require 'shell'
+path = require 'path'
+localStorage = require '../local-storage'
 
-module.exports = class LearnUpdater extends EventEmitter
+module.exports = class Updater extends EventEmitter
   constructor: (autoCheck) ->
-    @currentVersion = atom.appVersion.replace(/\-.*/, '')
+    @currentVersion = version
     @autoCheck = autoCheck
 
   checkForUpdate: =>
@@ -33,16 +39,37 @@ module.exports = class LearnUpdater extends EventEmitter
             if @autoCheck && !outOfDate
               console.log 'Automatically checked for updates...up to date.'
             else
-              ipc.send 'new-update-window',
+              {win, mac} = parsed.download_urls
+              downloadURL = if process.platform == 'win32' then win else mac
+
+              localStorage.set 'updateCheck', JSON.stringify(
+                downloadURL: downloadURL
+                outOfDate: outOfDate
+              )
+
+              args =
                 width: 500
                 height: 250
                 show: false
                 title: 'Update Learn IDE'
                 resizable: false
-                outOfDate: outOfDate
 
-          catch
+              console.log('loading window')
+              win = new BrowserWindow(args)
+
+              win.on 'closed', ->
+                win = null
+
+              updatePath = path.resolve(path.join(__dirname, '..', '..', 'static', 'update_check.html'))
+
+              win.loadUrl("file://#{ updatePath }")
+
+              win.webContents.on 'did-finish-load', ->
+                win.show()
+
+          catch err
             console.log 'There was a problem checking for updates.'
+            console.error(err)
 
   outOfDate: (currentNums, latestNums) =>
     @laterMajorVersion(currentNums, latestNums) || @laterMinorVersion(currentNums, latestNums) || @laterPatchVersion(currentNums, latestNums)
@@ -62,7 +89,7 @@ module.exports = class LearnUpdater extends EventEmitter
     if checkDate
       checkDate = parseInt(checkDate.toString())
 
-    if !checkDate || (checkDate && Date.now() - checkDate >= 86400)
+    if !checkDate || (checkDate && ((Date.now() - checkDate) >= 86400))
       true
     else
       false

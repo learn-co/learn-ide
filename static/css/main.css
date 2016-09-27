@@ -1,0 +1,54 @@
+body {
+  background-color: #21252B;
+  color: #9DA5B4;
+  font-family: '.SFNSText-Regular', 'SF UI Text', 'Lucida Grande', 'Segoe UI', Ubuntu, Cantarell, sans-serif;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.button {
+  -webkit-appearance: none;
+  -webkit-user-select: none;
+  background-color: #353B45;
+  background-image: linear-gradient(#3A3F4B, #353B45);
+  border: 1px solid #181A1F;
+  border-radius: 3px;
+  color: #9DA5B4;
+  cursor: pointer;
+  font-family: '.SFNSText-Regular', 'SF UI Text', 'Lucida Grande', 'Segoe UI', Ubuntu, Cantarell, sans-serif;
+  font-size: 14.19px;
+  height: 30px;
+  line-height: 28.38px;
+  padding: 0 11.352px;
+  width: 120.688px;
+}
+
+.button:hover {
+  background-color: #3A3F4B;
+  color: #D7DAE0;
+  background-image: linear-gradient(#3E4451, #3A3F4B);
+}
+
+.up-to-date-wrapper {
+  margin-top: 65px;
+}
+
+.up-to-date-wrapper .button { margin-top: 25px; }
+
+.header,.button-wrapper { text-align: center; }
+
+.install {
+  margin-top: 20px;
+  margin-bottom: 15px;
+  margin-left: 90px;
+  font-size: 14px;
+
+}
+
+.install li {
+  padding-bottom: 10px;
+}
+
+.install li a { padding-top: 5px; color: #40A876;}
