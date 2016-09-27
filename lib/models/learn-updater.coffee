@@ -6,6 +6,7 @@ BrowserWindow = remote.require 'browser-window'
 version = require '../version'
 shell = require 'shell'
 path = require 'path'
+localStorage = require '../local-storage'
 
 module.exports = class Updater extends EventEmitter
   constructor: (autoCheck) ->
@@ -39,20 +40,25 @@ module.exports = class Updater extends EventEmitter
             if @autoCheck && !outOfDate
               console.log 'Automatically checked for updates...up to date.'
             else
+              {win, mac} = parsed.download_urls
+              downloadURL = if process.platform == 'win32' then win else mac
+
+              localStorage.set 'updateCheck', JSON.stringify(
+                downloadURL: downloadURL
+                outOfDate: outOfDate
+              )
+
               args =
                 width: 500
                 height: 250
                 show: false
                 title: 'Update Learn IDE'
                 resizable: false
-                outOfDate: outOfDate
 
               win = new BrowserWindow(args)
 
               win.on 'closed', ->
                 win = null
-
-              updatePlatform = if process.platform == 'win32' then 'win' else 'mac'
 
               updatePath = path.resolve(path.join(__dirname, '..', '..', 'static', 'update_check.html'))
 
