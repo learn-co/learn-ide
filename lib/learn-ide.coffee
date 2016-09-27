@@ -9,7 +9,6 @@ StatusView = require './views/status'
 {EventEmitter} = require 'events'
 Updater = require './models/learn-updater'
 LocalhostProxy = require './models/localhost-proxy'
-WebWindow = require './models/web-window'
 bus = require('./event-bus')()
 Notifier = require './notifier.coffee'
 atomHelper = require './atom-helper'
@@ -124,16 +123,6 @@ module.exports =
   activateUpdater: ->
     @updater = new Updater(true)
     @updater.checkForUpdate()
-
-  # activateIDE: ->
-    # TODO: to remove, left for reference of remaining logic that needs to be reimplemented
-
-    # ipc.on 'learn-submit-alert', (event) ->
-      # new WebWindow(event.file, resizable: false)
-
-    # ipc.on 'in-app-notification', (notifData) =>
-      # atom.notifications['add' + notifData.type.charAt(0).toUpperCase() + notifData.type.slice(1)] notifData.message, {detail: notifData.detail, dismissable: notifData.dismissable}
-
 
   deactivate: ->
     @termView = null
