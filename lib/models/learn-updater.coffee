@@ -26,7 +26,6 @@ module.exports = class Updater extends EventEmitter
 
         response.on 'end', =>
           parsed = JSON.parse(body)
-          parsed.version = '2.0.0'
 
           try
             currentVersionNums = @currentVersion.split('.').map((n) -> parseInt(n))
@@ -55,6 +54,7 @@ module.exports = class Updater extends EventEmitter
                 title: 'Update Learn IDE'
                 resizable: false
 
+              console.log('loading window')
               win = new BrowserWindow(args)
 
               win.on 'closed', ->
@@ -67,8 +67,9 @@ module.exports = class Updater extends EventEmitter
               win.webContents.on 'did-finish-load', ->
                 win.show()
 
-          catch
+          catch err
             console.log 'There was a problem checking for updates.'
+            console.error(err)
 
   outOfDate: (currentNums, latestNums) =>
     @laterMajorVersion(currentNums, latestNums) || @laterMinorVersion(currentNums, latestNums) || @laterPatchVersion(currentNums, latestNums)
@@ -88,7 +89,7 @@ module.exports = class Updater extends EventEmitter
     if checkDate
       checkDate = parseInt(checkDate.toString())
 
-    if !checkDate || (checkDate && Date.now() - checkDate >= 86400)
+    if !checkDate || (checkDate && ((Date.now() - checkDate) >= 86400))
       true
     else
       false

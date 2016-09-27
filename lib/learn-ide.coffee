@@ -109,7 +109,6 @@ module.exports =
 
     openPath = localStorage.get('learnOpenLabOnActivation')
     if openPath
-      console.log('opening lab on activation')
       localStorage.delete('learnOpenLabOnActivation')
       @termView.openLab(openPath)
 
@@ -123,7 +122,7 @@ module.exports =
     @notifier.activate()
 
   activateUpdater: ->
-    @updater = new Updater()
+    @updater = new Updater(true)
     @updater.checkForUpdate()
 
   # activateIDE: ->

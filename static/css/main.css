@@ -4,6 +4,10 @@ body {
   font-family: '.SFNSText-Regular', 'SF UI Text', 'Lucida Grande', 'Segoe UI', Ubuntu, Cantarell, sans-serif;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .button {
   -webkit-appearance: none;
   -webkit-user-select: none;
