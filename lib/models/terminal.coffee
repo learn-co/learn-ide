@@ -11,21 +11,25 @@ class Terminal extends EventEmitter
 
   connect: () ->
     @waitForSocket = new Promise (resolve, reject) =>
-      @socket = new SingleSocket @url,
-        onopen: () =>
-          console.log('open')
-          @emit 'open'
-          resolve()
-        onmessage: (msg) =>
-          console.log('message', msg)
-          @emit 'message', utf8.decode(window.atob(msg))
-        onclose: () =>
-          console.log('close')
-          @emit 'close'
-        onerror: (e) ->
-          console.log('error', e)
-          @emit 'error', e
-          reject(e)
+      @socket = new SingleSocket @url
+
+      @socket.on 'open', =>
+        console.log('open')
+        @emit 'open'
+        resolve()
+
+      @socket.on 'message', (msg) =>
+        console.log('message', msg)
+        @emit 'message', utf8.decode(window.atob(msg))
+
+      @socket.on 'close', () =>
+        console.log('close')
+        @emit 'close'
+
+      @socket.on 'error', (e) =>
+        console.log('error', e)
+        @emit 'error', e
+        reject(e)
 
   reset: () ->
     @socket.reset()
