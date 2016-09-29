@@ -2,7 +2,7 @@ ipc = require 'ipc'
 https = require 'https'
 querystring = require 'querystring'
 {EventEmitter} = require 'events'
-WebSocket = require('websocket').w3cwebsocket
+SingleSocket = require('single-socket')
 atomHelper = require './atom-helper'
 
 module.exports =
@@ -72,14 +72,14 @@ class Notifier extends EventEmitter
             reject Error('Cannot subscribe to notifications. Problem parsing response.')
 
   connect: =>
-    @connection = new WebSocket('wss://push.flatironschool.com:9443/ws/fis-user-' + @id)
+    @connection = new SingleSocket('wss://push.flatironschool.com:9443/ws/fis-user-' + @id)
 
-    @connection.onopen = (e) =>
+    @connection.on 'open', (e) =>
       this.emit 'notification-debug', 'Listening for notifications...'
 
-    @connection.onmessage = (e) =>
+    @connection.on 'message', (data) =>
       try
-        rawData = JSON.parse(e.data)
+        rawData = JSON.parse(data)
         eventData = querystring.parse rawData.text
         uid = @eventUid eventData
 
