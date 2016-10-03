@@ -2,6 +2,7 @@ ipc  = require 'ipc'
 utf8      = require 'utf8'
 {EventEmitter} = require 'events'
 SingleSocket = require 'single-socket'
+atomHelper = require '../atom-helper'
 
 module.exports =
 class Terminal extends EventEmitter
@@ -11,7 +12,7 @@ class Terminal extends EventEmitter
 
   connect: () ->
     @waitForSocket = new Promise (resolve, reject) =>
-      @socket = new SingleSocket @url
+      @socket = new SingleSocket @url, {spawn: atomHelper.spawn}
 
       @socket.on 'open', =>
         console.log('open')
