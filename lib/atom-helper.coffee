@@ -6,3 +6,7 @@ module.exports =
 
   setLastFocusedWindow: ->
     localStorage.set('lastFocusedWindow', process.pid)
+
+  spawn: (modulePath) ->
+    {BufferedNodeProcess} = require 'atom'
+    new BufferedNodeProcess({command: modulePath})
