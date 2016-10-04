@@ -3,6 +3,7 @@
   "main": "./lib/learn-ide",
   "urlMain": "./lib/url-handler",
   "version": "1.9.0",
+  "atomVersion": "1.10.2",
   "description": "An integrated development environment for use with Learn.co",
   "scripts": {
     "start": "./node_modules/gulp/bin/gulp.js"

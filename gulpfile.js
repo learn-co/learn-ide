@@ -11,6 +11,8 @@ const decompress = require('decompress');
 const request = require('request');
 const del = require('del');
 const runSequence = require('run-sequence');
+const cp = require('./utils/child-process-wrapper');
+const pkg = require('./package.json')
 
 var buildDir = path.join(__dirname, 'build')
 
@@ -21,8 +23,7 @@ gulp.task('setup', function() {
 });
 
 gulp.task('download-atom', function(done) {
-  var atomVersion = '1.10.2'
-  var tarballURL = `https://github.com/atom/atom/archive/v${ atomVersion }.tar.gz`
+  var tarballURL = `https://github.com/atom/atom/archive/v${ pkg.atomVersion }.tar.gz`
   console.log(`Downloading Atom from ${ tarballURL }`)
   var tarballPath = path.join(buildDir, 'atom.tar.gz')
 
@@ -38,6 +39,14 @@ gulp.task('download-atom', function(done) {
   })
 
   r.pipe(fs.createWriteStream(tarballPath))
+})
+
+gulp.task('build-atom', function(done) {
+  process.chdir(buildDir)
+
+  cp.safeSpawn('node', ['script/build'], function() {
+    done()
+  })
 })
 
 gulp.task('reset', function() {
@@ -56,12 +65,12 @@ gulp.task('inject-packages', function() {
     fs.writeFileSync(packageJSON, JSON.stringify(packages, null, '  '))
   }
 
-  injectPackage('learn-ide', '2.0.0')
-  injectPackage('learn-ide-tree', '0.198.0')
+  injectPackage('learn-ide', '0.0.1')
+  injectPackage('learn-ide-tree', '0.0.1')
 })
 
 gulp.task('build', function(done) {
-  runSequence('reset', 'download-atom', 'inject-packages', done)
+  runSequence('reset', 'download-atom', 'inject-packages', 'build-atom', done)
 })
 
 gulp.task('clone', function() {
