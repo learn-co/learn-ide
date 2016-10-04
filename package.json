@@ -76,6 +76,7 @@
   },
   "devDependencies": {
     "decompress": "4.0.0",
+    "del": "2.2.2",
     "gulp": "3.9.1",
     "gulp-util": "3.0.7",
     "request": "2.75.0",
