@@ -10,6 +10,7 @@ const path = require('path');
 const decompress = require('decompress');
 const request = require('request');
 const del = require('del');
+const runSequence = require('run-sequence');
 
 var buildDir = path.join(__dirname, 'build')
 
@@ -43,7 +44,24 @@ gulp.task('reset', function() {
   del.sync(['build/**/*', '!build/.gitkeep'], {dot: true})
 })
 
-gulp.task('build', ['download-atom'], function() {
+gulp.task('sleep', function(done) {
+  setTimeout(function() { done() }, 1000 * 60)
+})
+
+gulp.task('inject-packages', function() {
+  function injectPackage(name, version) {
+    var packageJSON = path.join(buildDir, 'package.json')
+    var packages = JSON.parse(fs.readFileSync(packageJSON))
+    packages.packageDependencies[name] = version
+    fs.writeFileSync(packageJSON, JSON.stringify(packages, null, '  '))
+  }
+
+  injectPackage('learn-ide', '2.0.0')
+  injectPackage('learn-ide-tree', '0.198.0')
+})
+
+gulp.task('build', function(done) {
+  runSequence('reset', 'download-atom', 'inject-packages', done)
 })
 
 gulp.task('clone', function() {
