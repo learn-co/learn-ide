@@ -7,12 +7,38 @@ const Client = require('ssh2').Client;
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const decompress = require('decompress');
+const request = require('request');
 
 gulp.task('default', ['ws:start']);
 
 gulp.task('setup', function() {
   shell.cp('./.env.example', './.env');
 });
+
+gulp.task('download-atom', function(done) {
+  var workDir = path.join(process.cwd(), 'build')
+  var atomVersion = '1.10.2'
+  var tarballURL = `https://github.com/atom/atom/archive/v${ atomVersion }.tar.gz`
+  console.log(`Downloading Atom from ${ tarballURL }`)
+  var tarballPath = path.join(workDir, 'atom.tar.gz')
+
+  var r = request(tarballURL)
+
+  r.on('end', function() {
+    decompress(tarballPath, workDir).then(function(files) {
+      fs.unlinkSync(tarballPath)
+      done()
+    }).catch(function(err) {
+      console.error(err)
+    })
+  })
+
+  r.pipe(fs.createWriteStream(tarballPath))
+})
+
+gulp.task('build', ['download-atom'], function() {
+})
 
 gulp.task('clone', function() {
   log('Cloning down all Learn IDE repositories...');
