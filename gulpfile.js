@@ -7,12 +7,71 @@ const Client = require('ssh2').Client;
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const decompress = require('decompress');
+const request = require('request');
+const del = require('del');
+const runSequence = require('run-sequence');
+const cp = require('./utils/child-process-wrapper');
+const pkg = require('./package.json')
+
+var buildDir = path.join(__dirname, 'build')
 
 gulp.task('default', ['ws:start']);
 
 gulp.task('setup', function() {
   shell.cp('./.env.example', './.env');
 });
+
+gulp.task('download-atom', function(done) {
+  var tarballURL = `https://github.com/atom/atom/archive/v${ pkg.atomVersion }.tar.gz`
+  console.log(`Downloading Atom from ${ tarballURL }`)
+  var tarballPath = path.join(buildDir, 'atom.tar.gz')
+
+  var r = request(tarballURL)
+
+  r.on('end', function() {
+    decompress(tarballPath, buildDir, {strip: 1}).then(function(files) {
+      fs.unlinkSync(tarballPath)
+      done()
+    }).catch(function(err) {
+      console.error(err)
+    })
+  })
+
+  r.pipe(fs.createWriteStream(tarballPath))
+})
+
+gulp.task('build-atom', function(done) {
+  process.chdir(buildDir)
+
+  cp.safeSpawn('node', ['script/build'], function() {
+    done()
+  })
+})
+
+gulp.task('reset', function() {
+  del.sync(['build/**/*', '!build/.gitkeep'], {dot: true})
+})
+
+gulp.task('sleep', function(done) {
+  setTimeout(function() { done() }, 1000 * 60)
+})
+
+gulp.task('inject-packages', function() {
+  function injectPackage(name, version) {
+    var packageJSON = path.join(buildDir, 'package.json')
+    var packages = JSON.parse(fs.readFileSync(packageJSON))
+    packages.packageDependencies[name] = version
+    fs.writeFileSync(packageJSON, JSON.stringify(packages, null, '  '))
+  }
+
+  injectPackage('learn-ide', '0.0.1')
+  injectPackage('learn-ide-tree', '0.0.1')
+})
+
+gulp.task('build', function(done) {
+  runSequence('reset', 'download-atom', 'build-atom', done)
+})
 
 gulp.task('clone', function() {
   log('Cloning down all Learn IDE repositories...');

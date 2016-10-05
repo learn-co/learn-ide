@@ -3,6 +3,7 @@
   "main": "./lib/learn-ide",
   "urlMain": "./lib/url-handler",
   "version": "1.9.0",
+  "atomVersion": "1.10.2",
   "description": "An integrated development environment for use with Learn.co",
   "scripts": {
     "start": "./node_modules/gulp/bin/gulp.js"
@@ -75,8 +76,12 @@
     }
   },
   "devDependencies": {
+    "decompress": "4.0.0",
+    "del": "2.2.2",
     "gulp": "3.9.1",
     "gulp-util": "3.0.7",
+    "request": "2.75.0",
+    "run-sequence": "1.2.2",
     "shelljs": "0.7.3",
     "ssh2": "0.5.0"
   }
