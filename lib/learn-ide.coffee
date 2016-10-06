@@ -3,12 +3,12 @@ path = require 'path'
 ipc = require 'ipc'
 localStorage = require './local-storage'
 {CompositeDisposable} = require 'atom'
-Terminal = require './models/terminal'
+Terminal = require './terminal'
 TerminalView = require './views/terminal'
 StatusView = require './views/status'
 {EventEmitter} = require 'events'
-Updater = require './models/learn-updater'
-LocalhostProxy = require './models/localhost-proxy'
+Updater = require './updater'
+LocalhostProxy = require './localhost-proxy'
 bus = require('./event-bus')()
 Notifier = require './notifier.coffee'
 atomHelper = require './atom-helper'
@@ -35,7 +35,7 @@ WS_SERVER_URL = (->
 
 module.exports =
   activate: (state) ->
-    require('./init.coffee')
+    require('./auth.coffee')
 
     @oauthToken = atom.config.get('learn-ide.oauthToken')
     @vmPort = atom.config.get('learn-ide.vmPort')

@@ -4,25 +4,24 @@
 
 ## Project Structure
 
-This project is composed of multiple repositories, which can be divided into two areas of responsibility the **front end** and the **back end**:
+The Learn IDE client is a modified Atom build with two packages injected to provide functionality with a remote backend that provides a ready to go development environment for [Learn](https://learn.co) users.
 
-### Front End
+**Atom Packages:**
 
-- **[Integrated Learn Environment](https://github.com/flatiron-labs/integrated-learn-environment)** - This repo, currently holds the main entry to the project and various modules and resources used in our Atom fork.
-- **[Atom ILE](https://github.com/flatiron-labs/atom-ile)** - Our fork of Atom.
-- **[Tree View](https://github.com/learn-co/tree-view/)** - Our fork of Atom's [tree view](https://github.com/atom/tree-view).
-- **[Learn IDE Windows Packager](https://github.com/flatiron-labs/learn-ide-windows-packager)** - Scripts for packaging releases for Windows
-- **[Learn IDE Mac Packager](https://github.com/flatiron-labs/learn-ide-mac-packager)** - Scripts for packaging releases for Mac
+- **[Learn IDE](https://github.com/flatiron-labs/integrated-learn-environment)** - The main extension
+- **[Tree View](https://github.com/learn-co/learn-ide-tree)** - Our fork of Atom's [tree view](https://github.com/atom/tree-view). Intercepts Atom's file system events and instead performs them on our remote backend.
 
-### Back End
+**Related libraries:**
 
-- **[FS Server](https://github.com/flatiron-labs/fs_server)** - Syncs the local file system with our remote host through a websocket. Written in Ruby.
-- **[Go Terminal Server](https://github.com/flatiron-labs/go_terminal_server)** - Runs terminal commands from the client and returns the output to the client through a websocket. Written in Go.
-- **[Students Chef Repo](https://github.com/flatiron-labs/students-chef-repo)** - Chef server that automates student Unix account creation on our back end VMs.
+Those two packages include a couple important libraries:
+
+- **[nsync-fs](https://github.com/learn-co/nsync-fs)** A virtual file system for keeping Atom synced with the remote server
+- **[single-socket](https://github.com/learn-co/single-socket)** A library for sharing a single websocket connection across multiple Node processes. Every Atom window is a separate process and we want to share our server connection between all of them.
 
 ## Getting Started
 
-1. Build our [fork of Atom](https://github.com/flatiron-labs/atom-ile) 2. `apm link` - This will create a sym link to your .atom directory, making the plugin available for use.
+1. Build our [fork of Atom](https://github.com/flatiron-labs/atom-ile)
+2. `apm link` - This will create a sym link to your .atom directory, making the plugin available for use.
 3. `npm install`
 4. `npm install gulp-cli -g` - Gulp is our task runner, install this to use the global CLI command
 5. `gulp clone` - *optional* - This will clone down all related Learn IDE repos. They will be cloned to this repos parent directory (`..`)
@@ -34,5 +33,6 @@ This project is composed of multiple repositories, which can be divided into two
 
 - `gulp` - Default task of `gulp ws:start`
 - `gulp setup` - Set up project. Copies over `.env.example` to `.env`.
+- `gulp build` - Builds the Atom application with our packages injected ready for distribution.
 - `gulp ws:start` - Starts up the remote WebSocketd daemon on `vm02.students.learn.co` (both the terminal and fs server). The websocket logs will be piped back to your terminal. On exit, the websocketd processes will be cleaned up and killed on the server.
 - `gulp clone` - Clones down all related Learn IDE into this repo's parent directory.

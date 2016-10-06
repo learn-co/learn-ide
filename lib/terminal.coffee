@@ -2,7 +2,7 @@ ipc  = require 'ipc'
 utf8      = require 'utf8'
 {EventEmitter} = require 'events'
 SingleSocket = require 'single-socket'
-atomHelper = require '../atom-helper'
+atomHelper = require './atom-helper'
 
 module.exports =
 class Terminal extends EventEmitter
