@@ -3,10 +3,10 @@ https = require 'https'
 {EventEmitter} = require 'events'
 remote = require 'remote'
 BrowserWindow = remote.require 'browser-window'
-version = require '../version'
+version = require './version'
 shell = require 'shell'
 path = require 'path'
-localStorage = require '../local-storage'
+localStorage = require './local-storage'
 
 module.exports = class Updater extends EventEmitter
   constructor: (autoCheck) ->

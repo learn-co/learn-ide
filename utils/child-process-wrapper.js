@@ -1,3 +1,5 @@
+// special thanks to [particle dev](https://github.com/spark/particle-dev-app) for this
+
 var childProcess = require('child_process');
 
 // Exit the process if the command failed and only call the callback if the
