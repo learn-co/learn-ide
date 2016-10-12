@@ -1,4 +1,3 @@
-ipc = require 'ipc'
 https = require 'https'
 {EventEmitter} = require 'events'
 remote = require 'remote'

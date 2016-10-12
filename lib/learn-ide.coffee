@@ -1,4 +1,3 @@
-ipc = require 'ipc'
 localStorage = require './local-storage'
 {CompositeDisposable} = require 'atom'
 Terminal = require './terminal'
@@ -73,8 +72,6 @@ module.exports =
       'learn-ide:toggle-focus': => @termView.toggleFocus()
       'learn-ide:reset': =>
         @term.term.write('\n\rReconnecting...\r')
-        ipc.send 'reset-connection'
-        ipc.send 'connection-state-request'
       'application:update-ile': -> (new Updater).checkForUpdate()
 
     openPath = localStorage.get('learnOpenLabOnActivation')
@@ -96,7 +93,6 @@ module.exports =
     @statusView = null
     @subscriptions.dispose()
 
-    ipc.send 'deactivate-listener'
   cleanup: ->
     atomHelper.cleanup()
 

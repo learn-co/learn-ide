@@ -1,6 +1,5 @@
 {$, View} = require 'atom-space-pen-views'
 utf8      = require 'utf8'
-ipc       = require 'ipc'
 Clipboard = require 'clipboard'
 remote    = require 'remote'
 Menu      = remote.require 'menu'
@@ -27,9 +26,6 @@ class TerminalView extends View
     @terminalWrapper.write('Connecting...\r')
 
     @$termEl = $(@terminalWrapper.element)
-
-    ipc.on 'remote-open-event', (file) =>
-      @terminalWrapper.blur()
 
     @applyEditorStyling()
     @handleEvents()
