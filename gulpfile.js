@@ -83,11 +83,18 @@ gulp.task('inject-packages', function() {
 
   rmPackage('tree-view')
   injectPackage('mastermind', '0.0.5')
-  injectPackage('mirage', '0.0.3')
+  injectPackage('learn-ide-tree', '1.0.1')
+})
+
+gulp.task('replace-app-icons', function() {
+  var src = 'resources/app-icons/**/*';
+  var dest = path.join(buildDir, 'resources', 'app-icons', 'stable')
+
+  gulp.src([src]).pipe(gulp.dest(dest));
 })
 
 gulp.task('build', function(done) {
-  runSequence('reset', 'download-atom', 'inject-packages', 'build-atom', done)
+  runSequence('reset', 'download-atom', 'inject-packages', 'replace-app-icons', 'build-atom', done)
 })
 
 gulp.task('clone', function() {
