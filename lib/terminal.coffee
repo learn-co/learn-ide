@@ -6,8 +6,10 @@ atomHelper = require './atom-helper'
 
 module.exports =
 class Terminal extends EventEmitter
-  constructor: (url) ->
-    @url = url
+  constructor: (args) ->
+    args || (args = {})
+
+    @url = "#{args.url}/go_terminal_server?token=#{args.token}"
     @connect()
 
   connect: () ->

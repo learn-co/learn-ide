@@ -17,7 +17,7 @@ config = _.defaults
 if config.port != 443
   config.protocol = 'ws'
 
-config.wsServerURL = ->
+config.terminalServerURL = ->
   "#{config.protocol}://#{config.host}:#{config.port}"
 
 module.exports = config

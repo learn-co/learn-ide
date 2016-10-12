@@ -32,7 +32,10 @@ module.exports =
       window.resizeTo(750, 500)
       localStorage.delete('popoutTerminal')
 
-    @term = new Terminal("#{config.wsServerURL()}/go_terminal_server?token=#{@oauthToken}")
+    @term = new Terminal
+      url: config.terminalServerURL(),
+      token: @oauthToken
+
     @termView = new TerminalView(@term, null, @isTerminalWindow)
 
     if @isTerminalWindow
