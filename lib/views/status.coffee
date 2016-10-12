@@ -1,5 +1,5 @@
 {View} = require 'atom-space-pen-views'
-ipc = require 'ipc'
+{ipcRenderer} = require 'electron'
 {EventEmitter} = require 'events'
 
 localStorage = require '../local-storage'
@@ -47,7 +47,7 @@ class StatusView extends View
   popoutTerminal: ->
     localStorage.set('popoutTerminal', true)
     localStorage.set('disableTreeView', true)
-    ipc.send('command', 'application:new-window')
+    ipcRenderer.send('command', 'application:new-window')
     @emitter.emit 'terminal:popout'
     @hidePopoutIcon()
 

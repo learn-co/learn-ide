@@ -1,5 +1,5 @@
 url = require 'url'
-ipc = require 'ipc'
+{ipcRenderer} = require 'electron'
 localStorage = require './local-storage'
 bus = require('./event-bus')()
 
@@ -10,10 +10,9 @@ getLabSlug = ->
 module.exports = ({blobStore}) ->
   if localStorage.get('lastFocusedWindow')
     window.bus  = bus
-    console.log(getLabSlug())
     bus.emit('learn:open', {timestamp: Date.now(), slug: getLabSlug()})
   else
     localStorage.set('learnOpenLabOnActivation', getLabSlug())
-    ipc.send('command', 'application:new-window')
+    ipcRenderer.send('command', 'application:new-window')
   
   Promise.resolve()
