@@ -51,9 +51,7 @@ module.exports =
       @termView.toggle()
 
   activateEventHandlers: ->
-    # keep track of the focused window's pid
-    atomHelper.setLastFocusedWindow()
-    window.onfocus = atomHelper.setLastFocusedWindow
+    atomHelper.trackFocusedWindow()
 
     # listen for learn:open event from other render processes (url handler)
     bus.on 'learn:open', (lab) =>
