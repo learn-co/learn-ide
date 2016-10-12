@@ -14,3 +14,7 @@ module.exports =
   spawn: (modulePath) ->
     {BufferedNodeProcess} = require 'atom'
     new BufferedNodeProcess({command: modulePath})
+
+  cleanup: ->
+    if @isLastFocusedWindow()
+      localStorage.delete('lastFocusedWindow')

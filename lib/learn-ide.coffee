@@ -97,10 +97,8 @@ module.exports =
     @subscriptions.dispose()
 
     ipc.send 'deactivate-listener'
-
   cleanup: ->
-    if atomHelper.isLastFocusedWindow()
-      localStorage.delete('lastFocusedWindow')
+    atomHelper.cleanup()
 
   consumeStatusBar: (statusBar) ->
     @statusBarTile = statusBar.addRightTile(item: @statusView, priority: 5000)
