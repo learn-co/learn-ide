@@ -1,4 +1,4 @@
-{Terminal} = require 'term.js'
+{Terminal} = require 'learn-term.js'
 localStorage = require '../local-storage'
 
 module.exports =

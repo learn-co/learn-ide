@@ -1,5 +1,3 @@
-_ = require 'underscore-plus'
-path = require 'path'
 ipc = require 'ipc'
 localStorage = require './local-storage'
 {CompositeDisposable} = require 'atom'
@@ -11,26 +9,7 @@ Updater = require './updater'
 bus = require('./event-bus')()
 Notifier = require './notifier'
 atomHelper = require './atom-helper'
-
-require('dotenv').config({
-  path: path.join(__dirname, '../.env'),
-  silent: true
-});
-
-WS_SERVER_URL = (->
-  config = _.defaults
-    host: process.env['IDE_WS_HOST'],
-    port: process.env['IDE_WS_PORT']
-  ,
-    host: 'ile.learn.co',
-    port: 443,
-    protocol: 'wss'
-
-  if config.port != 443
-    config.protocol = 'ws'
-
-  return config.protocol + '://' + config.host + ':' + config.port;
-)()
+config = require './config'
 
 module.exports =
   activate: (state) ->
@@ -53,7 +32,7 @@ module.exports =
       window.resizeTo(750, 500)
       localStorage.delete('popoutTerminal')
 
-    @term = new Terminal("#{WS_SERVER_URL}/go_terminal_server?token=#{@oauthToken}")
+    @term = new Terminal("#{config.wsServerURL()}/go_terminal_server?token=#{@oauthToken}")
     @termView = new TerminalView(@term, null, @isTerminalWindow)
 
     if @isTerminalWindow
