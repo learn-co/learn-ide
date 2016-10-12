@@ -2,15 +2,15 @@
   "name": "learn-ide",
   "main": "./lib/learn-ide",
   "urlMain": "./lib/url-handler",
-  "version": "1.9.0",
-  "atomVersion": "1.10.2",
+  "version": "2.0.0-beta0",
+  "atomVersion": "1.11.0",
   "description": "An integrated development environment for use with Learn.co",
   "scripts": {
     "start": "./node_modules/gulp/bin/gulp.js"
   },
   "keywords": [],
-  "repository": "https://github.com/flatiron-labs/integrated-learn-environment",
-  "license": "Pending",
+  "repository": "https://github.com/learn-co/learn-ide",
+  "license": "pending",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
@@ -33,7 +33,7 @@
     "rimraf": "2.1",
     "rmdir": "1.2.0",
     "single-socket": "0.0.6",
-    "term.js": "learn-co/term.js",
+    "learn-term.js": "0.0.7",
     "underscore-plus": "1.6.6",
     "utf8": "2.1.1"
   },

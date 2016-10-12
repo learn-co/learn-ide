@@ -15,6 +15,7 @@ const cp = require('./utils/child-process-wrapper');
 const pkg = require('./package.json')
 
 var buildDir = path.join(__dirname, 'build')
+console.log('build directory', buildDir)
 
 gulp.task('default', ['ws:start']);
 
@@ -44,7 +45,15 @@ gulp.task('download-atom', function(done) {
 gulp.task('build-atom', function(done) {
   process.chdir(buildDir)
 
-  cp.safeSpawn('node', ['script/build'], function() {
+  var cmd  = process.platform === 'win32' ? 'script\\build' : 'script/build'
+  var args = []
+
+  if (process.platform == 'win32') {
+    args.push('--create-windows-installer')
+  }
+
+  console.log('running command: ' + cmd + ' ' + args.join(' '))
+  cp.safeSpawn(cmd, args, function() {
     done()
   })
 })
@@ -58,6 +67,13 @@ gulp.task('sleep', function(done) {
 })
 
 gulp.task('inject-packages', function() {
+  function rmPackage(name) {
+    var packageJSON = path.join(buildDir, 'package.json')
+    var packages = JSON.parse(fs.readFileSync(packageJSON))
+    delete packages.packageDependencies[name]
+    fs.writeFileSync(packageJSON, JSON.stringify(packages, null, '  '))
+  }
+
   function injectPackage(name, version) {
     var packageJSON = path.join(buildDir, 'package.json')
     var packages = JSON.parse(fs.readFileSync(packageJSON))
@@ -65,12 +81,13 @@ gulp.task('inject-packages', function() {
     fs.writeFileSync(packageJSON, JSON.stringify(packages, null, '  '))
   }
 
-  injectPackage('learn-ide', '0.0.1')
-  injectPackage('learn-ide-tree', '0.0.1')
+  rmPackage('tree-view')
+  injectPackage('mastermind', '0.0.5')
+  injectPackage('mirage', '0.0.3')
 })
 
 gulp.task('build', function(done) {
-  runSequence('reset', 'download-atom', 'build-atom', done)
+  runSequence('reset', 'download-atom', 'inject-packages', 'build-atom', done)
 })
 
 gulp.task('clone', function() {
