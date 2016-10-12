@@ -5,6 +5,7 @@ Clipboard = require 'clipboard'
 remote    = require 'remote'
 Menu      = remote.require 'menu'
 TerminalWrapper = require './terminal-wrapper.coffee'
+localStorage = require '../local-storage'
 
 module.exports =
 class TerminalView extends View
@@ -13,11 +14,12 @@ class TerminalView extends View
       @div class: 'terminal-view-resize-handle'
 
   initialize: (terminal, openPath, isTerminalWindow) ->
+    @terminal = terminal
+    @isTerminalWindow = isTerminalWindow
+
     rows = if isTerminalWindow then 26 else 18
     @terminalWrapper = new TerminalWrapper(cols: 80, rows: rows, useStyle: no, screenKeys: no, scrollback: yes)
     window.term = @terminalWrapper
-    @terminal = terminal
-    @isTerminalWindow = isTerminalWindow
     @panel = atom.workspace.addBottomPanel(item: this, visible: false, className: 'learn-terminal-view')
     @openPath = openPath
 
@@ -33,6 +35,13 @@ class TerminalView extends View
     @handleEvents()
     @terminalWrapper.restore()
     @terminalWrapper.showCursor()
+
+    if @isTerminalWindow
+      document.getElementsByClassName('terminal-view-resize-handle')[0].setAttribute('style', 'display:none;')
+      # document.getElementsByClassName('inset-panel')[0].setAttribute('style', 'display:none;')
+      document.getElementsByClassName('learn-terminal')[0].style.height = '448px'
+      workspaceView = atom.views.getView(atom.workspace)
+      atom.commands.dispatch(workspaceView, 'tree-view:toggle')
 
   applyEditorStyling: ->
     @terminalWrapper.element.style.height = '100%'

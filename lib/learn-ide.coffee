@@ -17,6 +17,13 @@ module.exports =
 
     @oauthToken = atom.config.get('learn-ide.oauthToken')
     @vmPort = atom.config.get('learn-ide.vmPort')
+
+
+    @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
+    if @isTerminalWindow
+      window.resizeTo(750, 500)
+      localStorage.delete('popoutTerminal')
+
       
     @activateTerminal()
     @activateStatusView(state)
@@ -26,25 +33,11 @@ module.exports =
     @activateUpdater()
 
   activateTerminal: ->
-    @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
-
-    if @isTerminalWindow
-      window.resizeTo(750, 500)
-      localStorage.delete('popoutTerminal')
-
     @term = new Terminal
       url: config.terminalServerURL(),
       token: @oauthToken
 
     @termView = new TerminalView(@term, null, @isTerminalWindow)
-
-    if @isTerminalWindow
-      document.getElementsByClassName('terminal-view-resize-handle')[0].setAttribute('style', 'display:none;')
-      # document.getElementsByClassName('inset-panel')[0].setAttribute('style', 'display:none;')
-      document.getElementsByClassName('learn-terminal')[0].style.height = '448px'
-      workspaceView = atom.views.getView(atom.workspace)
-      atom.commands.dispatch(workspaceView, 'tree-view:toggle')
-
     @termView.toggle()
 
   activateStatusView: (state) ->
