@@ -93,8 +93,35 @@ gulp.task('replace-app-icons', function() {
   gulp.src([src]).pipe(gulp.dest(dest));
 })
 
+gulp.task('rename-app', function() {
+  function replaceInFile(filepath, replacements) {
+    var data = fs.readFileSync(filepath, 'utf8');
+
+    _.each(replacements, function(v, k) {
+      data = data.replace(k, v);
+    });
+
+    fs.writeFileSync(filepath, data)
+  }
+
+  replaceInFile(path.join(buildDir, 'atom.sh'), {
+    'Atom.app': 'Learn IDE.app',
+    '/share/atom/atom': '/share/learn-ide/atom'
+  });
+
+  replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), {
+    "'Atom Beta' : 'Atom'": "'Atom Beta' : 'Learn IDE'",
+    "'atom-beta' : 'atom'": "'atom-beta' : 'learn-ide'",
+    "return 'atom'": "return 'learn-ide'",
+  });
+
+  replaceInFile(path.join(buildDir, 'script', 'lib', 'compress-artifacts.js'), {
+    'atom-': 'learn-ide-'
+  });
+})
+
 gulp.task('build', function(done) {
-  runSequence('reset', 'download-atom', 'inject-packages', 'replace-app-icons', 'build-atom', done)
+  runSequence('reset', 'download-atom', 'inject-packages', 'replace-app-icons', 'rename-app', 'build-atom', done)
 })
 
 gulp.task('clone', function() {
