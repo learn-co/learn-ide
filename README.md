@@ -35,4 +35,3 @@ Those two packages include a couple important libraries:
 - `gulp setup` - Set up project. Copies over `.env.example` to `.env`.
 - `gulp build` - Builds the Atom application with our packages injected ready for distribution.
 - `gulp ws:start` - Starts up the remote WebSocketd daemon on `vm02.students.learn.co` (both the terminal and fs server). The websocket logs will be piped back to your terminal. On exit, the websocketd processes will be cleaned up and killed on the server.
-- `gulp clone` - Clones down all related Learn IDE into this repo's parent directory.
