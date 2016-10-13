@@ -9,13 +9,17 @@ bus = require('./event-bus')()
 Notifier = require './notifier'
 atomHelper = require './atom-helper'
 config = require './config'
+auth = require './auth'
 
 module.exports =
   activate: (state) ->
-    require('./auth')
+    @loadCredentials()
 
-    @oauthToken = atom.config.get('learn-ide.oauthToken')
-    @vmPort = atom.config.get('learn-ide.vmPort')
+    auth().then =>
+      @loadCredentials()
+      if not @term.isConnected
+        @term.updateToken(@oauthToken)
+        @term.connect()
 
 
     @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
@@ -23,7 +27,6 @@ module.exports =
       window.resizeTo(750, 500)
       localStorage.delete('popoutTerminal')
 
-      
     @activateTerminal()
     @activateStatusView(state)
     @activateEventHandlers()
@@ -33,7 +36,8 @@ module.exports =
 
   activateTerminal: ->
     @term = new Terminal
-      url: config.terminalServerURL(),
+      host: config.host,
+      port: config.port,
       token: @oauthToken
 
     @termView = new TerminalView(@term, null, @isTerminalWindow)
@@ -96,8 +100,12 @@ module.exports =
   cleanup: ->
     atomHelper.cleanup()
 
+  loadCredentials: ->
+    @oauthToken = atom.config.get('learn-ide.oauthToken')
+    @vmPort = atom.config.get('learn-ide.vmPort')
+
   consumeStatusBar: (statusBar) ->
-    @statusBarTile = statusBar.addRightTile(item: @statusView, priority: 5000)
+    statusBar.addRightTile(item: @statusView, priority: 5000)
 
   serialize: ->
     termViewState: @termView.serialize()
