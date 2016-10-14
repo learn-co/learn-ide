@@ -1,4 +1,3 @@
-ipc = require 'ipc'
 https = require 'https'
 querystring = require 'querystring'
 {EventEmitter} = require 'events'

@@ -1,4 +1,3 @@
-ipc = require 'ipc'
 https = require 'https'
 {EventEmitter} = require 'events'
 remote = require 'remote'
@@ -54,15 +53,15 @@ module.exports = class Updater extends EventEmitter
                 title: 'Update Learn IDE'
                 resizable: false
 
-              console.log('loading window')
               win = new BrowserWindow(args)
 
               win.on 'closed', ->
                 win = null
 
-              updatePath = path.resolve(path.join(__dirname, '..', '..', 'static', 'update_check.html'))
+              updatePath = path.resolve(path.join(__dirname, '..', 'static', 'update_check.html'))
 
-              win.loadUrl("file://#{ updatePath }")
+              updatePageURL = "file://#{ updatePath }"
+              win.loadUrl(updatePageURL)
 
               win.webContents.on 'did-finish-load', ->
                 win.show()

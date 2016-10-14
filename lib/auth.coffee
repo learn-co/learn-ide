@@ -36,7 +36,6 @@ confirmOauthToken = (token) ->
       response.on 'end', ->
         try
           parsed = JSON.parse(body)
-          console.log parsed
 
           if parsed.email
             resolve parsed
@@ -46,7 +45,7 @@ confirmOauthToken = (token) ->
           resolve false
   )
 
-githubLogin = ->
+githubLogin = (cb) ->
   win = new BrowserWindow(show: false, width: 440, height: 660, resizable: false)
   webContents = win.webContents
 
@@ -69,13 +68,12 @@ githubLogin = ->
       atom.config.set('learn-ide.oauthToken', token)
       atom.config.set('learn-ide.vmPort', res.vm_uid)
       win.destroy()
-
-      atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
+      if cb then cb()
 
   if not win.loadUrl('https://learn.co/ide/token?ide_config=true')
     promptManualEntry()
 
-window.learnSignIn = ->
+window.learnSignIn = (cb) ->
   win = new BrowserWindow(show: false, width: 400, height: 600, resizable: false)
   {webContents} = win
 
@@ -93,7 +91,7 @@ window.learnSignIn = ->
   webContents.on 'will-navigate', (e, url) ->
     if url.match(/github_sign_in/)
       win.destroy()
-      githubLogin()
+      githubLogin(cb)
 
   webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
     if newURL.match(/ide_token/)
@@ -104,14 +102,14 @@ window.learnSignIn = ->
           return unless res
           atom.config.set('learn-ide.oauthToken', token)
           atom.config.set('learn-ide.vmPort', res.vm_uid)
-          atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal', show: true)
+          if cb then cb()
     if newURL.match(/github_sign_in/)
       win.destroy()
-      githubLogin()
+      githubLogin(cb)
 
   if not win.loadUrl('https://learn.co/ide/sign_in?ide_onboard=true')
     win.destroy()
-    githubLogin()
+    githubLogin(cb)
 
 promptManualEntry = ->
   oauthPrompt = document.createElement 'div'
@@ -157,11 +155,11 @@ promptManualEntry = ->
         else
           invalidLabel.setAttribute 'style', 'color: red; opacity: 100;'
 
-getVMPort = ->
+getVMPort = (cb) ->
   confirmOauthToken(existingToken).then (res) ->
     if res
       atom.config.set('learn-ide.vmPort', res.vm_uid)
-      atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
+      if cb then cb()
       return true
 
 githubLogout = ->
@@ -180,13 +178,17 @@ window.logout = ->
   learnLogout()
   githubLogout()
 
-existingToken = atom.config.get('learn-ide.oauthToken')
-vmPort = atom.config.get('learn-ide.vmPort')
+module.exports = ->
+  new Promise (resolve, reject) ->
+    existingToken = atom.config.get('learn-ide.oauthToken')
+    vmPort = atom.config.get('learn-ide.vmPort')
 
-if !existingToken
-  learnSignIn()
-else if !vmPort
-  getVMPort()
-else
-  atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
-  confirmOauthToken(existingToken)
+    if !existingToken
+      learnSignIn ->
+        resolve()
+    else if !vmPort
+      getVMPort ->
+        resolve()
+    else
+      confirmOauthToken(existingToken).then ->
+        resolve()

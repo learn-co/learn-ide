@@ -163,25 +163,6 @@ gulp.task('build', function(done) {
   )
 })
 
-gulp.task('clone', function() {
-  log('Cloning down all Learn IDE repositories...');
-  var repos = [
-    'flatiron-labs/students-chef-repo',
-    'flatiron-labs/go_terminal_server',
-    'flatiron-labs/fs_server',
-    'flatiron-labs/learn-ide-mac-packager',
-    'flatiron-labs/learn-ide-windows-packager',
-    'learn-co/tree-view',
-    'flatiron-labs/atom-ile'
-  ];
-
-  _.map(repos, function(repo) {
-    var name = _.last(repo.split('/'));
-    var cmd = 'git clone git@github.com:' + repo + '.git --progress ../' + name;
-    exec(cmd, {name: name, async: true});
-  })
-});
-
 gulp.task('ws:start', function(done) {
   var conn = new Client();
   var host = process.env.IDE_WS_HOST || 'vm02.students.learn.co';
