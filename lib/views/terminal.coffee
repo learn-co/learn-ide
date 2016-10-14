@@ -3,7 +3,7 @@ utf8      = require 'utf8'
 Clipboard = require 'clipboard'
 remote    = require 'remote'
 Menu      = remote.require 'menu'
-TerminalWrapper = require './terminal-wrapper.coffee'
+TerminalWrapper = require './terminal-wrapper'
 localStorage = require '../local-storage'
 
 module.exports =
