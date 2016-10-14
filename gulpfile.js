@@ -50,6 +50,8 @@ gulp.task('build-atom', function(done) {
 
   if (process.platform == 'win32') {
     args.push('--create-windows-installer')
+  } else {
+    args.push('--compress-artifacts')
   }
 
   console.log('running command: ' + cmd + ' ' + args.join(' '))
