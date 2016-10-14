@@ -111,10 +111,10 @@ gulp.task('rename-app', function() {
     fs.writeFileSync(filepath, data)
   }
 
-  replaceInFile(path.join(buildDir, 'atom.sh'), [
-    [/Atom\.app/g, 'Learn IDE.app'],
-    [/\/share\/atom\/atom/g, '/share/learn-ide/atom']
-  ]);
+  // replaceInFile(path.join(buildDir, 'atom.sh'), [
+  //   [/Atom\.app/g, 'Learn IDE.app'],
+  //   [/\/share\/atom\/atom/g, '/share/learn-ide/atom']
+  // ]);
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
     [/'Atom Beta' : 'Atom'/g, "'Atom Beta' : 'Learn IDE'"],
