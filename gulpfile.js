@@ -48,8 +48,20 @@ gulp.task('build-atom', function(done) {
   var cmd  = process.platform === 'win32' ? 'script\\build' : 'script/build'
   var args = []
 
-  if (process.platform == 'win32') {
-    args.push('--create-windows-installer')
+  switch (process.platform) {
+    case 'win32':
+      args.push('--create-windows-installer');
+      break;
+
+    case 'darwin':
+      args.push('--compress-artifacts');
+      args.push('--code-sign');
+      break;
+
+    case 'linux':
+      args.push('--create-rpm-package');
+      args.push('--create-debian-package');
+      break;
   }
 
   console.log('running command: ' + cmd + ' ' + args.join(' '))
@@ -95,7 +107,7 @@ gulp.task('replace-app-icons', function() {
 
 gulp.task('replace-code-sign', function() {
   var src = 'resources/code-sign-on-mac.js';
-  var dest = path.join(buildDir, 'resources', 'lib', 'code-sign-on-mac.js')
+  var dest = path.join(buildDir, 'script', 'lib')
 
   gulp.src([src]).pipe(gulp.dest(dest));
 })
