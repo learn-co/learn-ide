@@ -125,6 +125,17 @@ gulp.task('rename-app', function() {
   replaceInFile(path.join(buildDir, 'script', 'lib', 'compress-artifacts.js'), [
     [/atom-/g, 'learn-ide-']
   ]);
+
+  replaceInFile(path.join(buildDir, 'src', 'main-process', 'atom-application.coffee'), [
+    [
+      'options.socketPath = "\\\\.\\pipe\\atom-#{options.version}-#{userNameSafe}-sock"',
+      'options.socketPath = "\\\\.\\pipe\\learn-ide-#{options.version}-#{userNameSafe}-sock"',
+    ],
+    [
+      'options.socketPath = path.join(os.tmpdir(), "atom-#{options.version}-#{process.env.USER}.sock")',
+      'options.socketPath = path.join(os.tmpdir(), "learn-ide-#{options.version}-#{process.env.USER}.sock")'
+    ]
+  ]);
 })
 
 gulp.task('build', function(done) {
