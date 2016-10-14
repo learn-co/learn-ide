@@ -48,10 +48,20 @@ gulp.task('build-atom', function(done) {
   var cmd  = process.platform === 'win32' ? 'script\\build' : 'script/build'
   var args = []
 
-  if (process.platform == 'win32') {
-    args.push('--create-windows-installer')
-  } else {
-    args.push('--compress-artifacts')
+  switch (process.platform) {
+    case 'win32':
+      args.push('--create-windows-installer');
+      break;
+
+    case 'darwin':
+      args.push('--compress-artifacts');
+      args.push('--code-sign');
+      break;
+
+    case 'linux':
+      args.push('--create-rpm-package');
+      args.push('--create-debian-package');
+      break;
   }
 
   console.log('running command: ' + cmd + ' ' + args.join(' '))
@@ -85,11 +95,72 @@ gulp.task('inject-packages', function() {
 
   rmPackage('tree-view')
   injectPackage('mastermind', '0.0.5')
-  injectPackage('mirage', '0.0.3')
+  injectPackage('learn-ide-tree', '1.0.1')
+})
+
+gulp.task('replace-app-icons', function() {
+  var src = 'resources/app-icons/**/*';
+  var dest = path.join(buildDir, 'resources', 'app-icons', 'stable')
+
+  gulp.src([src]).pipe(gulp.dest(dest));
+})
+
+gulp.task('replace-code-sign', function() {
+  var src = 'resources/code-sign-on-mac.js';
+  var dest = path.join(buildDir, 'script', 'lib')
+
+  gulp.src([src]).pipe(gulp.dest(dest));
+})
+
+gulp.task('rename-app', function() {
+  function replaceInFile(filepath, replaceArgs) {
+    var data = fs.readFileSync(filepath, 'utf8');
+
+    replaceArgs.forEach(function(args) {
+      data = data.replace(args[0], args[1]);
+    });
+
+    fs.writeFileSync(filepath, data)
+  }
+
+  // replaceInFile(path.join(buildDir, 'atom.sh'), [
+  //   [/Atom\.app/g, 'Learn IDE.app'],
+  //   [/\/share\/atom\/atom/g, '/share/learn-ide/atom']
+  // ]);
+
+  replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
+    [/'Atom Beta' : 'Atom'/g, "'Atom Beta' : 'Learn IDE'"],
+    [/'atom-beta' : 'atom'/g, "'atom-beta' : 'learn-ide'"],
+    [/return 'atom'/, "return 'learn-ide'"]
+  ]);
+
+  replaceInFile(path.join(buildDir, 'script', 'lib', 'compress-artifacts.js'), [
+    [/atom-/g, 'learn-ide-']
+  ]);
+
+  replaceInFile(path.join(buildDir, 'src', 'main-process', 'atom-application.coffee'), [
+    [
+      'options.socketPath = "\\\\.\\pipe\\atom-#{options.version}-#{userNameSafe}-sock"',
+      'options.socketPath = "\\\\.\\pipe\\learn-ide-#{options.version}-#{userNameSafe}-sock"',
+    ],
+    [
+      'options.socketPath = path.join(os.tmpdir(), "atom-#{options.version}-#{process.env.USER}.sock")',
+      'options.socketPath = path.join(os.tmpdir(), "learn-ide-#{options.version}-#{process.env.USER}.sock")'
+    ]
+  ]);
 })
 
 gulp.task('build', function(done) {
-  runSequence('reset', 'download-atom', 'inject-packages', 'build-atom', done)
+  runSequence(
+    'reset',
+    'download-atom',
+    'inject-packages',
+    'replace-app-icons',
+    'replace-code-sign',
+    'rename-app',
+    'build-atom',
+    done
+  )
 })
 
 gulp.task('ws:start', function(done) {
