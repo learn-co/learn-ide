@@ -94,30 +94,30 @@ gulp.task('replace-app-icons', function() {
 })
 
 gulp.task('rename-app', function() {
-  function replaceInFile(filepath, replacements) {
+  function replaceInFile(filepath, replaceArgs) {
     var data = fs.readFileSync(filepath, 'utf8');
 
-    _.each(replacements, function(v, k) {
-      data = data.replace(k, v);
+    replaceArgs.forEach(function(args) {
+      data = data.replace(args[0], args[1]);
     });
 
     fs.writeFileSync(filepath, data)
   }
 
-  replaceInFile(path.join(buildDir, 'atom.sh'), {
-    'Atom.app': 'Learn IDE.app',
-    '/share/atom/atom': '/share/learn-ide/atom'
-  });
+  replaceInFile(path.join(buildDir, 'atom.sh'), [
+    [/Atom\.app/g, 'Learn IDE.app'],
+    [/\/share\/atom\/atom/g, '/share/learn-ide/atom']
+  ]);
 
-  replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), {
-    "'Atom Beta' : 'Atom'": "'Atom Beta' : 'Learn IDE'",
-    "'atom-beta' : 'atom'": "'atom-beta' : 'learn-ide'",
-    "return 'atom'": "return 'learn-ide'",
-  });
+  replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
+    [/'Atom Beta' : 'Atom'/g, "'Atom Beta' : 'Learn IDE'"],
+    [/'atom-beta' : 'atom'/g, "'atom-beta' : 'learn-ide'"],
+    [/return 'atom'/, "return 'learn-ide'"]
+  ]);
 
-  replaceInFile(path.join(buildDir, 'script', 'lib', 'compress-artifacts.js'), {
-    'atom-': 'learn-ide-'
-  });
+  replaceInFile(path.join(buildDir, 'script', 'lib', 'compress-artifacts.js'), [
+    [/atom-/g, 'learn-ide-']
+  ]);
 })
 
 gulp.task('build', function(done) {
