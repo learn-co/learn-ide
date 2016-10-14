@@ -93,6 +93,13 @@ gulp.task('replace-app-icons', function() {
   gulp.src([src]).pipe(gulp.dest(dest));
 })
 
+gulp.task('replace-code-sign', function() {
+  var src = 'resources/code-sign-on-mac.js';
+  var dest = path.join(buildDir, 'resources', 'lib', 'code-sign-on-mac.js')
+
+  gulp.src([src]).pipe(gulp.dest(dest));
+})
+
 gulp.task('rename-app', function() {
   function replaceInFile(filepath, replaceArgs) {
     var data = fs.readFileSync(filepath, 'utf8');
@@ -121,7 +128,16 @@ gulp.task('rename-app', function() {
 })
 
 gulp.task('build', function(done) {
-  runSequence('reset', 'download-atom', 'inject-packages', 'replace-app-icons', 'rename-app', 'build-atom', done)
+  runSequence(
+    'reset',
+    'download-atom',
+    'inject-packages',
+    'replace-app-icons',
+    'replace-code-sign',
+    'rename-app',
+    'build-atom',
+    done
+  )
 })
 
 gulp.task('clone', function() {
