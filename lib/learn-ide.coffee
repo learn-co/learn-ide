@@ -10,6 +10,8 @@ Notifier = require './notifier'
 atomHelper = require './atom-helper'
 config = require './config'
 auth = require './auth'
+remote = require 'remote'
+BrowserWindow = remote.require('browser-window')
 
 module.exports =
   activate: (state) ->
@@ -44,7 +46,7 @@ module.exports =
     @termView.toggle()
 
   activateStatusView: (state) ->
-    @statusView = new StatusView state, @term, {isTerminalWindow: @isTerminalWindow}
+    @statusView = new StatusView state, @term, {@isTerminalWindow}
 
     bus.on 'terminal:popin', () =>
       @statusView.onTerminalPopIn()
@@ -74,6 +76,7 @@ module.exports =
       'learn-ide:open': (e) => @termView.openLab(e.detail.path)
       'learn-ide:toggle-terminal': () => @termView.toggle()
       'learn-ide:toggle-focus': => @termView.toggleFocus()
+      'learn-ide:logout': => @logout()
       'learn-ide:reset': =>
         @term.term.write('\n\rReconnecting...\r')
       'application:update-ile': -> (new Updater).checkForUpdate()
@@ -93,6 +96,7 @@ module.exports =
     @updater.checkForUpdate()
 
   deactivate: ->
+    localStorage.delete('disableTreeView')
     @termView = null
     @statusView = null
     @subscriptions.dispose()
@@ -110,3 +114,17 @@ module.exports =
   serialize: ->
     termViewState: @termView.serialize()
     fsViewState: @statusView.serialize()
+
+  logout: ->
+    atom.config.unset('learn-ide.oauthToken')
+
+    github = new BrowserWindow(show: false)
+    github.webContents.on 'did-finish-load', -> github.show()
+    github.loadUrl('https://github.com/logout')
+
+    learn = new BrowserWindow(show: false)
+    learn.webContents.on 'did-finish-load', -> learn.destroy()
+    learn.loadUrl('https://learn.co/sign_out')
+
+    atom.reload()
+
