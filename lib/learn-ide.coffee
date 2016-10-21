@@ -93,6 +93,7 @@ module.exports =
     @updater.checkForUpdate()
 
   deactivate: ->
+    localStorage.delete('disableTreeView')
     @termView = null
     @statusView = null
     @subscriptions.dispose()
