@@ -19,17 +19,11 @@
       'command': 'learn-ide:toggle-terminal'
     }
   ]
-  '.tree-view.full-menu .project-root .entries .directory > .header': [
-    {
-      'label': 'Resync with Learn IDE Server'
-      'command': 'learn-ide:resync'
-    }
-  ]
 'menu': [
   {
     'label': 'Packages'
     'submenu': [
-      'label': 'Learn.co'
+      'label': 'Learn IDE'
       'submenu': [
         {
           'label': 'Focus Terminal'
@@ -42,6 +36,10 @@
         {
           'label': 'Reconnect'
           'command': 'learn-ide:reset'
+        }
+        {
+          'label': 'Logout'
+          'command': 'learn-ide:logout'
         }
       ]
     ]
