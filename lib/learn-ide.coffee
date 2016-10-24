@@ -38,8 +38,9 @@ module.exports =
 
   activateTerminal: ->
     @term = new Terminal
-      host: config.host,
-      port: config.port,
+      host: config.host
+      port: config.port
+      path: config.path
       token: @oauthToken
 
     @termView = new TerminalView(@term, null, @isTerminalWindow)

@@ -9,6 +9,7 @@ module.exports = class Terminal extends EventEmitter
 
     @host = args.host
     @port = args.port
+    @path = args.path
     @token = args.token
 
     @isConnected = false
@@ -37,7 +38,7 @@ module.exports = class Terminal extends EventEmitter
 
   url: ->
     protocol = if @port == 443 then 'wss' else 'ws'
-    "#{protocol}://#{@host}:#{@port}/go_terminal_server?token=#{@token}"
+    "#{protocol}://#{@host}:#{@port}/#{@path}?token=#{@token}"
 
   send: (data) ->
     @waitForSocket.then =>
