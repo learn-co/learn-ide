@@ -98,6 +98,7 @@ module.exports =
 
   deactivate: ->
     localStorage.delete('disableTreeView')
+    localStorage.delete('terminalOut')
     @termView = null
     @statusView = null
     @subscriptions.dispose()
