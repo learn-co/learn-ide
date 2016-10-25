@@ -15,8 +15,8 @@ module.exports = class Updater extends EventEmitter
   checkForUpdate: =>
     if (@autoCheck && @noCheckToday()) || !@autoCheck
       https.get
-        host: 'learn.co'
-        path: '/api/v1/learn_ide/latest_version'
+        host: 'api.github.com'
+        path: '/repos/learn-co/learn-ide/releases/latest'
       , (response) =>
         body = ''
 
@@ -27,8 +27,8 @@ module.exports = class Updater extends EventEmitter
           parsed = JSON.parse(body)
 
           try
-            currentVersionNums = @currentVersion.split('.').map((n) -> parseInt(n))
-            latestVersionNums  = parsed.version.split('.').map((n) -> parseInt(n))
+            currentVersionNums = @currentVersion.match(/\d/g).map((n) -> parseInt(n))
+            latestVersionNums  = parsed.tag_name.match(/\d/g).map((n) -> parseInt(n))
 
             atom.blobStore.set('learnUpdateCheckDate', 'learn-update-key', new Buffer(Date.now().toString()))
             atom.blobStore.save()
@@ -38,8 +38,7 @@ module.exports = class Updater extends EventEmitter
             if @autoCheck && !outOfDate
               console.log 'Automatically checked for updates...up to date.'
             else
-              {win, mac} = parsed.download_urls
-              downloadURL = if process.platform == 'win32' then win else mac
+              downloadUrl = @getDownloadUrl(parsed)
 
               localStorage.set 'updateCheck', JSON.stringify(
                 downloadURL: downloadURL
@@ -81,6 +80,17 @@ module.exports = class Updater extends EventEmitter
 
   laterPatchVersion: (currentNums, latestNums) =>
     latestNums[0] == currentNums[0] && latestNums[1] == currentNums[1] && latestNums[2] > currentNums[2]
+
+  getDownloadUrl: (githubRelease) =>
+    switch process.platform
+      when 'darwin'
+        zip = githubRelease.assets.find (a) -> a.name.endsWith('mac.zip')
+        zip.browser_download_url
+      when 'win32'
+        exe = githubRelease.assets.find (a) -> a.name.endsWith('.exe')
+        exe.browser_download_url
+      else
+        githubRelease.html_url
 
   noCheckToday: =>
     checkDate = atom.blobStore.get('learnUpdateCheckDate', 'learn-update-key')
