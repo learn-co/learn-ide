@@ -27,13 +27,13 @@ module.exports = class Updater extends EventEmitter
           parsed = JSON.parse(body)
 
           try
-            currentVersionNums = @currentVersion.match(/\d/g).map((n) -> parseInt(n))
-            latestVersionNums  = parsed.tag_name.match(/\d/g).map((n) -> parseInt(n))
+            current = @currentVersion.match(/[\d|\.]+/)[0]
+            latest  = parsed.tag_name.match(/[\d|\.]+/)[0]
 
             atom.blobStore.set('learnUpdateCheckDate', 'learn-update-key', new Buffer(Date.now().toString()))
             atom.blobStore.save()
 
-            outOfDate = @outOfDate(currentVersionNums, latestVersionNums)
+            outOfDate = current isnt latest
 
             if @autoCheck && !outOfDate
               console.log 'Automatically checked for updates...up to date.'
@@ -68,18 +68,6 @@ module.exports = class Updater extends EventEmitter
           catch err
             console.log 'There was a problem checking for updates.'
             console.error(err)
-
-  outOfDate: (currentNums, latestNums) =>
-    @laterMajorVersion(currentNums, latestNums) || @laterMinorVersion(currentNums, latestNums) || @laterPatchVersion(currentNums, latestNums)
-
-  laterMajorVersion: (currentNums, latestNums) =>
-    latestNums[0] > currentNums[0]
-
-  laterMinorVersion: (currentNums, latestNums) =>
-    latestNums[0] == currentNums[0] && latestNums[1] > currentNums[1]
-
-  laterPatchVersion: (currentNums, latestNums) =>
-    latestNums[0] == currentNums[0] && latestNums[1] == currentNums[1] && latestNums[2] > currentNums[2]
 
   getDownloadUrl: (githubRelease) =>
     switch process.platform
