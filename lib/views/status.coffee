@@ -28,14 +28,20 @@ class StatusView extends View
       icon.dataset.status = 'good'
 
     @socket.on 'close', =>
-      icon = @statusIcon()
-      icon.textContent = ' Learn...reconnect?'
-      icon.dataset.status = 'bad'
+      @displayDisconnected()
+
+    @socket.on 'error', =>
+      @displayDisconnected()
 
     @statusIcon().addEventListener 'click', (e) =>  
       # TODO: have this based on the socket state itself instead of the view state
       if e.target.dataset.status == 'bad'
         @socket.reset()
+
+  displayDisconnected: ->
+    icon = @statusIcon()
+    icon.textContent = ' Learn...reconnect?'
+    icon.dataset.status = 'bad'
 
   activatePopoutIcon: ->
     if @options.isTerminalWindow
