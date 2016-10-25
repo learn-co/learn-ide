@@ -123,16 +123,22 @@ gulp.task('rename-app', function() {
     fs.writeFileSync(filepath, data)
   }
 
-  // replaceInFile(path.join(buildDir, 'atom.sh'), [
-  //   [/Atom\.app/g, 'Learn IDE.app'],
-  //   [/\/share\/atom\/atom/g, '/share/learn-ide/atom']
-  // ]);
+  var packageApplication = path.join(buildDir, 'script', 'lib', 'package-application.js');
+  var pkgAppReplacements = [ [/'Atom Beta' : 'Atom'/g, "'Atom Beta' : 'Learn IDE'"] ];
 
-  replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
-    [/'Atom Beta' : 'Atom'/g, "'Atom Beta' : 'Learn IDE'"],
-    [/'atom-beta' : 'atom'/g, "'atom-beta' : 'learn-ide'"],
-    [/return 'atom'/, "return 'learn-ide'"]
-  ]);
+  if (process.platform == 'win32') {
+    pkgAppReplacements.push(
+      [/return 'atom'/, "return 'learnide'"],
+      [/'atom-beta' : 'atom'/g, "'atom-beta' : 'learnide'"]
+    );
+  } else {
+    pkgAppReplacements.push(
+      [/return 'atom'/, "return 'learn-ide'"],
+      [/'atom-beta' : 'atom'/g, "'atom-beta' : 'learn-ide'"]
+    );
+  }
+
+  replaceInFile(packageApplication, pkgAppReplacements);
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'compress-artifacts.js'), [
     [/atom-/g, 'learn-ide-']
@@ -150,15 +156,36 @@ gulp.task('rename-app', function() {
   ]);
 })
 
+gulp.task('update-package-json', function() {
+  var packageJSON = path.join(buildDir, 'package.json')
+  var atomPkg = JSON.parse(fs.readFileSync(packageJSON))
+  var learnPkg = require('./package.json')
+
+  atomPkg.name = process.platform == 'win32' ? 'learnide' : 'learn-ide'
+  atomPkg.productName = 'Learn IDE'
+  atomPkg.version = learnPkg.version
+  atomPkg.description = learnPkg.description
+
+  fs.writeFileSync(packageJSON, JSON.stringify(atomPkg, null, '  '))
+})
+
 gulp.task('build', function(done) {
   runSequence(
     'reset',
     'download-atom',
+    'prep-build',
+    'build-atom',
+    done
+  )
+})
+
+gulp.task('prep-build', function(done) {
+  runSequence(
     'inject-packages',
     'replace-app-icons',
     'replace-code-sign',
     'rename-app',
-    'build-atom',
+    'update-package-json',
     done
   )
 })
