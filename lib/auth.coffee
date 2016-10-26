@@ -18,98 +18,105 @@ atom.commands.dispatch(workspaceView, 'tree-view:show')
 atom.project.setPaths([getUserWorkingDirPath()])
 
 confirmOauthToken = (token) ->
-  return new Promise((resolve, reject) ->
-    https.get
-      host: 'learn.co'
-      path: '/api/v1/users/me?ile_version=' + atom.appVersion
-      headers:
-        'Authorization': 'Bearer ' + token
-    , (response) ->
-      body = ''
+  return new Promise (resolve, reject) ->
+    console.log('here')
+    try
+      authRequest = https.get
+        host: 'learn.co'
+        path: '/api/v1/users/me?ile_version=' + atom.appVersion
+        headers:
+          'Authorization': 'Bearer ' + token
+      , (response) ->
+        body = ''
 
-      response.on 'data', (d) ->
-        body += d
+        response.on 'data', (d) ->
+          body += d
 
-      response.on 'error', ->
-        resolve false
+        response.on 'error', reject
 
-      response.on 'end', ->
-        try
-          parsed = JSON.parse(body)
+        response.on 'end', ->
+          try
+            parsed = JSON.parse(body)
 
-          if parsed.email
-            resolve parsed
-          else
-            resolve false
-        catch
-          resolve false
-  )
+            if parsed.email
+              resolve parsed
+            else
+              resolve false
+          catch
+            reject false
 
-githubLogin = (cb) ->
-  win = new BrowserWindow(show: false, width: 440, height: 660, resizable: false)
-  webContents = win.webContents
+      authRequest.on 'error', (err) ->
+        reject err
 
-  win.setSkipTaskbar(true)
-  win.setMenuBarVisibility(false)
-  win.setTitle('Sign in to Github to get started with the Learn IDE')
+    catch err
+      reject err
 
-  # show window only if login is required
-  webContents.on 'did-finish-load', -> win.show()
+githubLogin = () ->
+  new Promise (resolve, reject) ->
+    win = new BrowserWindow(show: false, width: 440, height: 660, resizable: false)
+    webContents = win.webContents
 
-  # hide window immediately after login
-  webContents.on 'will-navigate', (e, url) ->
-    win.hide() if url.match(/learn\.co\/users\/auth\/github\/callback/)
+    win.setSkipTaskbar(true)
+    win.setMenuBarVisibility(false)
+    win.setTitle('Sign in to Github to get started with the Learn IDE')
 
-  webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
-    return unless newURL.match(/ide_token/)
-    token = url.parse(newURL, true).query.ide_token
-    confirmOauthToken(token).then (res) ->
-      return unless res?
-      atom.config.set('learn-ide.oauthToken', token)
-      atom.config.set('learn-ide.vmPort', res.vm_uid)
-      win.destroy()
-      if cb then cb()
+    # show window only if login is required
+    webContents.on 'did-finish-load', -> win.show()
 
-  if not win.loadUrl('https://learn.co/ide/token?ide_config=true')
-    promptManualEntry()
+    # hide window immediately after login
+    webContents.on 'will-navigate', (e, url) ->
+      win.hide() if url.match(/learn\.co\/users\/auth\/github\/callback/)
 
-window.learnSignIn = (cb) ->
-  win = new BrowserWindow(show: false, width: 400, height: 600, resizable: false)
-  {webContents} = win
-
-  win.setSkipTaskbar(true)
-  win.setMenuBarVisibility(false)
-  win.setTitle('Welcome to the Learn IDE')
-
-  webContents.on 'did-finish-load', -> win.show()
-
-  webContents.on 'new-window', (e, url) ->
-    e.preventDefault()
-    win.destroy()
-    shell.openExternal(url)
-
-  webContents.on 'will-navigate', (e, url) ->
-    if url.match(/github_sign_in/)
-      win.destroy()
-      githubLogin(cb)
-
-  webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
-    if newURL.match(/ide_token/)
+    webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
+      return unless newURL.match(/ide_token/)
       token = url.parse(newURL, true).query.ide_token
-      if token?.length
-        confirmOauthToken(token).then (res) ->
-          console.log "res: #{res}"
-          return unless res
-          atom.config.set('learn-ide.oauthToken', token)
-          atom.config.set('learn-ide.vmPort', res.vm_uid)
-          if cb then cb()
-    if newURL.match(/github_sign_in/)
-      win.destroy()
-      githubLogin(cb)
+      confirmOauthToken(token).then (res) ->
+        return unless res?
+        atom.config.set('learn-ide.oauthToken', token)
+        atom.config.set('learn-ide.vmPort', res.vm_uid)
+        win.destroy()
+        resolve()
 
-  if not win.loadUrl('https://learn.co/ide/sign_in?ide_onboard=true')
-    win.destroy()
-    githubLogin(cb)
+    if not win.loadUrl('https://learn.co/ide/token?ide_config=true')
+      promptManualEntry()
+
+window.learnSignIn = () ->
+  new Promise (resolve, reject) ->
+    win = new BrowserWindow(show: false, width: 400, height: 600, resizable: false)
+    {webContents} = win
+
+    win.setSkipTaskbar(true)
+    win.setMenuBarVisibility(false)
+    win.setTitle('Welcome to the Learn IDE')
+
+    webContents.on 'did-finish-load', -> win.show()
+
+    webContents.on 'new-window', (e, url) ->
+      e.preventDefault()
+      win.destroy()
+      shell.openExternal(url)
+
+    webContents.on 'will-navigate', (e, url) ->
+      if url.match(/github_sign_in/)
+        win.destroy()
+        githubLogin().then(resolve)
+
+    webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
+      if newURL.match(/ide_token/)
+        token = url.parse(newURL, true).query.ide_token
+        if token?.length
+          confirmOauthToken(token).then (res) ->
+            return unless res
+            atom.config.set('learn-ide.oauthToken', token)
+            atom.config.set('learn-ide.vmPort', res.vm_uid)
+            resolve()
+      if newURL.match(/github_sign_in/)
+        win.destroy()
+        githubLogin().then(resolve)
+
+    if not win.loadUrl('https://learn.co/ide/sign_in?ide_onboard=true')
+      win.destroy()
+      githubLogin.then(resolve)
 
 promptManualEntry = ->
   oauthPrompt = document.createElement 'div'
@@ -155,11 +162,10 @@ promptManualEntry = ->
         else
           invalidLabel.setAttribute 'style', 'color: red; opacity: 100;'
 
-getVMPort = (cb) ->
+getVMPort = ->
   confirmOauthToken(existingToken).then (res) ->
     if res
       atom.config.set('learn-ide.vmPort', res.vm_uid)
-      if cb then cb()
       return true
 
 githubLogout = ->
@@ -179,16 +185,12 @@ window.logout = ->
   githubLogout()
 
 module.exports = ->
-  new Promise (resolve, reject) ->
-    existingToken = atom.config.get('learn-ide.oauthToken')
-    vmPort = atom.config.get('learn-ide.vmPort')
+  existingToken = atom.config.get('learn-ide.oauthToken')
+  vmPort = atom.config.get('learn-ide.vmPort')
 
-    if !existingToken
-      learnSignIn ->
-        resolve()
-    else if !vmPort
-      getVMPort ->
-        resolve()
-    else
-      confirmOauthToken(existingToken).then ->
-        resolve()
+  if !existingToken
+    learnSignIn()
+  else if !vmPort
+    getVMPort()
+  else
+    confirmOauthToken(existingToken)
