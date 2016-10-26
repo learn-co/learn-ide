@@ -4,8 +4,12 @@ localStorage = require '../local-storage'
 module.exports =
 class TerminalWrapper extends Terminal
   write: (data) ->
-    localStorage.set('terminalOut', (localStorage.get('terminalOut') || '') + data)
+    this.saveHistory(data)
     Terminal.prototype.write.apply(this, arguments)
+
+  saveHistory: (data) ->
+    history = ((localStorage.get('terminalOut') || '') + data).split('\n').slice(-20).join('\n')
+    localStorage.set('terminalOut', history)
 
   restore: () ->
     out = localStorage.get('terminalOut')
