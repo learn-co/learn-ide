@@ -29,3 +29,7 @@ Those two packages include a couple important libraries:
 ## Building the Learn IDE
 
 `gulp build` - Builds the Atom application with our packages injected ready for distribution and swaps out icons and names to brand it the Learn IDE.
+
+## License
+
+Learn IDE is [MIT licensed](LICENSE.md)
