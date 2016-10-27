@@ -14,18 +14,33 @@ const runSequence = require('run-sequence');
 const cp = require('./utils/child-process-wrapper');
 const pkg = require('./package.json')
 
+var buildBeta;
+
 var buildDir = path.join(__dirname, 'build')
 console.log('build directory', buildDir)
 
-var windowsInstallerName = 'LearnIDESetup.exe';
+function productName() {
+  var name = 'Learn IDE';
 
-function executableName() {
-  if (process.platform == 'win32') { return 'learnide'; }
-  return 'learn-ide';
+  if (buildBeta) {
+    name += ' Beta';
+  }
+
+  return name;
 }
 
-function productName() {
-  return 'Learn IDE';
+function executableName() {
+  var name = productName().toLowerCase();
+
+  if (process.platform == 'win32') {
+    name = name.replace(/ /g, '');
+  }
+
+  return name.replace(/ /g, '-');
+}
+
+function windowsInstallerName() {
+  return productName().replace(/ /g, '') + 'Setup.exe';
 }
 
 gulp.task('default', ['ws:start']);
@@ -187,7 +202,7 @@ gulp.task('update-package-json', function() {
 
 gulp.task('rename-installer', function(done) {
   var src = path.join(buildDir, 'out', 'Learn IDESetup.exe');
-  var des = path.join(buildDir, 'out', windowsInstallerName);
+  var des = path.join(buildDir, 'out', windowsInstallerName());
 
   fs.rename(src, des, function (err) {
     if (err) {
@@ -208,7 +223,7 @@ gulp.task('sign-installer', function() {
   }
 
   var cmd = path.join(buildDir, 'script', 'node_modules', 'electron-winstaller', 'vendor', 'signtool.exe')
-  var installer = path.join(buildDir, 'out', windowsInstallerName);
+  var installer = path.join(buildDir, 'out', windowsInstallerName());
   args = ['sign', '/a', '/f', certPath, '/p', "'" + password + "'", installer]
 
   console.log('running command: ' + cmd + ' ' + args.join(' '))
@@ -226,6 +241,16 @@ gulp.task('complete-windows', function(done) {
   runSequence('rename-installer', 'sign-installer', done)
 })
 
+gulp.task('prep-build', function(done) {
+  runSequence(
+    'inject-packages',
+    'replace-files',
+    'alter-files',
+    'update-package-json',
+    done
+  )
+})
+
 gulp.task('build', function(done) {
   runSequence(
     'reset',
@@ -237,12 +262,7 @@ gulp.task('build', function(done) {
   )
 })
 
-gulp.task('prep-build', function(done) {
-  runSequence(
-    'inject-packages',
-    'replace-files',
-    'alter-files',
-    'update-package-json',
-    done
-  )
+gulp.task('build-beta', function(done) {
+  buildBeta = true;
+  runSequence('build', done)
 })
