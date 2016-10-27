@@ -199,8 +199,6 @@ gulp.task('rename-installer', function(done) {
 })
 
 gulp.task('sign-installer', function() {
-  var installer = path.join(buildDir, 'out', windowsInstallerName);
-  var signtool = path.join(buildDir, 'script', 'node_modules', 'electron-winstaller', 'vendor', 'signtool.exe')
   var certPath = process.env.FLATIRON_P12KEY_PATH;
   var password = process.env.FLATIRON_P12KEY_PASSWORD;
 
@@ -209,8 +207,9 @@ gulp.task('sign-installer', function() {
     return
   }
 
-  cmd = 'cmd'
-  args = ['/s', '/c', signtool, 'sign', '/a', '/f', "'" + certPath + "'", '/p', "'" + password + "'", installer]
+  var cmd = path.join(buildDir, 'script', 'node_modules', 'electron-winstaller', 'vendor', 'signtool.exe')
+  var installer = path.join(buildDir, 'out', windowsInstallerName);
+  args = ['sign', '/a', '/f', certPath, '/p', "'" + password + "'", installer]
 
   console.log('running command: ' + cmd + ' ' + args.join(' '))
   cp.safeSpawn(cmd, args, function() {
