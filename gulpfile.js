@@ -19,18 +19,18 @@ var buildBeta;
 var buildDir = path.join(__dirname, 'build')
 console.log('build directory', buildDir)
 
-function productName() {
+function productName(isBeta) {
   var name = 'Learn IDE';
 
-  if (buildBeta) {
+  if (isBeta || buildBeta) {
     name += ' Beta';
   }
 
   return name;
 }
 
-function executableName() {
-  var name = productName().toLowerCase();
+function executableName(isBeta) {
+  var name = productName(isBeta).toLowerCase();
 
   if (process.platform == 'win32') {
     name = name.replace(/ /g, '');
@@ -39,8 +39,8 @@ function executableName() {
   return name.replace(/ /g, '-');
 }
 
-function windowsInstallerName() {
-  return productName().replace(/ /g, '') + 'Setup.exe';
+function windowsInstallerName(isBeta) {
+  return productName(isBeta).replace(/ /g, '') + 'Setup.exe';
 }
 
 gulp.task('default', ['ws:start']);
@@ -166,9 +166,9 @@ gulp.task('alter-files', function() {
   ])
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
-    [/'Atom Beta' : 'Atom'/g, "'Atom Beta' : '" + productName() + "'"],
+    [/'Atom Beta' : 'Atom'/g, "'" + productName(true) + "' : '" + productName() + "'"],
     [/return 'atom'/, "return '" + executableName() + "'"],
-    [/'atom-beta' : 'atom'/g, "'atom-beta' : '" + executableName() + "'"]
+    [/'atom-beta' : 'atom'/g, "'" + executableName(true) + "' : '" + executableName() + "'"]
   ]);
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'compress-artifacts.js'), [
