@@ -9,7 +9,7 @@ The Learn IDE client is a modified Atom build with two packages injected to prov
 **Atom Packages:**
 
 - **[Learn IDE](https://github.com/flatiron-labs/integrated-learn-environment)** - The main extension
-- **[Tree View](https://github.com/learn-co/learn-ide-tree)** - Our fork of Atom's [tree view](https://github.com/atom/tree-view). Intercepts Atom's file system events and instead performs them on our remote backend.
+- **[Learn IDE Tree](https://github.com/learn-co/learn-ide-tree)** - Our fork of Atom's [tree view](https://github.com/atom/tree-view). Intercepts Atom's file system events and instead performs them on our remote backend.
 
 **Related libraries:**
 
@@ -20,18 +20,16 @@ Those two packages include a couple important libraries:
 
 ## Getting Started
 
-1. Build our [fork of Atom](https://github.com/flatiron-labs/atom-ile)
-2. `apm link` - This will create a sym link to your .atom directory, making the plugin available for use.
-3. `npm install`
-4. `npm install gulp-cli -g` - Gulp is our task runner, install this to use the global CLI command
-5. `gulp clone` - *optional* - This will clone down all related Learn IDE repos. They will be cloned to this repos parent directory (`..`)
-6. `gulp setup`
-6. `gulp` - This will connect to our dev websocketd server (hosting the terminal and fs server) start up the daemon on the port specified in `.env` (should be added after running `gulp setup` above)
-7. Open the Learn IDE
+1. Download [Atom](https://atom.io/)
+2. Clone this repo and [learn-ide-tree](https://github.com/learn-co/learn-ide-tree)
+3. Run `npm install` in both repos
+4. Run `apm link` inside both repos - This will create a sym link to your .atom directory, making the plugin available for use.
+5. Open Atom
 
-## Gulp Tasks
+## Building the Learn IDE
 
-- `gulp` - Default task of `gulp ws:start`
-- `gulp setup` - Set up project. Copies over `.env.example` to `.env`.
-- `gulp build` - Builds the Atom application with our packages injected ready for distribution.
-- `gulp ws:start` - Starts up the remote WebSocketd daemon on `vm02.students.learn.co` (both the terminal and fs server). The websocket logs will be piped back to your terminal. On exit, the websocketd processes will be cleaned up and killed on the server.
+`gulp build` - Builds the Atom application with our packages injected ready for distribution and swaps out icons and names to brand it the Learn IDE.
+
+## License
+
+Learn IDE is [MIT licensed](LICENSE.md)

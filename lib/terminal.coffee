@@ -40,8 +40,11 @@ module.exports = class Terminal extends EventEmitter
     protocol = if @port == 443 then 'wss' else 'ws'
     "#{protocol}://#{@host}:#{@port}/#{@path}?token=#{@token}"
 
+  reset: ->
+    @socket.connect()
+
   send: (data) ->
-    @waitForSocket.then =>
+    if @socket
       @socket.send(data)
 
   updateToken: (token) ->

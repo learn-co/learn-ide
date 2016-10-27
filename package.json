@@ -4,13 +4,14 @@
   "urlMain": "./lib/url-handler",
   "version": "2.0.0-beta0",
   "atomVersion": "1.11.1",
+  "treeVersion": "1.0.3",
   "description": "An integrated development environment for use with Learn.co",
   "scripts": {
     "start": "./node_modules/gulp/bin/gulp.js"
   },
   "keywords": [],
   "repository": "https://github.com/learn-co/learn-ide",
-  "license": "pending",
+  "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
@@ -32,7 +33,7 @@
     "page-bus": "3.0.1",
     "rimraf": "2.1",
     "rmdir": "1.2.0",
-    "single-socket": "0.0.6",
+    "single-socket": "0.0.7",
     "learn-term.js": "0.0.7",
     "underscore-plus": "1.6.6",
     "utf8": "2.1.1"

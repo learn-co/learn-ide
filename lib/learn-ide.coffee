@@ -15,14 +15,13 @@ BrowserWindow = remote.require('browser-window')
 
 module.exports =
   activate: (state) ->
+    @waitForAuth = auth().then =>
+      @activateIDE(state)
+    .catch =>
+      @activateIDE(state)
+
+  activateIDE: (state) ->
     @loadCredentials()
-
-    auth().then =>
-      @loadCredentials()
-      if not @term.isConnected
-        @term.updateToken(@oauthToken)
-        @term.connect()
-
 
     @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
     if @isTerminalWindow
@@ -111,11 +110,8 @@ module.exports =
     @vmPort = atom.config.get('learn-ide.vmPort')
 
   consumeStatusBar: (statusBar) ->
-    statusBar.addRightTile(item: @statusView, priority: 5000)
-
-  serialize: ->
-    termViewState: @termView.serialize()
-    fsViewState: @statusView.serialize()
+    @waitForAuth.then =>
+      statusBar.addRightTile(item: @statusView, priority: 5000)
 
   logout: ->
     atom.config.unset('learn-ide.oauthToken')

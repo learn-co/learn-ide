@@ -46,6 +46,12 @@ class TerminalView extends View
     @openColor = atom.config.get('learn-ide.terminalFontColor')
     @openBackgroundColor = atom.config.get('learn-ide.terminalBackgroundColor')
 
+  displayDisconnected: ->
+    @terminalWrapper.off 'data'
+    @terminalWrapper.element.style.color = '#666'
+    @terminalWrapper.cursorHidden = true
+    @terminalWrapper.write('Unable to connect to Learn\r')
+
   handleEvents: ->
     @on 'focus', => @fitTerminal()
     @on 'mousedown', '.terminal-view-resize-handle', (e) => @resizeStarted(e)
@@ -60,9 +66,10 @@ class TerminalView extends View
       @terminalWrapper.write(message)
 
     @terminal.on 'close', () =>
-      @terminalWrapper.off 'data'
-      @terminalWrapper.element.style.color = '#666'
-      @terminalWrapper.cursorHidden = true
+      @displayDisconnected()
+
+    @terminal.on 'error', () =>
+      @displayDisconnected()
 
     @terminal.on 'open', =>
       @fitTerminal()
