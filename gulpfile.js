@@ -177,7 +177,7 @@ gulp.task('update-package-json', function() {
   var atomPkg = JSON.parse(fs.readFileSync(packageJSON))
   var learnPkg = require('./package.json')
 
-  atomPkg.name = executableName()
+  atomPkg.name = 'learnide'
   atomPkg.productName = productName()
   atomPkg.version = learnPkg.version
   atomPkg.description = learnPkg.description
