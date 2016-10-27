@@ -146,7 +146,7 @@ gulp.task('alter-files', function() {
   replaceInFile(path.join(buildDir, 'script', 'lib', 'create-windows-installer.js'), [
     [
       'https://raw.githubusercontent.com/atom/atom/master/resources/app-icons/${CONFIG.channel}/atom.ico',
-      'https://raw.githubusercontent.com/learn-co/mastermind/master/resources/app-icons/atom.ico'
+      'https://raw.githubusercontent.com/learn-co/learn-ide/master/resources/app-icons/atom.ico'
     ]
   ])
 
