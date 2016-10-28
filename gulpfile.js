@@ -196,7 +196,7 @@ gulp.task('update-package-json', function() {
 })
 
 gulp.task('rename-installer', function(done) {
-  var src = path.join(buildDir, 'out', 'Learn IDESetup.exe');
+  var src = path.join(buildDir, 'out', productName() + 'Setup.exe');
   var des = path.join(buildDir, 'out', windowsInstallerName());
 
   fs.rename(src, des, function (err) {
