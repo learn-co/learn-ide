@@ -31,7 +31,7 @@ function productName() {
 
 function executableName() {
   var name = productName().toLowerCase()
-  return name.replace(/ /g, '');
+  return name.replace(/ /g, '_');
 }
 
 function windowsInstallerName() {
@@ -187,7 +187,7 @@ gulp.task('update-package-json', function() {
   var atomPkg = JSON.parse(fs.readFileSync(packageJSON))
   var learnPkg = require('./package.json')
 
-  atomPkg.name = 'learnide'
+  atomPkg.name = executableName()
   atomPkg.productName = productName()
   atomPkg.version = learnPkg.version
   atomPkg.description = learnPkg.description
