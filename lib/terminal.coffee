@@ -41,7 +41,8 @@ module.exports = class Terminal extends EventEmitter
     "#{protocol}://#{@host}:#{@port}/#{@path}?token=#{@token}"
 
   reset: ->
-    @socket.connect()
+    @socket.close()
+    setTimeout(@connect.bind(this), 100)
 
   send: (data) ->
     if @socket
