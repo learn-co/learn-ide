@@ -45,6 +45,13 @@ module.exports =
     @termView = new TerminalView(@term, null, @isTerminalWindow)
     @termView.toggle()
 
+    # Listen for connection updates from the learn-ide-tree package, as
+    # it actively monitors the status of its websocket through a sort of ping & pong.
+    # Although the packages don't share a connection yet, they are on a single server.
+    bus.on 'learn-ide-tree:connection', (status) =>
+      if status.isConnected isnt @term.isConnected
+        @term.reset()
+
   activateStatusView: (state) ->
     @statusView = new StatusView state, @term, {@isTerminalWindow}
 
