@@ -12,7 +12,7 @@ require('dotenv').config
 module.exports = _.defaults
   host: process.env['IDE_WS_HOST']
   port: process.env['IDE_WS_PORT']
-  path: process.env['IDE_WS_PATH']
+  path: process.env['IDE_WS_TERM_PATH']
 ,
   host: 'ile.learn.co'
   port: 443
