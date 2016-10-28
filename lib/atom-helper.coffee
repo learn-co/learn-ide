@@ -18,3 +18,7 @@ module.exports =
   cleanup: ->
     if @isLastFocusedWindow()
       localStorage.delete('lastFocusedWindow')
+
+  on: (event, callback) ->
+    atom.emitter.on(event, callback)
+
