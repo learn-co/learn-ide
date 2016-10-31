@@ -166,6 +166,7 @@ gulp.task('alter-files', function() {
   ])
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'create-rpm-package.js'), [
+    ['atom.${generatedArch}.rpm', executableName() + '.${generatedArch}.rpm'],
     [/'Atom Beta' : 'Atom'/g, "'" + productName() + "' : '" + productName() + "'"],
     [/'atom-beta' : 'atom'/g, "'" + executableName() + "' : '" + executableName() + "'"]
   ]);
