@@ -15,6 +15,7 @@ BrowserWindow = remote.require('browser-window')
 
 module.exports =
   activate: (state) ->
+    @disableFormerPackage()
     @waitForAuth = auth().then =>
       @activateIDE(state)
     .catch =>
@@ -130,4 +131,10 @@ module.exports =
     learn.loadUrl('https://learn.co/sign_out')
 
     atom.reload()
+
+  disableFormerPackage: ->
+    ilePkg = atom.packages.loadPackage('integrated-learn-environment')
+
+    if ilePkg?
+      ilePkg.disable()
 
