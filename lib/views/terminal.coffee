@@ -23,7 +23,6 @@ class TerminalView extends View
     @openPath = openPath
 
     @terminalWrapper.open(this.get(0))
-    @terminalWrapper.write('Connecting...\r')
 
     @$termEl = $(@terminalWrapper.element)
 
