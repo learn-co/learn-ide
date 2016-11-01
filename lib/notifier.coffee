@@ -71,7 +71,9 @@ class Notifier extends EventEmitter
             reject Error('Cannot subscribe to notifications. Problem parsing response.')
 
   connect: =>
-    @connection = new SingleSocket('wss://push.flatironschool.com:9443/ws/fis-user-' + @id, {spawn: atomHelper.spawn})
+    @connection = new SingleSocket 'wss://push.flatironschool.com:9443/ws/fis-user-' + @id,
+      spawn: atomHelper.spawn
+      silent: true
 
     @connection.on 'open', (e) =>
       this.emit 'notification-debug', 'Listening for notifications...'

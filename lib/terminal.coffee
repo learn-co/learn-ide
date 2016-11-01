@@ -17,7 +17,9 @@ module.exports = class Terminal extends EventEmitter
 
   connect: (token) ->
     @waitForSocket = new Promise (resolve, reject) =>
-      @socket = new SingleSocket @url(), spawn: atomHelper.spawn
+      @socket = new SingleSocket @url(),
+        spawn: atomHelper.spawn
+        silent: true
 
       @socket.on 'open', =>
         @isConnected = true
