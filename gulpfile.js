@@ -177,9 +177,14 @@ gulp.task('alter-files', function() {
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
     [/'Atom Beta' : 'Atom'/g, "'" + productName() + "' : '" + productName() + "'"]
-    // [/return 'atom'/, "return '" + executableName() + "'"],
-    // [/'atom-beta' : 'atom'/g, "'" + executableName() + "' : '" + executableName() + "'"]
   ]);
+
+  if (process.platform != 'linux') {
+    replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
+      [/return 'atom'/, "return '" + executableName() + "'"],
+      [/'atom-beta' : 'atom'/g, "'" + executableName() + "' : '" + executableName() + "'"]
+    ]);
+  }
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'compress-artifacts.js'), [
     [/atom-/g, executableName() + '-']
