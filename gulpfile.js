@@ -30,8 +30,13 @@ function productName() {
 }
 
 function executableName() {
-  var name = productName().toLowerCase()
-  return name.replace(/ /g, '_');
+  var name = productName().toLowerCase();
+
+  if (process.platform == 'win32') {
+    return name.replace(/ /g, '_');
+  }
+
+  return name.replace(/ /g, '-');
 }
 
 function windowsInstallerName() {
@@ -160,11 +165,26 @@ gulp.task('alter-files', function() {
     ]
   ])
 
-  replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
-    [/'Atom Beta' : 'Atom'/g, "'" + productName() + "' : '" + productName() + "'"],
-    [/return 'atom'/, "return '" + executableName() + "'"],
-    [/'atom-beta' : 'atom'/g, "'" + executableName() + "' : '" + executableName() + "'"]
+  replaceInFile(path.join(buildDir, 'script', 'lib', 'create-rpm-package.js'), [
+    ['atom.${generatedArch}.rpm', executableName() + '.${generatedArch}.rpm'],
+    [/'Atom Beta' : 'Atom'/g, "'" + productName() + "' : '" + productName() + "'"]
   ]);
+
+  replaceInFile(path.join(buildDir, 'script', 'lib', 'create-debian-package.js'), [
+    ['atom-${arch}.deb', executableName() + '-${arch}.deb'],
+    [/'Atom Beta' : 'Atom'/g, "'" + productName() + "' : '" + productName() + "'"]
+  ]);
+
+  replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
+    [/'Atom Beta' : 'Atom'/g, "'" + productName() + "' : '" + productName() + "'"]
+  ]);
+
+  if (process.platform != 'linux') {
+    replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
+      [/return 'atom'/, "return '" + executableName() + "'"],
+      [/'atom-beta' : 'atom'/g, "'" + executableName() + "' : '" + executableName() + "'"]
+    ]);
+  }
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'compress-artifacts.js'), [
     [/atom-/g, executableName() + '-']
@@ -227,13 +247,20 @@ gulp.task('sign-installer', function() {
   })
 })
 
-gulp.task('complete-windows', function(done) {
-  if (process.platform != 'win32') {
-    console.log('Skipping Windows specific tasks')
-    return
-  }
+gulp.task('cleanup', function(done) {
+  switch (process.platform) {
+    case 'win32':
+      runSequence('rename-installer', 'sign-installer', done)
+      break;
 
-  runSequence('rename-installer', 'sign-installer', done)
+    case 'darwin':
+      done()
+      break;
+
+    case 'linux':
+      done()
+      break;
+  }
 })
 
 gulp.task('prep-build', function(done) {
@@ -255,7 +282,7 @@ gulp.task('build', function(done) {
     'download-atom',
     'prep-build',
     'build-atom',
-    'complete-windows',
+    'cleanup',
     done
   )
 })
