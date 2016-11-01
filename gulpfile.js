@@ -167,14 +167,12 @@ gulp.task('alter-files', function() {
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'create-rpm-package.js'), [
     ['atom.${generatedArch}.rpm', executableName() + '.${generatedArch}.rpm'],
-    [/'Atom Beta' : 'Atom'/g, "'" + productName() + "' : '" + productName() + "'"],
-    [/'atom-beta' : 'atom'/g, "'" + executableName() + "' : '" + executableName() + "'"]
+    [/'Atom Beta' : 'Atom'/g, "'" + productName() + "' : '" + productName() + "'"]
   ]);
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'create-debian-package.js'), [
     ['atom-${arch}.deb', executableName() + '-${arch}.deb'],
-    [/'Atom Beta' : 'Atom'/g, "'" + productName() + "' : '" + productName() + "'"],
-    [/'atom-beta' : 'atom'/g, "'" + executableName() + "' : '" + executableName() + "'"]
+    [/'Atom Beta' : 'Atom'/g, "'" + productName() + "' : '" + productName() + "'"]
   ]);
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
