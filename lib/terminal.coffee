@@ -13,6 +13,8 @@ module.exports = class Terminal extends EventEmitter
     @token = args.token
 
     @isConnected = false
+    @hasFailed = false
+
     @connect()
 
   connect: (token) ->
@@ -23,6 +25,7 @@ module.exports = class Terminal extends EventEmitter
 
       @socket.on 'open', =>
         @isConnected = true
+        @hasFailed = false
         @emit 'open'
         resolve()
 
@@ -31,10 +34,12 @@ module.exports = class Terminal extends EventEmitter
 
       @socket.on 'close', () =>
         @isConnected = false
+        @hasFailed = true
         @emit 'close'
 
       @socket.on 'error', (e) =>
         @isConnected = false
+        @hasFailed = true
         @emit 'error', e
         reject(e)
 
@@ -47,8 +52,18 @@ module.exports = class Terminal extends EventEmitter
     setTimeout(@connect.bind(this), 100)
 
   send: (data) ->
-    if @socket
+    if @isConnected
       @socket.send(data)
+    else
+      if @hasFailed
+        @reset()
+        setTimeout =>
+          @waitForSocket.then =>
+            @socket.send(data)
+        , 200
+      else
+        @waitForSocket.then =>
+          @socket.send(data)
 
   updateToken: (token) ->
     @token = token
