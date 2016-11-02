@@ -19,7 +19,6 @@ atom.project.setPaths([getUserWorkingDirPath()])
 
 confirmOauthToken = (token) ->
   return new Promise (resolve, reject) ->
-    console.log('here')
     try
       authRequest = https.get
         host: 'learn.co'
