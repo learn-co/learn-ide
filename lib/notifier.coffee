@@ -49,6 +49,9 @@ class Notifier extends EventEmitter
         headers:
           'Authorization': 'Bearer ' + @authToken
       , (response) =>
+        console.log('debugging')
+        console.log(response)
+        console.log('response')
         body = ''
 
         response.on 'data', (d) ->
