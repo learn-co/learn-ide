@@ -68,12 +68,6 @@
       "default": null,
       "title": "OAuth Token",
       "description": "Your learn.co oauth token"
-    },
-    "vmPort": {
-      "type": "integer",
-      "default": null,
-      "title": "Remote Port",
-      "description": "The remote port available to you via the IDE terminal"
     }
   },
   "devDependencies": {

@@ -113,7 +113,6 @@ module.exports =
 
   loadCredentials: ->
     @oauthToken = atom.config.get('learn-ide.oauthToken')
-    @vmPort = atom.config.get('learn-ide.vmPort')
 
   consumeStatusBar: (statusBar) ->
     @waitForAuth.then =>
