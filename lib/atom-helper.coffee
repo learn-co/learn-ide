@@ -22,3 +22,7 @@ module.exports =
   on: (event, callback) ->
     atom.emitter.on(event, callback)
 
+  closePaneItems: ->
+    atom.workspace.getPanes().forEach (pane) ->
+      pane.close()
+

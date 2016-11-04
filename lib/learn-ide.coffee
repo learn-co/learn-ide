@@ -12,9 +12,10 @@ config = require './config'
 auth = require './auth'
 remote = require 'remote'
 BrowserWindow = remote.require('browser-window')
-token = require './token'
 
 module.exports =
+  token: require('./token')
+
   activate: (state) ->
     @disableFormerPackage()
     @waitForAuth = auth().then =>
@@ -23,8 +24,6 @@ module.exports =
       @activateIDE(state)
 
   activateIDE: (state) ->
-    @oauthToken = token.get()
-
     @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
     if @isTerminalWindow
       window.resizeTo(750, 500)
@@ -42,7 +41,7 @@ module.exports =
       host: config.host
       port: config.port
       path: config.path
-      token: @oauthToken
+      token: @token.get()
 
     @termView = new TerminalView(@term, null, @isTerminalWindow)
     @termView.toggle()
@@ -95,7 +94,7 @@ module.exports =
 
 
   activateNotifier: ->
-    @notifier = new Notifier(@oauthToken)
+    @notifier = new Notifier(@token.get())
     @notifier.activate()
 
   activateUpdater: ->
@@ -117,7 +116,7 @@ module.exports =
       statusBar.addRightTile(item: @statusView, priority: 5000)
 
   logout: ->
-    token.unset()
+    @token.unset()
 
     github = new BrowserWindow(show: false)
     github.webContents.on 'did-finish-load', -> github.show()
@@ -127,6 +126,7 @@ module.exports =
     learn.webContents.on 'did-finish-load', -> learn.destroy()
     learn.loadUrl('https://learn.co/sign_out')
 
+    atomHelper.closePaneItems()
     atom.reload()
 
   disableFormerPackage: ->
@@ -134,6 +134,4 @@ module.exports =
 
     if ilePkg?
       ilePkg.disable()
-
-  token: token
 
