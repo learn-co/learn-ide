@@ -39,18 +39,6 @@
     "utf8": "2.1.1"
   },
   "configSchema": {
-    "defaultFontSize": {
-      "type": "integer",
-      "default": 14,
-      "title": "Default Terminal Font Size",
-      "description": "Resetting your font size will fall back to this default"
-    },
-    "currentFontSize": {
-      "type": "integer",
-      "default": 14,
-      "title": "Current Terminal Font Size",
-      "description": "This is used to maintain any font size adjustment you've made"
-    },
     "terminalFontColor": {
       "type": "string",
       "default": "#ffffff",
