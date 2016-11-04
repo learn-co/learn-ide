@@ -12,6 +12,7 @@ config = require './config'
 auth = require './auth'
 remote = require 'remote'
 BrowserWindow = remote.require('browser-window')
+token = require './token'
 
 module.exports =
   activate: (state) ->
@@ -22,7 +23,7 @@ module.exports =
       @activateIDE(state)
 
   activateIDE: (state) ->
-    @loadCredentials()
+    @oauthToken = token.get()
 
     @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
     if @isTerminalWindow
@@ -111,15 +112,12 @@ module.exports =
   cleanup: ->
     atomHelper.cleanup()
 
-  loadCredentials: ->
-    @oauthToken = atom.config.get('learn-ide.oauthToken')
-
   consumeStatusBar: (statusBar) ->
     @waitForAuth.then =>
       statusBar.addRightTile(item: @statusView, priority: 5000)
 
   logout: ->
-    atom.config.unset('learn-ide.oauthToken')
+    token.unset()
 
     github = new BrowserWindow(show: false)
     github.webContents.on 'did-finish-load', -> github.show()
@@ -136,4 +134,6 @@ module.exports =
 
     if ilePkg?
       ilePkg.disable()
+
+  token: token
 

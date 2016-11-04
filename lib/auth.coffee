@@ -2,9 +2,10 @@ url = require 'url'
 https = require 'https'
 remote = require 'remote'
 shell = require 'shell'
+path = require 'path'
+mkdirp = require 'mkdirp'
+_token = require './token'
 BrowserWindow = remote.require('browser-window')
-path = require('path')
-mkdirp = require('mkdirp')
 
 workspaceView = atom.views.getView(atom.workspace)
 
@@ -62,7 +63,7 @@ githubLogin = () ->
       token = url.parse(newURL, true).query.ide_token
       confirmOauthToken(token).then (res) ->
         return unless res?
-        atom.config.set('learn-ide.oauthToken', token)
+        _token.set(token)
         win.destroy()
         resolve()
 
@@ -96,7 +97,7 @@ window.learnSignIn = () ->
         if token?.length
           confirmOauthToken(token).then (res) ->
             return unless res
-            atom.config.set('learn-ide.oauthToken', token)
+            _token.set(token)
             resolve()
       if newURL.match(/github_sign_in/)
         win.destroy()
@@ -142,7 +143,7 @@ promptManualEntry = ->
       token = input.value.trim()
       confirmOauthToken(token).then (res) ->
         if res
-          atom.config.set('learn-ide.oauthToken', input.value)
+          _token.set(token)
           panel.destroy()
           atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
           return true
@@ -160,12 +161,12 @@ learnLogout = ->
   win.loadUrl('https://learn.co/sign_out')
 
 window.logout = ->
-  atom.config.unset('learn-ide.oauthToken')
+  _token.unset()
   learnLogout()
   githubLogout()
 
 module.exports = ->
-  existingToken = atom.config.get('learn-ide.oauthToken')
+  existingToken = _token.get()
 
   if !existingToken
     learnSignIn()
