@@ -39,9 +39,11 @@ class TerminalView extends View
       atom.commands.dispatch(workspaceView, 'tree-view:toggle')
 
   applyEditorStyling: ->
+    fontSize = localStorage.get('learn-ide:currentFontSize')
+    fontSize ?= atom.config.defaultSettings.editor.fontSize
     @terminalWrapper.element.style.height = '100%'
     @terminalWrapper.element.style.fontFamily = -> atom.config.get('editor.fontFamily') or "monospace"
-    @terminalWrapper.element.style.fontSize = "#{atom.config.get('learn-ide.currentFontSize')}px"
+    @terminalWrapper.element.style.fontSize = "#{fontSize}px"
     @openColor = atom.config.get('learn-ide.terminalFontColor')
     @openBackgroundColor = atom.config.get('learn-ide.terminalBackgroundColor')
 
@@ -146,11 +148,11 @@ class TerminalView extends View
     @changeFontSize currentFontSize - 2
 
   resetFontSize: ->
-    defaultSize = atom.config.get('learn-ide.defaultFontSize')
+    defaultSize = atom.config.defaultSettings.editor.fontSize
     @changeFontSize defaultSize
 
   persistFontSize: (fontSize = @currentFontSize()) ->
-    atom.config.set('learn-ide.currentFontSize', fontSize)
+    localStorage.set('learn-ide:currentFontSize', fontSize)
 
   changeFontSize: (fontSize) ->
     @$termEl.css 'font-size', fontSize

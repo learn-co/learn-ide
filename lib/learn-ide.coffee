@@ -15,6 +15,8 @@ BrowserWindow = remote.require('browser-window')
 logger = require './logger'
 
 module.exports =
+  token: require('./token')
+
   activate: (state) ->
     logger.info('activating learn ide')
     @disableFormerPackage()
@@ -26,8 +28,6 @@ module.exports =
       logger.error('failed to authenticate')
 
   activateIDE: (state) ->
-    @loadCredentials()
-
     @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
     if @isTerminalWindow
       window.resizeTo(750, 500)
@@ -45,7 +45,7 @@ module.exports =
       host: config.host
       port: config.port
       path: config.path
-      token: @oauthToken
+      token: @token.get()
 
     @termView = new TerminalView(@term, null, @isTerminalWindow)
     @termView.toggle()
@@ -98,7 +98,7 @@ module.exports =
 
 
   activateNotifier: ->
-    @notifier = new Notifier(@oauthToken)
+    @notifier = new Notifier(@token.get())
     @notifier.activate()
 
   activateUpdater: ->
@@ -115,16 +115,12 @@ module.exports =
   cleanup: ->
     atomHelper.cleanup()
 
-  loadCredentials: ->
-    @oauthToken = atom.config.get('learn-ide.oauthToken')
-    @vmPort = atom.config.get('learn-ide.vmPort')
-
   consumeStatusBar: (statusBar) ->
     @waitForAuth.then =>
       statusBar.addRightTile(item: @statusView, priority: 5000)
 
   logout: ->
-    atom.config.unset('learn-ide.oauthToken')
+    @token.unset()
 
     github = new BrowserWindow(show: false)
     github.webContents.on 'did-finish-load', -> github.show()
@@ -134,6 +130,7 @@ module.exports =
     learn.webContents.on 'did-finish-load', -> learn.destroy()
     learn.loadUrl('https://learn.co/sign_out')
 
+    atomHelper.closePaneItems()
     atom.reload()
 
   disableFormerPackage: ->

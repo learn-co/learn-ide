@@ -40,18 +40,6 @@
     "winston": "2.3.0"
   },
   "configSchema": {
-    "defaultFontSize": {
-      "type": "integer",
-      "default": 14,
-      "title": "Default Terminal Font Size",
-      "description": "Resetting your font size will fall back to this default"
-    },
-    "currentFontSize": {
-      "type": "integer",
-      "default": 14,
-      "title": "Current Terminal Font Size",
-      "description": "This is used to maintain any font size adjustment you've made"
-    },
     "terminalFontColor": {
       "type": "string",
       "default": "#ffffff",
@@ -63,18 +51,6 @@
       "default": "#000000",
       "title": "Terminal Background Color",
       "description": "A valid CSS color value which will be used to style your terminal's background"
-    },
-    "oauthToken": {
-      "type": "string",
-      "default": null,
-      "title": "OAuth Token",
-      "description": "Your learn.co oauth token"
-    },
-    "vmPort": {
-      "type": "integer",
-      "default": null,
-      "title": "Remote Port",
-      "description": "The remote port available to you via the IDE terminal"
     }
   },
   "devDependencies": {

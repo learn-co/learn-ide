@@ -2,20 +2,12 @@ url = require 'url'
 https = require 'https'
 remote = require 'remote'
 shell = require 'shell'
+path = require 'path'
+mkdirp = require 'mkdirp'
+_token = require './token'
 BrowserWindow = remote.require('browser-window')
-path = require('path')
-mkdirp = require('mkdirp')
-
-# TODO: better location for this (extracted from atom-ile core)
-getUserWorkingDirPath = ->
-  configDirPath = atom.getConfigDirPath()
-  workingDirPath = path.join(configDirPath, 'code')
-  mkdirp(workingDirPath)
-  return workingDirPath
 
 workspaceView = atom.views.getView(atom.workspace)
-atom.commands.dispatch(workspaceView, 'tree-view:show')
-atom.project.setPaths([getUserWorkingDirPath()])
 
 confirmOauthToken = (token) ->
   return new Promise (resolve, reject) ->
@@ -71,8 +63,7 @@ githubLogin = () ->
       token = url.parse(newURL, true).query.ide_token
       confirmOauthToken(token).then (res) ->
         return unless res?
-        atom.config.set('learn-ide.oauthToken', token)
-        atom.config.set('learn-ide.vmPort', res.vm_uid)
+        _token.set(token)
         win.destroy()
         resolve()
 
@@ -106,8 +97,7 @@ window.learnSignIn = () ->
         if token?.length
           confirmOauthToken(token).then (res) ->
             return unless res
-            atom.config.set('learn-ide.oauthToken', token)
-            atom.config.set('learn-ide.vmPort', res.vm_uid)
+            _token.set(token)
             resolve()
       if newURL.match(/github_sign_in/)
         win.destroy()
@@ -153,19 +143,12 @@ promptManualEntry = ->
       token = input.value.trim()
       confirmOauthToken(token).then (res) ->
         if res
-          atom.config.set('learn-ide.oauthToken', input.value)
-          atom.config.set('learn-ide.vmPort', res.vm_uid)
+          _token.set(token)
           panel.destroy()
           atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
           return true
         else
           invalidLabel.setAttribute 'style', 'color: red; opacity: 100;'
-
-getVMPort = ->
-  confirmOauthToken(existingToken).then (res) ->
-    if res
-      atom.config.set('learn-ide.vmPort', res.vm_uid)
-      return true
 
 githubLogout = ->
   win = new BrowserWindow(show: false)
@@ -178,18 +161,14 @@ learnLogout = ->
   win.loadUrl('https://learn.co/sign_out')
 
 window.logout = ->
-  atom.config.unset('learn-ide.oauthToken')
-  atom.config.unset('learn-ide.vmPort')
+  _token.unset()
   learnLogout()
   githubLogout()
 
 module.exports = ->
-  existingToken = atom.config.get('learn-ide.oauthToken')
-  vmPort = atom.config.get('learn-ide.vmPort')
+  existingToken = _token.get()
 
   if !existingToken
     learnSignIn()
-  else if !vmPort
-    getVMPort()
   else
     confirmOauthToken(existingToken)
