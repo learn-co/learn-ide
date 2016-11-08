@@ -19,8 +19,11 @@ module.exports =
     if @isLastFocusedWindow()
       localStorage.delete('lastFocusedWindow')
 
-  on: (event, callback) ->
-    atom.emitter.on(event, callback)
+  emit: (key, detail) ->
+    atom.emitter.emit(key, detail)
+
+  on: (key, callback) ->
+    atom.emitter.on(key, callback)
 
   closePaneItems: ->
     atom.workspace.getPanes().forEach (pane) ->
