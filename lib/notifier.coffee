@@ -15,11 +15,11 @@ class Notifier extends EventEmitter
   activate: ->
 
     @on 'notification-debug', (msg) ->
-      console.log('msg from notification manager', msg)
+      console.log('NOTIFICATION DEBUG:', msg)
 
     @on 'new-notification', (data) =>
       if atomHelper.isLastFocusedWindow()
-        console.log('new notification data', data)
+        console.log('NOTIFICATION:', data)
 
         notif = new Notification data.displayTitle,
           body: data.message
@@ -29,12 +29,10 @@ class Notifier extends EventEmitter
           notif.close()
 
     @authenticate()
-      .then => 
-        console.log('authenticated!!!')
+      .then =>
         @connect()
       .catch (e) ->
-        console.log('error connecting to notification service')
-        console.error(e)
+        console.error 'error connecting to notification service:', e
 
   getIcon: (data) ->
     passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
@@ -49,9 +47,7 @@ class Notifier extends EventEmitter
         headers:
           'Authorization': 'Bearer ' + @authToken
       , (response) =>
-        console.log('debugging')
-        console.log(response)
-        console.log('response')
+        console.log 'NOTIFICATION RESPONSE:', response
         body = ''
 
         response.on 'data', (d) ->
