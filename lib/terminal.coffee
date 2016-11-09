@@ -2,6 +2,7 @@ utf8 = require 'utf8'
 {EventEmitter} = require 'events'
 SingleSocket = require 'single-socket'
 atomHelper = require './atom-helper'
+logger = require './logger'
 
 module.exports = class Terminal extends EventEmitter
   constructor: (args) ->
@@ -24,23 +25,27 @@ module.exports = class Terminal extends EventEmitter
         silent: true
 
       @socket.on 'open', =>
+        logger.info('term:open')
         @isConnected = true
         @hasFailed = false
         @emit 'open'
         resolve()
 
       @socket.on 'message', (msg) =>
+        logger.info('term:msg', {msg: msg})
         @emit 'message', utf8.decode(window.atob(msg))
 
       @socket.on 'close', () =>
         @isConnected = false
         @hasFailed = true
         @emit 'close'
+        logger.info('term:close')
 
       @socket.on 'error', (e) =>
         @isConnected = false
         @hasFailed = true
         @emit 'error', e
+        logger.error('term:error', {debug: @debugInfo(), error: e})
         reject(e)
 
   url: ->
@@ -48,24 +53,34 @@ module.exports = class Terminal extends EventEmitter
     "#{protocol}://#{@host}:#{@port}/#{@path}?token=#{@token}"
 
   reset: ->
+    logger.info('term:reset')
     @socket.close().then =>
       @connect()
     .catch (err) =>
       @emit 'error', err
 
-  send: (data) ->
+  send: (msg) ->
+    logger.info('term:send', {msg: msg})
     if @isConnected
-      @socket.send(data)
+      @socket.send(msg)
     else
       if @hasFailed
         @reset()
         setTimeout =>
           @waitForSocket.then =>
-            @socket.send(data)
+            @socket.send(msg)
         , 200
       else
         @waitForSocket.then =>
-          @socket.send(data)
+          @socket.send(msg)
 
-  updateToken: (token) ->
-    @token = token
+  debugInfo: ->
+    {
+      host: @host,
+      port: @port,
+      path: @path,
+      token: @token,
+      isConnected: @isConnected,
+      hasFailed: @hasFailed,
+      socket: @socket
+    }
