@@ -3,6 +3,7 @@ utf8 = require 'utf8'
 SingleSocket = require 'single-socket'
 atomHelper = require './atom-helper'
 logger = require './logger'
+path = require 'path'
 
 module.exports = class Terminal extends EventEmitter
   constructor: (args) ->
@@ -23,6 +24,7 @@ module.exports = class Terminal extends EventEmitter
       @socket = new SingleSocket @url(),
         spawn: atomHelper.spawn
         silent: true
+        logFile: path.join(atom.getConfigDirPath(), 'learn-ide.log')
 
       @socket.on 'open', =>
         logger.info('term:open')
