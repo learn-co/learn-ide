@@ -124,11 +124,11 @@ module.exports =
 
     github = new BrowserWindow(show: false)
     github.webContents.on 'did-finish-load', -> github.show()
-    github.loadUrl('https://github.com/logout')
+    github.loadURL('https://github.com/logout')
 
     learn = new BrowserWindow(show: false)
     learn.webContents.on 'did-finish-load', -> learn.destroy()
-    learn.loadUrl('https://learn.co/sign_out')
+    learn.loadURL('https://learn.co/sign_out')
 
     atomHelper.emit('learn-ide:logout')
     atomHelper.closePaneItems()

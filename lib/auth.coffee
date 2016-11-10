@@ -67,7 +67,7 @@ githubLogin = () ->
         win.destroy()
         resolve()
 
-    if not win.loadUrl('https://learn.co/ide/token?ide_config=true')
+    if not win.loadURL('https://learn.co/ide/token?ide_config=true')
       promptManualEntry()
 
 window.learnSignIn = () ->
@@ -103,7 +103,7 @@ window.learnSignIn = () ->
         win.destroy()
         githubLogin().then(resolve)
 
-    if not win.loadUrl('https://learn.co/ide/sign_in?ide_onboard=true')
+    if not win.loadURL('https://learn.co/ide/sign_in?ide_onboard=true')
       win.destroy()
       githubLogin.then(resolve)
 
@@ -153,12 +153,12 @@ promptManualEntry = ->
 githubLogout = ->
   win = new BrowserWindow(show: false)
   win.webContents.on 'did-finish-load', -> win.show()
-  win.loadUrl('https://github.com/logout')
+  win.loadURL('https://github.com/logout')
 
 learnLogout = ->
   win = new BrowserWindow(show: false)
   win.webContents.on 'did-finish-load', -> win.destroy()
-  win.loadUrl('https://learn.co/sign_out')
+  win.loadURL('https://learn.co/sign_out')
 
 window.logout = ->
   _token.unset()

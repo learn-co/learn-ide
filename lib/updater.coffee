@@ -61,7 +61,7 @@ module.exports = class Updater extends EventEmitter
               updatePath = path.resolve(path.join(__dirname, '..', 'static', 'update_check.html'))
 
               updatePageURL = "file://#{ updatePath }"
-              win.loadUrl(updatePageURL)
+              win.loadURL(updatePageURL)
 
               win.webContents.on 'did-finish-load', ->
                 win.show()
