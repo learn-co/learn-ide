@@ -13,11 +13,16 @@ auth = require './auth'
 remote = require 'remote'
 BrowserWindow = remote.require('browser-window')
 logger = require './logger'
+path = require 'path'
 
 module.exports =
   token: require('./token')
 
   activate: (state) ->
+    wsWindow = new BrowserWindow
+
+    wsWindow.loadURL("file://#{ path.join(__dirname, 'websocket.html') }")
+
     logger.info('activating learn ide')
     @disableFormerPackage()
     @waitForAuth = auth().then =>
