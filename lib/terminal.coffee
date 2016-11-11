@@ -42,19 +42,7 @@ module.exports = class Terminal extends EventEmitter
       @emit 'error', err
 
   send: (msg) ->
-    logger.info('term:send', {msg: msg})
-    if @isConnected
-      @socket.send(msg)
-    else
-      if @hasFailed
-        @reset()
-        setTimeout =>
-          @waitForSocket.then =>
-            @socket.send(msg)
-        , 200
-      else
-        @waitForSocket.then =>
-          @socket.send(msg)
+    bus.emit('send', msg)
 
   debugInfo: ->
     {
