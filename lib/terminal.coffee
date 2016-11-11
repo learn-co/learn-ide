@@ -4,6 +4,7 @@ SingleSocket = require 'single-socket'
 atomHelper = require './atom-helper'
 logger = require './logger'
 path = require 'path'
+bus = require('./event-bus')()
 
 module.exports = class Terminal extends EventEmitter
   constructor: (args) ->
@@ -21,34 +22,13 @@ module.exports = class Terminal extends EventEmitter
 
   connect: (token) ->
     @waitForSocket = new Promise (resolve, reject) =>
-      @socket = new SingleSocket @url(),
-        spawn: atomHelper.spawn
-        silent: true
-        logFile: path.join(atom.getConfigDirPath(), 'learn-ide.log')
-
-      @socket.on 'open', =>
-        logger.info('term:open')
-        @isConnected = true
-        @hasFailed = false
+      bus.on 'open', =>
         @emit 'open'
         resolve()
 
-      @socket.on 'message', (msg) =>
-        logger.info('term:msg', {msg: msg})
-        @emit 'message', utf8.decode(window.atob(msg))
-
-      @socket.on 'close', () =>
-        @isConnected = false
-        @hasFailed = true
-        @emit 'close'
-        logger.info('term:close')
-
-      @socket.on 'error', (e) =>
-        @isConnected = false
-        @hasFailed = true
-        @emit 'error', e
-        logger.error('term:error', {debug: @debugInfo(), error: e})
-        reject(e)
+      bus.on 'message', (message) =>
+        @emit 'message', utf8.decode(atob(message))
+        console.log('message over localStorage', message)
 
   url: ->
     protocol = if @port == 443 then 'wss' else 'ws'
