@@ -44,9 +44,11 @@ module.exports =
     @activateUpdater()
 
   activateWebsocket: ->
-    wsWindow = new BrowserWindow(webPreferences: {devTools: true})
-    wsWindow.loadURL("file://#{ path.join(__dirname, 'websocket.html') }")
-    wsWindow.webContents.openDevTools()
+    if !localStorage.get('ws:manager:started')
+      localStorage.set('ws:manager:started', true)
+      wsWindow = new BrowserWindow({show: false, webPreferences: {devTools: true}})
+      wsWindow.loadURL("file://#{ path.join(__dirname, 'websocket.html') }")
+      wsWindow.webContents.openDevTools()
 
   activateTerminal: ->
     @term = new Terminal
@@ -81,6 +83,8 @@ module.exports =
       @cleanup()
       if @isTerminalWindow
         bus.emit('terminal:popin', Date.now())
+
+      localStorage.delete('ws:manager:started')
 
   activateSubscriptions: ->
     @subscriptions = new CompositeDisposable
