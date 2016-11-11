@@ -6,6 +6,8 @@ logger = require './logger'
 path = require 'path'
 bus = require('./event-bus')()
 
+SocketDrawer = require('socket-drawer')
+
 module.exports = class Terminal extends EventEmitter
   constructor: (args) ->
     args || (args = {})
@@ -21,12 +23,15 @@ module.exports = class Terminal extends EventEmitter
     @connect()
 
   connect: (token) ->
+    @socket = new SocketDrawer('term', @url())
+
     @waitForSocket = new Promise (resolve, reject) =>
-      bus.on 'open', =>
+      @socket.on 'open', =>
         @emit 'open'
         resolve()
 
-      bus.on 'message', (message) =>
+      @socket.on 'message', (message) =>
+        console.log('message coming out of socket', message)
         @emit 'message', utf8.decode(atob(message))
         console.log('message over localStorage', message)
 
@@ -42,7 +47,7 @@ module.exports = class Terminal extends EventEmitter
       @emit 'error', err
 
   send: (msg) ->
-    bus.emit('send', msg)
+    @socket.send(msg)
 
   debugInfo: ->
     {

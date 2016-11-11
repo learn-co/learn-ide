@@ -34,21 +34,12 @@ module.exports =
       window.resizeTo(750, 500)
       localStorage.delete('popoutTerminal')
 
-
-    @activateWebsocket()
     @activateTerminal()
     @activateStatusView(state)
     @activateEventHandlers()
     @activateSubscriptions()
     @activateNotifier()
     @activateUpdater()
-
-  activateWebsocket: ->
-    if !localStorage.get('ws:manager:started')
-      localStorage.set('ws:manager:started', true)
-      wsWindow = new BrowserWindow({webPreferences: {devTools: true}})
-      wsWindow.loadURL("file://#{ path.join(__dirname, 'websocket.html') }")
-      wsWindow.webContents.openDevTools()
 
   activateTerminal: ->
     @term = new Terminal
