@@ -46,7 +46,7 @@ module.exports =
   activateWebsocket: ->
     if !localStorage.get('ws:manager:started')
       localStorage.set('ws:manager:started', true)
-      wsWindow = new BrowserWindow({show: false, webPreferences: {devTools: true}})
+      wsWindow = new BrowserWindow({webPreferences: {devTools: true}})
       wsWindow.loadURL("file://#{ path.join(__dirname, 'websocket.html') }")
       wsWindow.webContents.openDevTools()
 
