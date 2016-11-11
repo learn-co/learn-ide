@@ -19,10 +19,6 @@ module.exports =
   token: require('./token')
 
   activate: (state) ->
-    wsWindow = new BrowserWindow
-
-    wsWindow.loadURL("file://#{ path.join(__dirname, 'websocket.html') }")
-
     logger.info('activating learn ide')
     @disableFormerPackage()
     @waitForAuth = auth().then =>
@@ -38,12 +34,19 @@ module.exports =
       window.resizeTo(750, 500)
       localStorage.delete('popoutTerminal')
 
+
+    @activateWebsocket()
     @activateTerminal()
     @activateStatusView(state)
     @activateEventHandlers()
     @activateSubscriptions()
     @activateNotifier()
     @activateUpdater()
+
+  activateWebsocket: ->
+    wsWindow = new BrowserWindow(webPreferences: {devTools: true})
+    wsWindow.loadURL("file://#{ path.join(__dirname, 'websocket.html') }")
+    wsWindow.webContents.openDevTools()
 
   activateTerminal: ->
     @term = new Terminal

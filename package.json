@@ -25,6 +25,7 @@
   "dependencies": {
     "atom-space-pen-views": "2.1.0",
     "base-64": "0.1.0",
+    "coffee-script": "1.11.1",
     "cross-spawn": "2.1.5",
     "dotenv": "2.0.0",
     "fs-plus": "2.9.1",
