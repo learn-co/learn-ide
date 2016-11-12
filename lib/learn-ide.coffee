@@ -13,7 +13,6 @@ auth = require './auth'
 remote = require 'remote'
 BrowserWindow = remote.require('browser-window')
 logger = require './logger'
-path = require 'path'
 
 module.exports =
   token: require('./token')
@@ -74,8 +73,6 @@ module.exports =
       @cleanup()
       if @isTerminalWindow
         bus.emit('terminal:popin', Date.now())
-
-      localStorage.delete('ws:manager:started')
 
   activateSubscriptions: ->
     @subscriptions = new CompositeDisposable
