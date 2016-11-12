@@ -2,6 +2,7 @@ https = require 'https'
 querystring = require 'querystring'
 {EventEmitter} = require 'events'
 SingleSocket = require('single-socket')
+SocketDrawer = require('socket-drawer')
 atomHelper = require './atom-helper'
 
 module.exports =
@@ -70,9 +71,7 @@ class Notifier extends EventEmitter
             reject Error('Cannot subscribe to notifications. Problem parsing response.')
 
   connect: =>
-    @connection = new SingleSocket 'wss://push.flatironschool.com:9443/ws/fis-user-' + @id,
-      spawn: atomHelper.spawn
-      silent: true
+    @connection = new SocketDrawer('notif', 'wss://push.flatironschool.com:9443/ws/fis-user-' + @id)
 
     @connection.on 'open', (e) =>
       this.emit 'notification-debug', 'Listening for notifications...'
