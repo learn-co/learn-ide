@@ -5,8 +5,7 @@ atomHelper = require './atom-helper'
 logger = require './logger'
 path = require 'path'
 bus = require('./event-bus')()
-
-SocketDrawer = require('socket-drawer')
+AtomSocket = require('atom-socket')
 
 module.exports = class Terminal extends EventEmitter
   constructor: (args) ->
@@ -23,7 +22,7 @@ module.exports = class Terminal extends EventEmitter
     @connect()
 
   connect: (token) ->
-    @socket = new SocketDrawer('term', @url())
+    @socket = new AtomSocket('term', @url())
 
     @waitForSocket = new Promise (resolve, reject) =>
       @socket.on 'open', =>
