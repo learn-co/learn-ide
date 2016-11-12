@@ -31,9 +31,13 @@ module.exports = class Terminal extends EventEmitter
         resolve()
 
       @socket.on 'message', (message) =>
-        console.log('message coming out of socket', message)
         @emit 'message', utf8.decode(atob(message))
-        console.log('message over localStorage', message)
+
+      @socket.on 'close', =>
+        @emit 'close'
+
+      @socket.on 'error', (e) =>
+        @emit 'error', e
 
   url: ->
     protocol = if @port == 443 then 'wss' else 'ws'
@@ -41,10 +45,7 @@ module.exports = class Terminal extends EventEmitter
 
   reset: ->
     logger.info('term:reset')
-    @socket.close().then =>
-      @connect()
-    .catch (err) =>
-      @emit 'error', err
+    @socket.reset()
 
   send: (msg) ->
     @socket.send(msg)
