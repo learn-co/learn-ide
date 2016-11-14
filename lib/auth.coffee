@@ -3,7 +3,6 @@ https = require 'https'
 remote = require 'remote'
 shell = require 'shell'
 path = require 'path'
-mkdirp = require 'mkdirp'
 _token = require './token'
 BrowserWindow = remote.require('browser-window')
 

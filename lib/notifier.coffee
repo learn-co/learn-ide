@@ -1,7 +1,6 @@
 https = require 'https'
 querystring = require 'querystring'
 {EventEmitter} = require 'events'
-SingleSocket = require('single-socket')
 AtomSocket = require('atom-socket')
 atomHelper = require './atom-helper'
 

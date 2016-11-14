@@ -1,6 +1,5 @@
 utf8 = require 'utf8'
 {EventEmitter} = require 'events'
-SingleSocket = require 'single-socket'
 atomHelper = require './atom-helper'
 logger = require './logger'
 path = require 'path'

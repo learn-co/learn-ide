@@ -1,5 +1,4 @@
 {$, View} = require 'atom-space-pen-views'
-utf8      = require 'utf8'
 Clipboard = require 'clipboard'
 remote    = require 'remote'
 Menu      = remote.require 'menu'
