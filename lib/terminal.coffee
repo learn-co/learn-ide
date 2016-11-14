@@ -48,6 +48,9 @@ module.exports = class Terminal extends EventEmitter
   send: (msg) ->
     @socket.send(msg)
 
+  toggleDebugger: () ->
+    @socket.toggleDebugger()
+
   debugInfo: ->
     {
       host: @host,
