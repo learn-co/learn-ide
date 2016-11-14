@@ -31,12 +31,7 @@ function productName() {
 
 function executableName() {
   var name = productName().toLowerCase();
-
-  if (process.platform == 'win32') {
-    return name.replace(/ /g, '_');
-  }
-
-  return name.replace(/ /g, '-');
+  return name.replace(/ /g, '_');
 }
 
 function windowsInstallerName() {

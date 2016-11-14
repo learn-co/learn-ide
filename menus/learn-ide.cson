@@ -34,6 +34,10 @@
           'command': 'learn-ide:toggle-terminal'
         }
         {
+          'label': 'Toggle Debugger'
+          'command': 'learn-ide:toggle:debugger'
+        }
+        {
           'label': 'Reconnect'
           'command': 'learn-ide:reset'
         }

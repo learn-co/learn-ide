@@ -1,9 +1,10 @@
 utf8 = require 'utf8'
 {EventEmitter} = require 'events'
-SingleSocket = require 'single-socket'
 atomHelper = require './atom-helper'
 logger = require './logger'
 path = require 'path'
+bus = require('./event-bus')()
+AtomSocket = require('atom-socket')
 
 module.exports = class Terminal extends EventEmitter
   constructor: (args) ->
@@ -20,35 +21,21 @@ module.exports = class Terminal extends EventEmitter
     @connect()
 
   connect: (token) ->
-    @waitForSocket = new Promise (resolve, reject) =>
-      @socket = new SingleSocket @url(),
-        spawn: atomHelper.spawn
-        silent: true
-        logFile: path.join(atom.getConfigDirPath(), 'learn-ide.log')
+    @socket = new AtomSocket('term', @url())
 
+    @waitForSocket = new Promise (resolve, reject) =>
       @socket.on 'open', =>
-        logger.info('term:open')
-        @isConnected = true
-        @hasFailed = false
         @emit 'open'
         resolve()
 
-      @socket.on 'message', (msg) =>
-        logger.info('term:msg', {msg: msg})
-        @emit 'message', utf8.decode(window.atob(msg))
+      @socket.on 'message', (message) =>
+        @emit 'message', utf8.decode(atob(message))
 
-      @socket.on 'close', () =>
-        @isConnected = false
-        @hasFailed = true
+      @socket.on 'close', =>
         @emit 'close'
-        logger.info('term:close')
 
       @socket.on 'error', (e) =>
-        @isConnected = false
-        @hasFailed = true
         @emit 'error', e
-        logger.error('term:error', {debug: @debugInfo(), error: e})
-        reject(e)
 
   url: ->
     protocol = if @port == 443 then 'wss' else 'ws'
@@ -56,25 +43,13 @@ module.exports = class Terminal extends EventEmitter
 
   reset: ->
     logger.info('term:reset')
-    @socket.close().then =>
-      @connect()
-    .catch (err) =>
-      @emit 'error', err
+    @socket.reset()
 
   send: (msg) ->
-    logger.info('term:send', {msg: msg})
-    if @isConnected
-      @socket.send(msg)
-    else
-      if @hasFailed
-        @reset()
-        setTimeout =>
-          @waitForSocket.then =>
-            @socket.send(msg)
-        , 200
-      else
-        @waitForSocket.then =>
-          @socket.send(msg)
+    @socket.send(msg)
+
+  toggleDebugger: () ->
+    @socket.toggleDebugger()
 
   debugInfo: ->
     {

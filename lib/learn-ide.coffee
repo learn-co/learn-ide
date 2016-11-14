@@ -81,6 +81,7 @@ module.exports =
       'learn-ide:open': (e) => @termView.openLab(e.detail.path)
       'learn-ide:toggle-terminal': () => @termView.toggle()
       'learn-ide:toggle-focus': => @termView.toggleFocus()
+      'learn-ide:toggle:debugger': => @term.toggleDebugger()
       'learn-ide:logout': => @logout()
       'learn-ide:reset': => @term.reset()
       'application:update-ile': -> (new Updater).checkForUpdate()

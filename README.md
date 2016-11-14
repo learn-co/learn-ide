@@ -16,7 +16,7 @@ The Learn IDE client is a modified Atom build with two packages injected to prov
 Those two packages include a couple important libraries:
 
 - **[nsync-fs](https://github.com/learn-co/nsync-fs)** A virtual file system for keeping Atom synced with the remote server
-- **[single-socket](https://github.com/learn-co/single-socket)** A library for sharing a single websocket connection across multiple Node processes. Every Atom window is a separate process and we want to share our server connection between all of them.
+- **[atom-socket](https://github.com/learn-co/atom-socket)** A library for sharing a single websocket connection in Atom packages.
 
 ## Getting Started
 
