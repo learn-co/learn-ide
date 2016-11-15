@@ -23,7 +23,7 @@
     }
   },
   "dependencies": {
-    "atom-socket": "0.0.2",
+    "atom-socket": "0.0.3",
     "atom-space-pen-views": "2.1.0",
     "dotenv": "2.0.0",
     "learn-term.js": "0.0.7",
