@@ -12,20 +12,19 @@ config = require './config'
 auth = require './auth'
 remote = require 'remote'
 BrowserWindow = remote.require('browser-window')
-logger = require './logger'
 
 module.exports =
   token: require('./token')
 
   activate: (state) ->
-    logger.info('activating learn ide')
+    console.log('activating learn ide')
     @disableFormerPackage()
     @waitForAuth = auth().then =>
       @activateIDE(state)
-      logger.info('successfully authenticated')
+      console.log('successfully authenticated')
     .catch =>
       @activateIDE(state)
-      logger.error('failed to authenticate')
+      console.error('failed to authenticate')
 
   activateIDE: (state) ->
     @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')

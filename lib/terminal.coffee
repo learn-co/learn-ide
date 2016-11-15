@@ -1,7 +1,6 @@
 utf8 = require 'utf8'
 {EventEmitter} = require 'events'
 atomHelper = require './atom-helper'
-logger = require './logger'
 path = require 'path'
 bus = require('./event-bus')()
 AtomSocket = require('atom-socket')
@@ -42,7 +41,7 @@ module.exports = class Terminal extends EventEmitter
     "#{protocol}://#{@host}:#{@port}/#{@path}?token=#{@token}"
 
   reset: ->
-    logger.info('term:reset')
+    console.log('term:reset')
     @socket.reset()
 
   send: (msg) ->
