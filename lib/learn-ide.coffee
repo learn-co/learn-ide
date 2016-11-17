@@ -85,11 +85,8 @@ module.exports =
       'learn-ide:reset': => @term.reset()
       'application:update-ile': -> (new Updater).checkForUpdate()
 
-    # Listen for connection updates from the learn-ide-tree package, as
-    # it actively monitors the status of its websocket through a sort of ping & pong.
-    atomHelper.on 'learn-ide-tree:connection', (status) =>
-      if status.isConnected isnt @term.isConnected
-        @term.reset()
+    window.addEventListener 'offline', => @term.reset()
+    window.addEventListener 'online', => @term.reset()
 
     openPath = localStorage.get('learnOpenLabOnActivation')
     if openPath
@@ -111,6 +108,8 @@ module.exports =
     @termView = null
     @statusView = null
     @subscriptions.dispose()
+    window.removeEventListener 'offline', => @term.reset()
+    window.removeEventListener 'online', => @term.reset()
 
   cleanup: ->
     atomHelper.cleanup()
