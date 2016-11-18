@@ -133,3 +133,7 @@ class Notifier extends EventEmitter
     switch event.type
       when 'submission' then parseInt(event.submission_id)
       else null
+
+  deactivate: ->
+    @connection.close()
+

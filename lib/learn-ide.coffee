@@ -89,6 +89,9 @@ module.exports =
     window.addEventListener 'offline', => @term.reset()
     window.addEventListener 'online', => @term.reset()
 
+    atom.config.onDidChange 'learn-ide.notifier', ({newValue}) =>
+      if newValue then @activateNotifier() else @notifier.deactivate()
+
     openPath = localStorage.get('learnOpenLabOnActivation')
     if openPath
       localStorage.delete('learnOpenLabOnActivation')
@@ -96,8 +99,9 @@ module.exports =
 
 
   activateNotifier: ->
-    @notifier = new Notifier(@token.get())
-    @notifier.activate()
+    if atom.config.get('learn-ide.notifier')
+      @notifier = new Notifier(@token.get())
+      @notifier.activate()
 
   activateUpdater: ->
     @updater = new Updater(true)

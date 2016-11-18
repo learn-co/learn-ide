@@ -32,6 +32,12 @@
     "utf8": "2.1.1"
   },
   "configSchema": {
+    "notifier": {
+      "type": "boolean",
+      "default": true,
+      "title": "Learn Status Notifications",
+      "description": "Receive desktop notifications that correspond to the lights on Learn.co"
+    },
     "terminalFontColor": {
       "type": "string",
       "default": "#ffffff",
