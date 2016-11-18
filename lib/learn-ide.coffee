@@ -54,7 +54,7 @@ module.exports =
 
     bus.on 'terminal:popin', () =>
       @statusView.onTerminalPopIn()
-      @termView.toggle()
+      @termView.showAndFocus()
 
     @statusView.on 'terminal:popout', =>
       @termView.toggle()
