@@ -1,8 +1,9 @@
 https = require 'https'
 querystring = require 'querystring'
 {EventEmitter} = require 'events'
-AtomSocket = require('atom-socket')
+AtomSocket = require 'atom-socket'
 atomHelper = require './atom-helper'
+path = require 'path'
 
 module.exports =
 class Notifier extends EventEmitter
@@ -35,9 +36,9 @@ class Notifier extends EventEmitter
         console.error 'error connecting to notification service:', e
 
   getIcon: (data) ->
-    passingIcon = 'http://i.imgbox.com/pAjW8tY1.png'
-    failingIcon = 'http://i.imgbox.com/vVZZG1Gx.png'
-    if data.passing == 'true' then passingIcon else failingIcon
+    pass = path.resolve(__dirname, '..', 'static', 'images', 'pass.png')
+    fail = path.resolve(__dirname, '..', 'static', 'images', 'fail.png')
+    if data.passing is 'true' then pass else fail
 
   authenticate: =>
     return new Promise (resolve, reject) =>
