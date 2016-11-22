@@ -86,9 +86,6 @@ module.exports =
       'learn-ide:reset': => @term.reset()
       'application:update-ile': -> (new Updater).checkForUpdate()
 
-    window.addEventListener 'offline', => @term.reset()
-    window.addEventListener 'online', => @term.reset()
-
     atom.config.onDidChange 'learn-ide.notifier', ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()
 
@@ -113,8 +110,6 @@ module.exports =
     @termView = null
     @statusView = null
     @subscriptions.dispose()
-    window.removeEventListener 'offline', => @term.reset()
-    window.removeEventListener 'online', => @term.reset()
 
   cleanup: ->
     atomHelper.cleanup()

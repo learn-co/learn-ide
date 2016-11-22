@@ -1,8 +1,8 @@
 {
   "name": "learn-ide",
-  "version": "2.1.0-beta4",
+  "version": "2.1.0-beta5",
   "atomVersion": "1.12.2",
-  "treeVersion": "1.0.14",
+  "treeVersion": "1.0.15",
   "main": "./lib/learn-ide",
   "urlMain": "./lib/url-handler",
   "description": "An integrated development environment for use with Learn.co",
@@ -23,7 +23,7 @@
     }
   },
   "dependencies": {
-    "atom-socket": "0.0.3",
+    "atom-socket": "learn-co/atom-socket#v0.0.5",
     "atom-space-pen-views": "2.1.0",
     "dotenv": "2.0.0",
     "learn-term.js": "0.0.7",
