@@ -1,8 +1,8 @@
 {
   "name": "learn-ide",
-  "version": "2.1.0-beta5",
+  "version": "2.1.0-beta6",
   "atomVersion": "1.12.2",
-  "treeVersion": "1.0.16",
+  "treeVersion": "1.0.17",
   "main": "./lib/learn-ide",
   "urlMain": "./lib/url-handler",
   "description": "An integrated development environment for use with Learn.co",
