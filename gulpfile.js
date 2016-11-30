@@ -176,7 +176,7 @@ gulp.task('alter-files', function() {
   ]);
 
   replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
-    [/Atom/g, productName()]
+    [/'Atom'/g, `'${productName()}'`]
   ]);
 
   if (process.platform != 'linux') {
