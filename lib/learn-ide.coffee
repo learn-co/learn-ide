@@ -18,6 +18,7 @@ module.exports =
 
   activate: (state) ->
     console.log 'activating learn ide'
+    @checkForV1WindowsInstall()
     @disableFormerPackage()
 
     @subscriptions = new CompositeDisposable
@@ -143,6 +144,16 @@ module.exports =
     atomHelper.emit('learn-ide:logout')
     atomHelper.closePaneItems()
     atom.reload()
+
+  checkForV1WindowsInstall: ->
+    isWindows = process.platform == 'win32'
+    return if !isWindows
+
+    installLocationX86 = path.join(process.env['ProgramFiles(x86)'], 'Learn IDE')
+    installLocation = path.join(process.env['ProgramFiles'], 'Learn IDE')
+
+    if (fs.existsSync(installLocationX86) || fs.existsSync(installLocation))
+      alert('old copy of Learn IDE detected')
 
   disableFormerPackage: ->
     ilePkg = atom.packages.loadPackage('integrated-learn-environment')
