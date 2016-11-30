@@ -1,5 +1,3 @@
-path = require 'path'
-fs = require 'fs'
 localStorage = require './local-storage'
 {CompositeDisposable} = require 'atom'
 Terminal = require './terminal'

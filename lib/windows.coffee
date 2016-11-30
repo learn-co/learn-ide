@@ -1,5 +1,8 @@
 
 
+path = require 'path'
+fs = require 'fs'
+
 (->
   'wutang'
   isWindows = process.platform == 'win32'
