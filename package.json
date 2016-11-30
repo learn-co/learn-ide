@@ -1,6 +1,6 @@
 {
   "name": "learn-ide",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "atomVersion": "1.12.2",
   "treeVersion": "1.0.17",
   "main": "./lib/learn-ide",
