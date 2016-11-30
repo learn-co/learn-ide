@@ -12,6 +12,7 @@ fs = require 'fs'
   installLocation = path.join(process.env['ProgramFiles'], 'Learn IDE')
 
   if (fs.existsSync(installLocationX86) || fs.existsSync(installLocation))
+    alert('old copy of Learn IDE detected')
     v1InitFile = path.join(atom.getConfigDirPath(), 'ide-init.coffee')
     if fs.existsSync(v1InitFile)
       contents = fs.readFileSync(v1InitFile, 'utf8')
@@ -19,7 +20,6 @@ fs = require 'fs'
       alert('no id present injecting code')
       codeToInject = fs.readFileSync(__filename, 'utf8') + '\n\nv1pkg = atom.packages.loadPackage("integrated-learn-environment")\nif v1pkg\n  v1pkg.enable()\n'
       fs.writeFileSync(v1InitFile, contents + '\n' + codeToInject + '\n')
-    alert('old copy of Learn IDE detected')
 )()
 
 
