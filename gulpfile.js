@@ -175,6 +175,10 @@ gulp.task('alter-files', function() {
     [/'Atom Beta' : 'Atom'/g, "'" + productName() + "' : '" + productName() + "'"]
   ]);
 
+  replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
+    [/Atom/g, productName()]
+  ]);
+
   if (process.platform != 'linux') {
     replaceInFile(path.join(buildDir, 'script', 'lib', 'package-application.js'), [
       [/return 'atom'/, "return '" + executableName() + "'"],
