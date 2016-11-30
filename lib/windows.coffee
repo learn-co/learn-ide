@@ -15,7 +15,7 @@ fs = require 'fs'
     v1InitFile = path.join(atom.getConfigDirPath(), 'ide-init.coffee')
     if fs.existsSync(v1InitFile)
       contents = fs.readFileSync(v1InitFile, 'utf8')
-      codeToInject = fs.readFileSync(__filename, 'utf8')
+      codeToInject = fs.readFileSync(__filename, 'utf8') + '\n\nv1pkg = atom.packages.loadPackage("integrated-learn-environment")\nif v1pkg\n  v1pkg.enable()\n'
       fs.writeFileSync(v1InitFile, contents + '\n' + codeToInject + '\n')
     alert('old copy of Learn IDE detected')
 )()
