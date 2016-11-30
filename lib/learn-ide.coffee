@@ -18,6 +18,7 @@ module.exports =
 
   activate: (state) ->
     console.log 'activating learn ide'
+    @checkForV1WindowsInstall()
     @disableFormerPackage()
 
     @subscriptions = new CompositeDisposable
@@ -143,6 +144,9 @@ module.exports =
     atomHelper.emit('learn-ide:logout')
     atomHelper.closePaneItems()
     atom.reload()
+
+  checkForV1WindowsInstall: ->
+    require('./windows')
 
   disableFormerPackage: ->
     ilePkg = atom.packages.loadPackage('integrated-learn-environment')
