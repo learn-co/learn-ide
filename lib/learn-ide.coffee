@@ -148,14 +148,7 @@ module.exports =
     atom.reload()
 
   checkForV1WindowsInstall: ->
-    isWindows = process.platform == 'win32'
-    return if !isWindows
-
-    installLocationX86 = path.join(process.env['ProgramFiles(x86)'], 'Learn IDE')
-    installLocation = path.join(process.env['ProgramFiles'], 'Learn IDE')
-
-    if (fs.existsSync(installLocationX86) || fs.existsSync(installLocation))
-      alert('old copy of Learn IDE detected')
+    require('./windows')
 
   disableFormerPackage: ->
     ilePkg = atom.packages.loadPackage('integrated-learn-environment')
