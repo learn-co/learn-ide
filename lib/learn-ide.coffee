@@ -17,8 +17,12 @@ module.exports =
   token: require('./token')
 
   activate: (state) ->
-    console.log('activating learn ide')
+    console.log 'activating learn ide'
     @disableFormerPackage()
+
+    @subscriptions = new CompositeDisposable
+    @subscribeToLogin()
+
     @waitForAuth = auth().then =>
       @activateIDE(state)
       console.log('successfully authenticated')
@@ -74,15 +78,12 @@ module.exports =
         bus.emit('terminal:popin', Date.now())
 
   activateSubscriptions: ->
-    @subscriptions = new CompositeDisposable
-
     @subscriptions.add atom.commands.add 'atom-workspace',
       'learn-ide:open': (e) => @termView.openLab(e.detail.path)
       'learn-ide:toggle-terminal': () => @termView.toggle()
       'learn-ide:toggle-focus': => @termView.toggleFocus()
       'learn-ide:focus': => @termView.fullFocus()
       'learn-ide:toggle:debugger': => @term.toggleDebugger()
-      'learn-ide:logout': => @logout()
       'learn-ide:reset': => @term.reset()
       'application:update-ile': -> (new Updater).checkForUpdate()
 
@@ -111,12 +112,22 @@ module.exports =
     @statusView = null
     @subscriptions.dispose()
 
+  subscribeToLogin: ->
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'learn-ide:log-in-out': => @logInOrOut()
+
   cleanup: ->
     atomHelper.cleanup()
 
   consumeStatusBar: (statusBar) ->
     @waitForAuth.then =>
       statusBar.addRightTile(item: @statusView, priority: 5000)
+
+  logInOrOut: ->
+    if @token.get()?
+      @logout()
+    else
+      atomHelper.resetPackage()
 
   logout: ->
     @token.unset()

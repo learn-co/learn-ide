@@ -1,5 +1,9 @@
 localStorage = require './local-storage'
 
+packageName = ->
+  pkg = require '../package.json'
+  pkg.name
+
 module.exports =
   isLastFocusedWindow: ->
     parseInt(localStorage.get('lastFocusedWindow')) == process.pid
@@ -28,4 +32,9 @@ module.exports =
   closePaneItems: ->
     atom.workspace.getPanes().forEach (pane) ->
       pane.close()
+
+  resetPackage: ->
+    atom.packages.deactivatePackage(packageName())
+    atom.packages.activatePackage(packageName()).then ->
+      atom.menu.sortPackagesMenu()
 

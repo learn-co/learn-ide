@@ -42,8 +42,8 @@
           'command': 'learn-ide:reset'
         }
         {
-          'label': 'Logout'
-          'command': 'learn-ide:logout'
+          'label': 'Log In/Out'
+          'command': 'learn-ide:log-in-out'
         }
       ]
     ]
