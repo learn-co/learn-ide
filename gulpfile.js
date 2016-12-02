@@ -200,6 +200,20 @@ gulp.task('alter-files', function() {
       'options.socketPath = path.join(os.tmpdir(), "' + executableName() + '-#{options.version}-#{process.env.USER}.sock")'
     ]
   ]);
+
+  replaceInFile(path.join(buildDir, 'resources', 'mac', 'atom-Info.plist'), [
+    [
+      /(CFBundleURLSchemes.+\n.+\n.+)(atom)(.+)/,
+      '$1learn-ide$3'
+    ]
+  ]);
+
+  replaceInFile(path.join(buildDir, 'src', 'main-process', 'atom-protocol-handler.coffee'), [
+    [
+      /(registerFileProtocol.+)(atom)(.+)/,
+      '$1learn-ide$3'
+    ]
+  ]);
 })
 
 gulp.task('update-package-json', function() {
