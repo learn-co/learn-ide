@@ -29,7 +29,8 @@
     "learn-term.js": "0.0.7",
     "page-bus": "3.0.1",
     "underscore-plus": "1.6.6",
-    "utf8": "2.1.1"
+    "utf8": "2.1.1",
+    "winreg": "1.2.2"
   },
   "configSchema": {
     "notifier": {
