@@ -19,6 +19,7 @@ module.exports =
   activate: (state) ->
     console.log 'activating learn ide'
     @checkForV1WindowsInstall()
+    @registerWindowsProtocol()
     @disableFormerPackage()
 
     @subscriptions = new CompositeDisposable
@@ -147,6 +148,10 @@ module.exports =
 
   checkForV1WindowsInstall: ->
     require('./windows')
+
+  registerWindowsProtocol: ->
+    if process.platform == 'win32'
+      require('./protocol')
 
   disableFormerPackage: ->
     ilePkg = atom.packages.loadPackage('integrated-learn-environment')

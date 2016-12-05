@@ -27,7 +27,9 @@
     "atom-space-pen-views": "2.1.0",
     "dotenv": "2.0.0",
     "learn-term.js": "0.0.7",
+    "node-windows": "^0.1.12",
     "page-bus": "3.0.1",
+    "register-protocol-win32": "^1.0.0",
     "underscore-plus": "1.6.6",
     "utf8": "2.1.1",
     "winreg": "1.2.2"
