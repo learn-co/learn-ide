@@ -27,6 +27,10 @@ module.exports = class Terminal extends EventEmitter
         @emit 'open'
         resolve()
 
+      @socket.on 'open:cached', =>
+        @emit 'open'
+        resolve()
+
       @socket.on 'message', (message) =>
         @emit 'message', utf8.decode(atob(message))
 
