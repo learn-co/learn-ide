@@ -27,6 +27,10 @@ module.exports = class Terminal extends EventEmitter
         @emit 'open'
         resolve()
 
+      @socket.on 'open:cached', =>
+        @emit 'open'
+        resolve()
+
       @socket.on 'message', (message) =>
         @emit 'message', utf8.decode(atob(message))
 
@@ -45,7 +49,12 @@ module.exports = class Terminal extends EventEmitter
     @socket.reset()
 
   send: (msg) ->
-    @socket.send(msg)
+    if @waitForSocket
+      @waitForSocket.then =>
+        @waitForSocket = null
+        @socket.send(msg)
+    else
+      @socket.send(msg)
 
   toggleDebugger: () ->
     @socket.toggleDebugger()
