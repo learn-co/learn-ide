@@ -45,7 +45,12 @@ module.exports = class Terminal extends EventEmitter
     @socket.reset()
 
   send: (msg) ->
-    @socket.send(msg)
+    if @waitForSocket
+      @waitForSocket.then =>
+        @waitForSocket = null
+        @socket.send(msg)
+    else
+      @socket.send(msg)
 
   toggleDebugger: () ->
     @socket.toggleDebugger()
