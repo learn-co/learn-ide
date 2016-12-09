@@ -8,7 +8,7 @@ The Learn IDE client is a modified Atom build with two packages injected to prov
 
 **Atom Packages:**
 
-- **[Learn IDE](https://github.com/flatiron-labs/integrated-learn-environment)** - The main extension
+- **[Learn IDE](https://github.com/learn-co/learn-ide)** - The main extension
 - **[Learn IDE Tree](https://github.com/learn-co/learn-ide-tree)** - Our fork of Atom's [tree view](https://github.com/atom/tree-view). Intercepts Atom's file system events and instead performs them on our remote backend.
 
 **Related libraries:**
