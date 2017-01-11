@@ -7,7 +7,7 @@ localStorage = require '../local-storage'
 module.exports =
 class StatusView extends View
   @content: ->
-    @div class: 'learn-synced-fs-status', =>
+    @div class: 'learn-synced-fs-status inline-block', =>
       @div class: 'learn-status-icon inline-block icon-terminal', id: 'learn-status-icon', ' Learn'
       @div class: 'learn-popout-terminal-icon inline-block icon-link-external', id: 'learn-popout-terminal-icon'
 

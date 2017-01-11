@@ -123,7 +123,7 @@ module.exports =
 
   consumeStatusBar: (statusBar) ->
     @waitForAuth.then =>
-      statusBar.addRightTile(item: @statusView, priority: 5000)
+      statusBar.addRightTile(item: @statusView, priority: -5000)
 
   logInOrOut: ->
     if @token.get()?
