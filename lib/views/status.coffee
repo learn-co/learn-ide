@@ -7,9 +7,9 @@ localStorage = require '../local-storage'
 module.exports =
 class StatusView extends View
   @content: ->
-    @div class: 'learn-synced-fs-status inline-block', =>
-      @div class: 'learn-status-icon inline-block icon-terminal', id: 'learn-status-icon', ' Learn'
-      @div class: 'learn-popout-terminal-icon inline-block icon-link-external', id: 'learn-popout-terminal-icon'
+    @div class: 'learn-synced-fs-status inline-block inline-block-tight', =>
+      @div class: 'learn-status-icon inline-block inline-block-tight icon icon-terminal', id: 'learn-status-icon', ' Learn'
+      @div class: 'learn-popout-terminal-icon inline-block inline-block-tight icon icon-link-external', id: 'learn-popout-terminal-icon'
 
   constructor: (state, termSocket, @options) ->
     super
@@ -33,7 +33,7 @@ class StatusView extends View
     @socket.on 'error', =>
       @displayDisconnected()
 
-    @statusIcon().addEventListener 'click', (e) =>  
+    @statusIcon().addEventListener 'click', (e) =>
       # TODO: have this based on the socket state itself instead of the view state
       if e.target.dataset.status == 'bad'
         @socket.reset()
