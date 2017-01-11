@@ -4,7 +4,7 @@ remote = require 'remote'
 shell = require 'shell'
 path = require 'path'
 _token = require './token'
-BrowserWindow = remote.require('browser-window')
+BrowserWindow = remote.BrowserWindow
 
 workspaceView = atom.views.getView(atom.workspace)
 

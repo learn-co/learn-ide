@@ -1,7 +1,7 @@
 https = require 'https'
 {EventEmitter} = require 'events'
 remote = require 'remote'
-BrowserWindow = remote.require 'browser-window'
+BrowserWindow = remote.BrowserWindow
 version = require './version'
 shell = require 'shell'
 path = require 'path'

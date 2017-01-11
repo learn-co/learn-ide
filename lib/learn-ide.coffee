@@ -11,7 +11,7 @@ atomHelper = require './atom-helper'
 config = require './config'
 auth = require './auth'
 remote = require 'remote'
-BrowserWindow = remote.require('browser-window')
+BrowserWindow = remote.BrowserWindow
 
 module.exports =
   token: require('./token')

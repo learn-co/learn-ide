@@ -1,7 +1,7 @@
 {$, View} = require 'atom-space-pen-views'
 Clipboard = require 'clipboard'
 remote    = require 'remote'
-Menu      = remote.require 'menu'
+Menu      = remote.Menu
 TerminalWrapper = require './terminal-wrapper'
 localStorage = require '../local-storage'
 
