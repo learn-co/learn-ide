@@ -122,8 +122,7 @@ module.exports =
     atomHelper.cleanup()
 
   consumeStatusBar: (statusBar) ->
-    @waitForAuth.then =>
-      statusBar.addRightTile(item: @statusView, priority: -5000)
+    @waitForAuth.then => @addLearnToStatusBar(statusBar)
 
   logInOrOut: ->
     if @token.get()?
@@ -158,4 +157,16 @@ module.exports =
 
     if ilePkg?
       ilePkg.disable()
+
+  addLearnToStatusBar: (statusBar) ->
+    leftTiles = Array.from(statusBar.getLeftTiles())
+    rightTiles = Array.from(statusBar.getRightTiles())
+    rightMostTile = rightTiles[rightTiles.length - 1]
+
+    if @isTerminalWindow
+      leftTiles.concat(rightTiles).forEach (tile) ->
+        tile.destroy()
+
+    priority = (rightMostTile?.priority || 0) - 1
+    statusBar.addRightTile({item: @statusView, priority})
 
