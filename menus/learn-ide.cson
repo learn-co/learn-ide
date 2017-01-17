@@ -39,7 +39,7 @@
         }
         {
           'label': 'Reconnect'
-          'command': 'learn-ide:reset'
+          'command': 'learn-ide:reset-connection'
         }
         {
           'label': 'Log In/Out'

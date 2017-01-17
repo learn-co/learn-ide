@@ -35,12 +35,13 @@ class StatusView extends View
 
     @statusIcon().addEventListener 'click', (e) =>
       # TODO: have this based on the socket state itself instead of the view state
-      if e.target.dataset.status == 'bad'
-        @socket.reset()
+      if e.target.dataset.status is 'bad'
+        view = atom.views.getView(atom.workspace)
+        atom.commands.dispatch view, 'learn-ide:reset-connection'
 
   displayDisconnected: ->
     icon = @statusIcon()
-    icon.textContent = ' Learn...reconnect?'
+    icon.textContent = ' Learn ...reconnect?'
     icon.dataset.status = 'bad'
 
   activatePopoutIcon: ->

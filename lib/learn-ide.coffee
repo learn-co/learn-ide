@@ -86,7 +86,7 @@ module.exports =
       'learn-ide:toggle-focus': => @termView.toggleFocus()
       'learn-ide:focus': => @termView.fullFocus()
       'learn-ide:toggle:debugger': => @term.toggleDebugger()
-      'learn-ide:reset': => @term.reset()
+      'learn-ide:reset-connection': => @term.reset()
       'application:update-ile': -> (new Updater).checkForUpdate()
 
     atom.config.onDidChange 'learn-ide.notifier', ({newValue}) =>
