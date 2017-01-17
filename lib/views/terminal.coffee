@@ -47,7 +47,9 @@ class TerminalView extends View
     @openBackgroundColor = atom.config.get('learn-ide.terminalBackgroundColor')
 
   displayDisconnected: ->
+    @displayingDisconnect = true
     @terminalWrapper.off 'data'
+    @terminalWrapper.reset()
     @terminalWrapper.element.style.color = '#666'
     @terminalWrapper.cursorHidden = true
     @terminalWrapper.write('Unable to connect to Learn\r')
@@ -63,6 +65,9 @@ class TerminalView extends View
       @terminal.send(data)
 
     @terminal.on 'message', (message) =>
+      if @displayingDisconnect
+        @terminalWrapper.reset()
+        @displayingDisconnect = false
       @terminalWrapper.write(message)
 
     @terminal.on 'close', () =>
