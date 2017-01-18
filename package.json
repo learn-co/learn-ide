@@ -2,7 +2,7 @@
   "name": "learn-ide",
   "version": "2.3.1",
   "atomVersion": "1.13.0",
-  "treeVersion": "1.0.19",
+  "treeVersion": "1.0.20",
   "main": "./lib/learn-ide",
   "urlMain": "./lib/url-handler",
   "description": "An integrated development environment for use with Learn.co",
