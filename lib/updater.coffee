@@ -15,8 +15,8 @@ module.exports = class Updater extends EventEmitter
   checkForUpdate: =>
     if (@autoCheck && @noCheckToday()) || !@autoCheck
       https.get
-        host: 'learn.co'
-        path: '/api/v1/learn_ide/latest_version'
+        host: 'api.github.com'
+        path: '/repos/learn-co/learn-ide/releases/latest'
       , (response) =>
         body = ''
 
@@ -27,19 +27,18 @@ module.exports = class Updater extends EventEmitter
           parsed = JSON.parse(body)
 
           try
-            currentVersionNums = @currentVersion.split('.').map((n) -> parseInt(n))
-            latestVersionNums  = parsed.version.split('.').map((n) -> parseInt(n))
+            current = @currentVersion.match(/[\d|\.]+/)[0]
+            latest  = parsed.tag_name.match(/[\d|\.]+/)[0]
 
             atom.blobStore.set('learnUpdateCheckDate', 'learn-update-key', new Buffer(Date.now().toString()))
             atom.blobStore.save()
 
-            outOfDate = @outOfDate(currentVersionNums, latestVersionNums)
+            outOfDate = current isnt latest
 
             if @autoCheck && !outOfDate
               console.log 'Automatically checked for updates...up to date.'
             else
-              {win, mac} = parsed.download_urls
-              downloadURL = if process.platform == 'win32' then win else mac
+              downloadUrl = @getDownloadUrl(parsed)
 
               localStorage.set 'updateCheck', JSON.stringify(
                 downloadURL: downloadURL
@@ -70,17 +69,16 @@ module.exports = class Updater extends EventEmitter
             console.log 'There was a problem checking for updates.'
             console.error(err)
 
-  outOfDate: (currentNums, latestNums) =>
-    @laterMajorVersion(currentNums, latestNums) || @laterMinorVersion(currentNums, latestNums) || @laterPatchVersion(currentNums, latestNums)
-
-  laterMajorVersion: (currentNums, latestNums) =>
-    latestNums[0] > currentNums[0]
-
-  laterMinorVersion: (currentNums, latestNums) =>
-    latestNums[0] == currentNums[0] && latestNums[1] > currentNums[1]
-
-  laterPatchVersion: (currentNums, latestNums) =>
-    latestNums[0] == currentNums[0] && latestNums[1] == currentNums[1] && latestNums[2] > currentNums[2]
+  getDownloadUrl: (githubRelease) =>
+    switch process.platform
+      when 'darwin'
+        zip = githubRelease.assets.find (a) -> a.name.endsWith('mac.zip')
+        zip.browser_download_url
+      when 'win32'
+        exe = githubRelease.assets.find (a) -> a.name.endsWith('.exe')
+        exe.browser_download_url
+      else
+        githubRelease.html_url
 
   noCheckToday: =>
     checkDate = atom.blobStore.get('learnUpdateCheckDate', 'learn-update-key')
