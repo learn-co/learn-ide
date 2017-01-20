@@ -30,6 +30,10 @@ Those two packages include a couple important libraries:
 
 `gulp build` - Builds the Atom application with our packages injected ready for distribution and swaps out icons and names to brand it the Learn IDE.
 
+## Atom and Electron
+
+The Learn IDE application currently uses [Atom at v1.13.0](https://github.com/atom/atom/tree/v1.13.0/docs), which runs [Electron at v1.3.13](https://github.com/electron/electron/tree/v1.3.13/docs). While developling, be sure that you are referring to the documentation that corresponds to these specific versions.
+
 ## License
 
 Learn IDE is [MIT licensed](LICENSE.md)
