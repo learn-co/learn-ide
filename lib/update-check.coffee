@@ -11,15 +11,17 @@ LATEST_VERSION_URL = "#{config.learnCo}/api/v1/learn_ide/latest_version"
 
 module.exports =
   autoCheck: ->
-    if not @_shouldSkipCheck()
-      @checkForUpdate()
+    return if @_shouldSkipCheck()
+
+    fetch(LATEST_VERSION_URL).then (latest) =>
+      if @_shouldUpdate(latest.version)
+        @_openUpdateCheck(latest)
+      else
+        localStorage.set('updateCheckDate', Date.now())
 
   checkForUpdate: ->
     fetch(LATEST_VERSION_URL).then (latest) =>
-      localStorage.set('updateCheckDate', Date.now())
-
-      if @_shouldUpdate(latest.version)
-        @_openUpdateCheck(latest)
+      @_openUpdateCheck(latest)
 
   _shouldUpdate: (latestVersion) ->
     currentVersion = require './version'
@@ -56,5 +58,6 @@ module.exports =
       outOfDate: @_shouldUpdate(latest.version)
 
     localStorage.set('updateCheck', data)
+    localStorage.set('updateCheckDate', Date.now())
 
 

@@ -45,6 +45,14 @@
           'label': 'Log In/Out'
           'command': 'learn-ide:log-in-out'
         }
+        {
+          'label': 'Update Check'
+          'command': 'learn-ide:update-check'
+        }
+        {
+          'label': 'Update'
+          'command': 'learn-ide:update'
+        }
       ]
     ]
   }
