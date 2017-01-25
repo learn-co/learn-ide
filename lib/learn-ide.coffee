@@ -139,7 +139,7 @@ module.exports =
 
     learn = new BrowserWindow(show: false)
     learn.webContents.on 'did-finish-load', -> learn.destroy()
-    learn.loadURL('https://learn.co/sign_out')
+    learn.loadURL("#{config.learnCo}/sign_out")
 
     atomHelper.emit('learn-ide:logout')
     atomHelper.closePaneItems()
