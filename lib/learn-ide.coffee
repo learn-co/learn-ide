@@ -4,7 +4,7 @@ Terminal = require './terminal'
 TerminalView = require './views/terminal'
 StatusView = require './views/status'
 {EventEmitter} = require 'events'
-Updater = require './updater'
+updater = require './updater'
 bus = require('./event-bus')()
 Notifier = require './notifier'
 atomHelper = require './atom-helper'
@@ -87,7 +87,7 @@ module.exports =
       'learn-ide:focus': => @termView.fullFocus()
       'learn-ide:toggle:debugger': => @term.toggleDebugger()
       'learn-ide:reset-connection': => @term.reset()
-      'application:update-ile': -> (new Updater).checkForUpdate()
+      'learn-ide:update-check': -> updater.checkForUpdate()
 
     atom.config.onDidChange 'learn-ide.notifier', ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()
@@ -104,8 +104,7 @@ module.exports =
       @notifier.activate()
 
   activateUpdater: ->
-    @updater = new Updater(true)
-    @updater.checkForUpdate()
+    updater.autoCheck()
 
   deactivate: ->
     localStorage.delete('disableTreeView')
