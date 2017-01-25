@@ -4,6 +4,7 @@ remote = require 'remote'
 shell = require 'shell'
 path = require 'path'
 _token = require './token'
+config = require './config'
 BrowserWindow = remote.BrowserWindow
 
 workspaceView = atom.views.getView(atom.workspace)
@@ -55,7 +56,7 @@ githubLogin = () ->
 
     # hide window immediately after login
     webContents.on 'will-navigate', (e, url) ->
-      win.hide() if url.match(/learn\.co\/users\/auth\/github\/callback/)
+      win.hide() if url.match("#{config.learnCo}/users/auth/github/callback")
 
     webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
       return unless newURL.match(/ide_token/)
@@ -66,10 +67,10 @@ githubLogin = () ->
         win.destroy()
         resolve()
 
-    if not win.loadURL('https://learn.co/ide/token?ide_config=true')
+    if not win.loadURL("#{config.learnCo}/ide/token?ide_config=true")
       promptManualEntry()
 
-window.learnSignIn = () ->
+learnSignIn = () ->
   new Promise (resolve, reject) ->
     win = new BrowserWindow(show: false, width: 400, height: 600, resizable: false)
     {webContents} = win
@@ -102,7 +103,7 @@ window.learnSignIn = () ->
         win.destroy()
         githubLogin().then(resolve)
 
-    if not win.loadURL('https://learn.co/ide/sign_in?ide_onboard=true')
+    if not win.loadURL("#{config.learnCo}/ide/sign_in?ide_onboard=true")
       win.destroy()
       githubLogin.then(resolve)
 
@@ -116,10 +117,10 @@ promptManualEntry = ->
   tokenLinkDiv = document.createElement 'div'
   tokenText = document.createTextNode 'Get your token here: '
   tokenLink = document.createElement 'a'
-  tokenLink.title = 'https://learn.co/ide/token'
-  tokenLink.href = 'https://learn.co/ide/token'
+  tokenLink.title = "#{config.learnCo}/ide/token"
+  tokenLink.href = "#{config.learnCo}/ide/token"
   tokenLink.setAttribute 'style', 'text-decoration: underline;'
-  tokenLink.appendChild document.createTextNode 'https://learn.co/ide/token'
+  tokenLink.appendChild document.createTextNode "#{config.learnCo}/ide/token"
   tokenLinkDiv.appendChild tokenText
   tokenLinkDiv.appendChild tokenLink
   oauthPrompt.appendChild oauthLabel
@@ -157,7 +158,7 @@ githubLogout = ->
 learnLogout = ->
   win = new BrowserWindow(show: false)
   win.webContents.on 'did-finish-load', -> win.destroy()
-  win.loadURL('https://learn.co/sign_out')
+  win.loadURL("#{config.learnCo}/sign_out")
 
 window.logout = ->
   _token.unset()

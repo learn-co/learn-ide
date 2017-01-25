@@ -13,8 +13,10 @@ module.exports = _.defaults
   host: process.env['IDE_WS_HOST']
   port: process.env['IDE_WS_PORT']
   path: process.env['IDE_WS_TERM_PATH']
+  learnCo: process.env['IDE_LEARN_CO']
 ,
   host: 'ile.learn.co'
   port: 443
   path: 'v2/terminal'
+  learnCo: 'https://learn.co'
 
