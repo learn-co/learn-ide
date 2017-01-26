@@ -47,8 +47,8 @@ module.exports =
     compare(latestVersion, currentVersion) is 1
 
   _shouldSkipCheck: ->
-    oneDay = 24 * 60 * 60
-    @_lastCheckedAgo() < oneDay
+    twelveHours = 12 * 60 * 60
+    @_lastCheckedAgo() < twelveHours
 
   _lastCheckedAgo: ->
     checked = parseInt(localStorage.get('updateCheckDate'))

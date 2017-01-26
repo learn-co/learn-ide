@@ -92,7 +92,6 @@ module.exports =
       'learn-ide:toggle:debugger': => @term.toggleDebugger()
       'learn-ide:reset-connection': => @term.reset()
       'learn-ide:update-check': -> updater.checkForUpdate()
-      'learn-ide:update': => updater.update()
 
     atom.config.onDidChange 'learn-ide.notifier', ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()
