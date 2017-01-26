@@ -3,15 +3,14 @@ localStorage = require './local-storage'
 Terminal = require './terminal'
 TerminalView = require './views/terminal'
 StatusView = require './views/status'
+{BrowserWindow} = require 'remote'
 {EventEmitter} = require 'events'
-updater = require './update-check'
-bus = require('./event-bus')()
 Notifier = require './notifier'
 atomHelper = require './atom-helper'
-config = require './config'
 auth = require './auth'
-remote = require 'remote'
-BrowserWindow = remote.BrowserWindow
+bus = require('./event-bus')()
+config = require './config'
+updater = require './updater'
 
 module.exports =
   token: require('./token')
@@ -33,7 +32,7 @@ module.exports =
       console.error('failed to authenticate')
 
   activateIDE: (state) ->
-    @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
+    @isTerminalWindow = (localStorage.get('popoutTerminal') is 'true')
     if @isTerminalWindow
       window.resizeTo(750, 500)
       localStorage.delete('popoutTerminal')
@@ -88,6 +87,7 @@ module.exports =
       'learn-ide:toggle:debugger': => @term.toggleDebugger()
       'learn-ide:reset-connection': => @term.reset()
       'learn-ide:update-check': -> updater.checkForUpdate()
+      'learn-ide:update': => updater.update()
 
     atom.config.onDidChange 'learn-ide.notifier', ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()

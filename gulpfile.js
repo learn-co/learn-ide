@@ -122,8 +122,9 @@ gulp.task('inject-packages', function() {
   var pkg = require('./package.json')
   rmPackage('welcome')
   rmPackage('tree-view')
-  injectPackage('learn-ide', pkg.version)
-  injectPackage('learn-ide-tree', pkg.treeVersion)
+  _.each(pkg.packageDependencies, (version, name) => {
+    injectPackage(name, version)
+  })
 })
 
 gulp.task('replace-files', function() {

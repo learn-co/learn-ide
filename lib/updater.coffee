@@ -1,10 +1,10 @@
-remote = require 'remote'
-BrowserWindow = remote.BrowserWindow
-path = require 'path'
+{BrowserWindow} = require 'remote'
+{BufferedProcess} = require 'atom'
 compare = require 'semver-compare'
-fetch = require './fetch'
 config = require './config'
+fetch = require './fetch'
 localStorage = require './local-storage'
+path = require 'path'
 
 UPDATE_WINDOW_URL = "file://#{path.resolve(__dirname, '..', 'static', 'update_check.html')}"
 LATEST_VERSION_URL = "#{config.learnCo}/api/v1/learn_ide/latest_version"
@@ -22,6 +22,14 @@ module.exports =
   checkForUpdate: ->
     fetch(LATEST_VERSION_URL).then (latest) =>
       @_openUpdateCheck(latest)
+
+  update: ->
+    @_updateOrInstallDependencies().then (data) =>
+      @_afterUpdate(data)
+
+  _getPackageDependencies: ->
+    pkg = require('../package.json')
+    Object.keys(pkg.packageDependencies)
 
   _shouldUpdate: (latestVersion) ->
     currentVersion = require './version'
@@ -60,4 +68,40 @@ module.exports =
     localStorage.set('updateCheck', data)
     localStorage.set('updateCheckDate', Date.now())
 
+  _updateOrInstallDependencies: ->
+    new Promise (resolve) =>
+      log = ''
+      packages = @_getPackageDependencies()
+
+      new BufferedProcess
+       command: atom.packages.getApmPath()
+       args: ['upgrade', '--no-confirm', '--no-color'].concat(packages)
+       stdout: (data) -> log += data
+       exit: (code) -> resolve({log, code})
+
+  _afterUpdate: ({log, code}) ->
+    callback = if code is 0 then @_updateSucceeded else @_updateFailed
+    callback(log)
+
+  _updateFailed: (log) ->
+    atom.notifications.addWarning 'Learn IDE: failed to update',
+      detail: log
+      description: 'Please pass this info along to support'
+      dismissable: true
+      buttons: [
+        text: 'Copy this log'
+        onDidClick: ->
+          {clipboard} = require 'electron'
+          clipboard.writeText(log)
+      ]
+
+  _updateSucceeded: (log) ->
+    atom.notifications.addSuccess 'Learn IDE: updates installed',
+      detail: log
+      description: 'Restart to get the new hotness'
+      dismissable: true
+      buttons: [
+        text: 'Restart now'
+        onDidClick: -> atom.restartApplication()
+      ]
 
