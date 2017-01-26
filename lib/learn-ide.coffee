@@ -32,6 +32,11 @@ module.exports =
       console.error('failed to authenticate')
 
   activateIDE: (state) ->
+    @isRestartAfterUpdate = (localStorage.get('restartingForUpdate') is 'true')
+    if @isRestartAfterUpdate
+      updater.didRestartAfterUpdate()
+      localStorage.delete('restartingForUpdate')
+
     @isTerminalWindow = (localStorage.get('popoutTerminal') is 'true')
     if @isTerminalWindow
       window.resizeTo(750, 500)

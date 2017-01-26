@@ -9,24 +9,31 @@ LATEST_VERSION_URL = "#{config.learnCo}/api/v1/learn_ide/latest_version"
 module.exports =
   autoCheck: ->
     if not @_shouldSkipCheck()
-      fetch(LATEST_VERSION_URL).then ({version}) =>
+      fetch(LATEST_VERSION_URL).then ({version, detail}) =>
         @_setCheckDate()
 
         if @_shouldUpdate(version)
-          @_addUpdateNotification()
+          @_addUpdateNotification(detail)
 
   checkForUpdate: ->
-    fetch(LATEST_VERSION_URL).then ({version}) =>
+    fetch(LATEST_VERSION_URL).then ({version, detail}) =>
       @_setCheckDate()
 
       if @_shouldUpdate(version)
-        @_addUpdateNotification()
+        @_addUpdateNotification(detail)
       else
         @_addUpToDateNotification()
 
   update: ->
-    @_updateOrInstallDependencies().then (data) =>
-      @_afterUpdate(data)
+    @_updateOrInstallDependencies().then (result) ->
+      localStorage.set('updateResult', JSON.stringify(result))
+      localStorage.set('restartingForUpdate', true)
+      atom.restartApplication()
+
+  didRestartAfterUpdate: ->
+    updateResult = JSON.parse(localStorage.get('updateResult'))
+    if updateResult?
+      @_afterUpdate(updateResult)
 
   _setCheckDate: ->
     localStorage.set('updateCheckDate', Date.now())
@@ -47,15 +54,15 @@ module.exports =
     checked = parseInt(localStorage.get('updateCheckDate'))
     Date.now() - checked
 
-  _addUpdateNotification: ->
-    @_updateNotification =
-      atom.notifications.addInfo 'Learn IDE: update available!',
-        description: "You're gonna want this new hotness"
-        dismissable: true
-        buttons: [
-          text: 'Install update'
-          onDidClick: => @update()
-        ]
+  _addUpdateNotification: (detail) ->
+    atom.notifications.addInfo 'Learn IDE: update available!',
+      detail: detail
+      description: 'Just click below to get the sweet, sweet newness.'
+      dismissable: true
+      buttons: [
+        text: 'Install the update & restart the editor'
+        onDidClick: => @update()
+      ]
 
   _addUpToDateNotification: ->
     atom.notifications.addSuccess 'Learn IDE: up-to-date!'
@@ -72,8 +79,6 @@ module.exports =
        exit: (code) -> resolve({log, code})
 
   _afterUpdate: ({log, code}) ->
-    @_updateNotification?.dismiss()
-
     callback = if code is 0 then @_updateSucceeded else @_updateFailed
     callback(log)
 
@@ -92,10 +97,4 @@ module.exports =
   _updateSucceeded: (log) ->
     atom.notifications.addSuccess 'Learn IDE: update installed',
       detail: log
-      description: 'Restart to activate hotness'
-      dismissable: true
-      buttons: [
-        text: 'Restart the editor'
-        onDidClick: -> atom.restartApplication()
-      ]
 

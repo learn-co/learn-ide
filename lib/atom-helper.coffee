@@ -15,10 +15,6 @@ module.exports =
     @setLastFocusedWindow()
     window.onfocus = @setLastFocusedWindow
 
-  spawn: (modulePath) ->
-    {BufferedNodeProcess} = require 'atom'
-    new BufferedNodeProcess({command: modulePath})
-
   cleanup: ->
     if @isLastFocusedWindow()
       localStorage.delete('lastFocusedWindow')
