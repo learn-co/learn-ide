@@ -1,31 +1,35 @@
-{BrowserWindow} = require 'remote'
 {BufferedProcess} = require 'atom'
 compare = require 'semver-compare'
 config = require './config'
 fetch = require './fetch'
 localStorage = require './local-storage'
-path = require 'path'
 
-UPDATE_WINDOW_URL = "file://#{path.resolve(__dirname, '..', 'static', 'update_check.html')}"
 LATEST_VERSION_URL = "#{config.learnCo}/api/v1/learn_ide/latest_version"
 
 module.exports =
   autoCheck: ->
-    return if @_shouldSkipCheck()
+    if not @_shouldSkipCheck()
+      fetch(LATEST_VERSION_URL).then ({version}) =>
+        @_setCheckDate()
 
-    fetch(LATEST_VERSION_URL).then (latest) =>
-      if @_shouldUpdate(latest.version)
-        @_openUpdateCheck(latest)
-      else
-        localStorage.set('updateCheckDate', Date.now())
+        if @_shouldUpdate(version)
+          @_addUpdateNotification()
 
   checkForUpdate: ->
-    fetch(LATEST_VERSION_URL).then (latest) =>
-      @_openUpdateCheck(latest)
+    fetch(LATEST_VERSION_URL).then ({version}) =>
+      @_setCheckDate()
+
+      if @_shouldUpdate(version)
+        @_addUpdateNotification()
+      else
+        @_addUpToDateNotification()
 
   update: ->
     @_updateOrInstallDependencies().then (data) =>
       @_afterUpdate(data)
+
+  _setCheckDate: ->
+    localStorage.set('updateCheckDate', Date.now())
 
   _getPackageDependencies: ->
     pkg = require('../package.json')
@@ -43,30 +47,18 @@ module.exports =
     checked = parseInt(localStorage.get('updateCheckDate'))
     Date.now() - checked
 
-  _openUpdateCheck: (latest) ->
-    @_setLocalStorage(latest)
+  _addUpdateNotification: ->
+    @_updateNotification =
+      atom.notifications.addInfo 'Learn IDE: update available!',
+        description: "You're gonna want this new hotness"
+        dismissable: true
+        buttons: [
+          text: 'Install update'
+          onDidClick: => @update()
+        ]
 
-    win = new BrowserWindow
-      show: false
-      width: 500
-      height: 250
-      resizable: false
-      title: 'Update Learn IDE'
-
-    win.loadURL(UPDATE_WINDOW_URL)
-    win.once 'ready-to-show', ->
-        win.show()
-
-  _setLocalStorage: (latest) ->
-    {win, mac} = latest.download_urls
-    downloadURL = if process.platform is 'win32' then win else mac
-
-    data = JSON.stringify
-      downloadURL: downloadURL
-      outOfDate: @_shouldUpdate(latest.version)
-
-    localStorage.set('updateCheck', data)
-    localStorage.set('updateCheckDate', Date.now())
+  _addUpToDateNotification: ->
+    atom.notifications.addSuccess 'Learn IDE: up-to-date!'
 
   _updateOrInstallDependencies: ->
     new Promise (resolve) =>
@@ -80,6 +72,8 @@ module.exports =
        exit: (code) -> resolve({log, code})
 
   _afterUpdate: ({log, code}) ->
+    @_updateNotification?.dismiss()
+
     callback = if code is 0 then @_updateSucceeded else @_updateFailed
     callback(log)
 
@@ -96,12 +90,12 @@ module.exports =
       ]
 
   _updateSucceeded: (log) ->
-    atom.notifications.addSuccess 'Learn IDE: updates installed',
+    atom.notifications.addSuccess 'Learn IDE: update installed',
       detail: log
-      description: 'Restart to get the new hotness'
+      description: 'Restart to activate hotness'
       dismissable: true
       buttons: [
-        text: 'Restart now'
+        text: 'Restart the editor'
         onDidClick: -> atom.restartApplication()
       ]
 
