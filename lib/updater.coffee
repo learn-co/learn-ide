@@ -1,9 +1,11 @@
+{shell} = require 'electron'
 {BufferedProcess} = require 'atom'
 compare = require 'semver-compare'
 config = require './config'
 fetch = require './fetch'
 localStorage = require './local-storage'
 
+HELP_CENTER_URL = 'https://help.learn.co/hc/en-us/sections/206572387-Common-IDE-Questions'
 LATEST_VERSION_URL = "#{config.learnCo}/api/v1/learn_ide/latest_version"
 
 module.exports =
@@ -83,18 +85,25 @@ module.exports =
     callback(log)
 
   _updateFailed: (log) ->
-    atom.notifications.addWarning 'Learn IDE: failed to update',
+    atom.notifications.addWarning 'Learn IDE: update failed!',
       detail: log
-      description: 'Please pass this info along to support'
+      description: 'Please include this information when contacting the Learn support team about the issue.'
       dismissable: true
       buttons: [
-        text: 'Copy this log'
-        onDidClick: ->
-          {clipboard} = require 'electron'
-          clipboard.writeText(log)
+        {
+          text: 'Copy this log'
+          onDidClick: ->
+            {clipboard} = require 'electron'
+            clipboard.writeText(log)
+        }
+        {
+          text: 'Visit the help center'
+          onDidClick: ->
+            shell.openExternal(HELP_CENTER_URL)
+        }
       ]
 
   _updateSucceeded: (log) ->
-    atom.notifications.addSuccess 'Learn IDE: update installed',
+    atom.notifications.addSuccess 'Learn IDE: update successful!',
       detail: log
 
