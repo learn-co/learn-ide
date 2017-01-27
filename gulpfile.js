@@ -226,6 +226,19 @@ gulp.task('alter-files', function() {
       "options.string('url-to-open')\n  $1"
     ]
   ]);
+
+  replaceInFile(path.join(buildDir, 'menus', 'darwin.cson'), [
+    /application:check-for-update/, 'learn-ide:update-check'
+  ]);
+
+  replaceInFile(path.join(buildDir, 'menus', 'win32.cson'), [
+    /application:check-for-update/, 'learn-ide:update-check'
+  ]);
+
+  replaceInFile(path.join(buildDir, 'src', 'application-delegate.coffee'), [
+    /    ipcRenderer.send('command', 'application:check-for-update')/,
+    "    # ipcRenderer.send('command', 'application:check-for-update')",
+  ]);
 })
 
 gulp.task('update-package-json', function() {
