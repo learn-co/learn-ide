@@ -10,7 +10,10 @@ atomHelper = require './atom-helper'
 auth = require './auth'
 bus = require('./event-bus')()
 config = require './config'
+{shell} = require 'electron'
 updater = require './updater'
+
+ABOUT_URL = 'https://help.learn.co/hc/en-us/categories/204144547-The-Learn-IDE'
 
 module.exports =
   token: require('./token')
@@ -92,6 +95,7 @@ module.exports =
       'learn-ide:toggle:debugger': => @term.toggleDebugger()
       'learn-ide:reset-connection': => @term.reset()
       'learn-ide:update-check': -> updater.checkForUpdate()
+      'learn-ide:about': => @about()
 
     atom.config.onDidChange 'learn-ide.notifier', ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()
@@ -172,4 +176,7 @@ module.exports =
 
     priority = (rightMostTile?.priority || 0) - 1
     statusBar.addRightTile({item: @statusView, priority})
+
+  about: ->
+    shell.openExternal(ABOUT_URL)
 

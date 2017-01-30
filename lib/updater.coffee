@@ -62,7 +62,7 @@ module.exports =
       description: 'Just click below to get the sweet, sweet newness.'
       dismissable: true
       buttons: [
-        text: 'Install the update & restart the editor'
+        text: 'Install update & restart editor'
         onDidClick: => @update()
       ]
 

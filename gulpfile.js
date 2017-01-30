@@ -122,6 +122,7 @@ gulp.task('inject-packages', function() {
   var pkg = require('./package.json')
   rmPackage('welcome')
   rmPackage('tree-view')
+  rmPackage('about')
   injectPackage(pkg.name, pkg.version)
   _.each(pkg.packageDependencies, (version, name) => {
     injectPackage(name, version)
@@ -225,6 +226,34 @@ gulp.task('alter-files', function() {
     [
       /(const args)/,
       "options.string('url-to-open')\n  $1"
+    ]
+  ]);
+
+  replaceInFile(path.join(buildDir, 'menus', 'darwin.cson'), [
+    [/application:check-for-update/, 'learn-ide:update-check'],
+    [/About Atom/, 'About'],
+    [/application:about/, 'learn-ide:about']
+  ]);
+
+  replaceInFile(path.join(buildDir, 'menus', 'win32.cson'), [
+    [/application:check-for-update/, 'learn-ide:update-check'],
+    [/About Atom/, 'About'],
+    [/application:about/, 'learn-ide:about']
+  ]);
+
+  replaceInFile(path.join(buildDir, 'menus', 'linux.cson'), [
+    [/About Atom/, 'About'],
+    [/application:about/, 'learn-ide:about']
+  ]);
+
+  replaceInFile(path.join(buildDir, 'src', 'config-schema.js'), [
+    [
+      'automaticallyUpdate: {\n        description: \'Automatically update Atom when a new release is available.\',\n        type: \'boolean\',\n        default: true\n      }',
+      'automaticallyUpdate: {\n        description: \'Automatically update Atom when a new release is available.\',\n        type: \'boolean\',\n        default: false\n      }',
+    ],
+    [
+      'openEmptyEditorOnStart: {\n        description: \'Automatically open an empty editor on startup.\',\n        type: \'boolean\',\n        default: true\n      }',
+      'openEmptyEditorOnStart: {\n        description: \'Automatically open an empty editor on startup.\',\n        type: \'boolean\',\n        default: false\n      }'
     ]
   ]);
 })
