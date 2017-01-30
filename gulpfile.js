@@ -230,11 +230,20 @@ gulp.task('alter-files', function() {
   ]);
 
   replaceInFile(path.join(buildDir, 'menus', 'darwin.cson'), [
-    [/application:check-for-update/, 'learn-ide:update-check']
+    [/application:check-for-update/, 'learn-ide:update-check'],
+    [/About Atom/, 'About'],
+    [/application:about/, 'learn-ide:about']
   ]);
 
   replaceInFile(path.join(buildDir, 'menus', 'win32.cson'), [
-    [/application:check-for-update/, 'learn-ide:update-check']
+    [/application:check-for-update/, 'learn-ide:update-check'],
+    [/About Atom/, 'About'],
+    [/application:about/, 'learn-ide:about']
+  ]);
+
+  replaceInFile(path.join(buildDir, 'menus', 'linux.cson'), [
+    [/About Atom/, 'About'],
+    [/application:about/, 'learn-ide:about']
   ]);
 
   replaceInFile(path.join(buildDir, 'src', 'config-schema.js'), [
