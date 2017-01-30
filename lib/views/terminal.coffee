@@ -206,3 +206,9 @@ class TerminalView extends View
     else
       @showAndFocus()
 
+  updateFontColor: (@openColor) ->
+    @terminalWrapper.element.style.color = @openColor
+
+  updateBackgroundColor: (@openBackgroundColor) ->
+    @terminalWrapper.element.style.backgroundColor = @openBackgroundColor
+

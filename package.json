@@ -2,12 +2,9 @@
   "name": "learn-ide",
   "version": "2.3.3",
   "atomVersion": "1.13.1",
-  "packageDependencies": {
-    "learn-ide-tree": "1.0.21"
-  },
   "main": "./lib/learn-ide",
   "urlMain": "./lib/url-handler",
-  "description": "An integrated development environment for use with Learn.co",
+  "description": "An integrated development environment for Learn.co",
   "scripts": {
     "start": "./node_modules/gulp/bin/gulp.js"
   },
@@ -35,6 +32,14 @@
     "underscore-plus": "1.6.6",
     "utf8": "2.1.1"
   },
+  "packageDependencies": {
+    "atom-material-syntax": "1.0.2",
+    "atom-material-syntax-dark": "0.2.7",
+    "atom-material-syntax-light": "0.4.6",
+    "atom-material-ui": "1.3.9",
+    "file-icons": "2.0.13",
+    "learn-ide-tree": "1.0.21"
+  },
   "configSchema": {
     "notifier": {
       "type": "boolean",
@@ -50,7 +55,7 @@
     },
     "terminalBackgroundColor": {
       "type": "string",
-      "default": "#000000",
+      "default": "#1A2226",
       "title": "Terminal Background Color",
       "description": "A valid CSS color value which will be used to style your terminal's background"
     }

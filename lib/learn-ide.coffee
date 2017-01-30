@@ -97,6 +97,12 @@ module.exports =
       'learn-ide:update-check': -> updater.checkForUpdate()
       'learn-ide:about': => @about()
 
+    atom.config.onDidChange 'learn-ide.terminalFontColor', ({newValue}) =>
+      @termView.updateFontColor(newValue)
+
+    atom.config.onDidChange 'learn-ide.terminalBackgroundColor', ({newValue}) =>
+      @termView.updateBackgroundColor(newValue)
+
     atom.config.onDidChange 'learn-ide.notifier', ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()
 
