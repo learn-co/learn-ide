@@ -254,6 +254,9 @@ gulp.task('alter-files', function() {
     [
       'openEmptyEditorOnStart: {\n        description: \'Automatically open an empty editor on startup.\',\n        type: \'boolean\',\n        default: true\n      }',
       'openEmptyEditorOnStart: {\n        description: \'Automatically open an empty editor on startup.\',\n        type: \'boolean\',\n        default: false\n      }'
+    ],
+    [
+      "['one-dark-ui', 'one-dark-syntax']", "['learn-ide-material-ui', 'atom-material-syntax']"
     ]
   ]);
 })

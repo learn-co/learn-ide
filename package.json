@@ -36,8 +36,7 @@
     "atom-material-syntax": "1.0.2",
     "atom-material-syntax-dark": "0.2.7",
     "atom-material-syntax-light": "0.4.6",
-    "atom-material-ui": "1.3.9",
-    "file-icons": "2.0.13",
+    "learn-ide-material-ui": "1.3.10",
     "learn-ide-tree": "1.0.21"
   },
   "configSchema": {
