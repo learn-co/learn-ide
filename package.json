@@ -48,13 +48,13 @@
       "description": "Receive desktop notifications that correspond to the lights on Learn.co"
     },
     "terminalFontColor": {
-      "type": "string",
+      "type": "color",
       "default": "#ffffff",
       "title": "Terminal Font Color",
       "description": "A valid CSS color value which will be used to style your terminal's font"
     },
     "terminalBackgroundColor": {
-      "type": "string",
+      "type": "color",
       "default": "#1A2226",
       "title": "Terminal Background Color",
       "description": "A valid CSS color value which will be used to style your terminal's background"

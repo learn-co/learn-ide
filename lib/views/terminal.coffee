@@ -43,8 +43,8 @@ class TerminalView extends View
     @terminalWrapper.element.style.height = '100%'
     @terminalWrapper.element.style.fontFamily = -> atom.config.get('editor.fontFamily') or "monospace"
     @terminalWrapper.element.style.fontSize = "#{fontSize}px"
-    @openColor = atom.config.get('learn-ide.terminalFontColor')
-    @openBackgroundColor = atom.config.get('learn-ide.terminalBackgroundColor')
+    @openColor = atom.config.get('learn-ide.terminalFontColor').toRGBAString()
+    @openBackgroundColor = atom.config.get('learn-ide.terminalBackgroundColor').toRGBAString()
 
   displayDisconnected: ->
     @displayingDisconnect = true
@@ -206,9 +206,11 @@ class TerminalView extends View
     else
       @showAndFocus()
 
-  updateFontColor: (@openColor) ->
+  updateFontColor: (color) ->
+    @openColor = color.toRGBAString()
     @terminalWrapper.element.style.color = @openColor
 
-  updateBackgroundColor: (@openBackgroundColor) ->
+  updateBackgroundColor: (color) ->
+    @openBackgroundColor = color.toRGBAString()
     @terminalWrapper.element.style.backgroundColor = @openBackgroundColor
 
