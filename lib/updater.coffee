@@ -1,12 +1,12 @@
 {shell} = require 'electron'
 {BufferedProcess} = require 'atom'
 compare = require 'semver-compare'
-config = require './config'
+{learnCo} = require './config'
 fetch = require './fetch'
 localStorage = require './local-storage'
 
 HELP_CENTER_URL = 'https://help.learn.co/hc/en-us/sections/206572387-Common-IDE-Questions'
-LATEST_VERSION_URL = "#{config.learnCo}/api/v1/learn_ide/latest_version"
+LATEST_VERSION_URL = "#{learnCo}/api/v1/learn_ide/latest_version"
 
 module.exports =
   autoCheck: ->
