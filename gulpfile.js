@@ -231,18 +231,30 @@ gulp.task('alter-files', function() {
 
   replaceInFile(path.join(buildDir, 'menus', 'darwin.cson'), [
     [/application:check-for-update/, 'learn-ide:update-check'],
+    [
+      '{ label: \'VERSION\', enabled: false }\n      { label: \'Restart and Install Update\', command: \'application:install-update\', visible: false}',
+      "{ label: 'View Version', command: 'learn-ide:view-version'}"
+    ],
     [/About Atom/, 'About'],
     [/application:about/, 'learn-ide:about']
   ]);
 
   replaceInFile(path.join(buildDir, 'menus', 'win32.cson'), [
     [/application:check-for-update/, 'learn-ide:update-check'],
+    [
+      '{ label: \'VERSION\', enabled: false }\n      { label: \'Restart and Install Update\', command: \'application:install-update\', visible: false}\n      { label: \'Check for Update\', command: \'learn-ide:update-check\', visible: false}\n      { label: \'Checking for Update\', enabled: false, visible: false}\n      { label: \'Downloading Update\', enabled: false, visible: false}\n',
+      "{ label: 'View Version', command: 'learn-ide:view-version'}"
+    ],
     [/About Atom/, 'About'],
     [/application:about/, 'learn-ide:about']
   ]);
 
   replaceInFile(path.join(buildDir, 'menus', 'linux.cson'), [
     [/About Atom/, 'About'],
+    [
+      '{ label: "VERSION", enabled: false }\n',
+      "{ label: 'View Version', command: 'learn-ide:view-version'}"
+    ],
     [/application:about/, 'learn-ide:about']
   ]);
 

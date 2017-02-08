@@ -12,6 +12,7 @@ bus = require('./event-bus')()
 config = require './config'
 {shell} = require 'electron'
 updater = require './updater'
+version = require './version'
 
 ABOUT_URL = 'https://help.learn.co/hc/en-us/categories/204144547-The-Learn-IDE'
 
@@ -94,6 +95,7 @@ module.exports =
       'learn-ide:focus': => @termView.fullFocus()
       'learn-ide:toggle:debugger': => @term.toggleDebugger()
       'learn-ide:reset-connection': => @term.reset()
+      'learn-ide:view-version': => @viewVersion()
       'learn-ide:update-check': -> updater.checkForUpdate()
       'learn-ide:about': => @about()
 
@@ -185,4 +187,7 @@ module.exports =
 
   about: ->
     shell.openExternal(ABOUT_URL)
+
+  viewVersion: ->
+    atom.notifications.addInfo("Learn IDE: v#{version}")
 
