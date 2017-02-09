@@ -242,7 +242,7 @@ gulp.task('alter-files', function() {
   replaceInFile(path.join(buildDir, 'menus', 'win32.cson'), [
     [/application:check-for-update/, 'learn-ide:update-check'],
     [
-      "{ label: 'VERSION', enabled: false }\n      { label: 'Restart and Install Update', command: 'application:install-update', visible: false}"
+      "{ label: 'VERSION', enabled: false }\n      { label: 'Restart and Install Update', command: 'application:install-update', visible: false}",
       "{ label: 'View Version', command: 'learn-ide:view-version'}"
     ],
     [
@@ -379,8 +379,7 @@ gulp.task('mastermind', function(done) {
 
   // update menus
   var menu = fs.readFileSync('./menus/learn-ide.cson', 'utf-8')
-  fs.unlinkSync('./menus/learn-ide.cson')
-  var updated = menu.replace('Learn IDE', 'Mastermind')
-  fs.writeFileSync('./menus/mastermind.cson', updated)
+  var updated = menu.replace(/Learn IDE/g, 'Mastermind')
+  fs.writeFileSync('./menus/learn-ide.cson', updated)
 })
 
