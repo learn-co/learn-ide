@@ -247,8 +247,8 @@ gulp.task('alter-files', function() {
     ],
     [
       "\n      { label: 'Checking for Update', enabled: false, visible: false}\n      { label: 'Downloading Update', enabled: false, visible: false}",
-      '',
-    ]
+      ''
+    ],
     [/About Atom/, 'About'],
     [/application:about/, 'learn-ide:about']
   ]);
