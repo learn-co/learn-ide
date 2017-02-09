@@ -13,6 +13,7 @@ config = require './config'
 {shell} = require 'electron'
 updater = require './updater'
 version = require './version'
+{name} = require '../package.json'
 
 ABOUT_URL = 'https://help.learn.co/hc/en-us/categories/204144547-The-Learn-IDE'
 
@@ -99,13 +100,13 @@ module.exports =
       'learn-ide:update-check': -> updater.checkForUpdate()
       'learn-ide:about': => @about()
 
-    atom.config.onDidChange 'learn-ide.terminalFontColor', ({newValue}) =>
+    atom.config.onDidChange "#{name}.terminalFontColor", ({newValue}) =>
       @termView.updateFontColor(newValue)
 
-    atom.config.onDidChange 'learn-ide.terminalBackgroundColor', ({newValue}) =>
+    atom.config.onDidChange "#{name}.terminalBackgroundColor", ({newValue}) =>
       @termView.updateBackgroundColor(newValue)
 
-    atom.config.onDidChange 'learn-ide.notifier', ({newValue}) =>
+    atom.config.onDidChange "#{name}.notifier", ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()
 
     openPath = localStorage.get('learnOpenLabOnActivation')
@@ -115,7 +116,7 @@ module.exports =
 
 
   activateNotifier: ->
-    if atom.config.get('learn-ide.notifier')
+    if atom.config.get("#{name}.notifier")
       @notifier = new Notifier(@token.get())
       @notifier.activate()
 

@@ -358,3 +358,25 @@ gulp.task('build', function(done) {
   )
 })
 
+gulp.task('mastermind', function(done) {
+  // update package.json
+  var pkg = require('./package.json')
+  pkg.name = 'mastermind'
+  pkg.description = 'The Learn IDE\'s evil twin that we use for testing'
+  pkg.packageDependencies['mirage'] = 'learn-co/mirage#master'
+  pkg.repository = pkg.repository.replace('learn-ide', 'mastermind')
+  delete pkg.packageDependencies['learn-ide-tree']
+  fs.writeFileSync('./package.json', JSON.stringify(pkg, null, '  '))
+
+  // update gulpfile
+  var gf = fs.readFileSync('./gulpfile.js', 'utf-8')
+  var updated = gf.replace('Learn IDE', 'Mastermind IDE')
+  fs.writeFileSync('./gulpfile.js', updated)
+
+  // update menus
+  var menu = fs.readFileSync('./menus/learn-ide.cson', 'utf-8')
+  fs.unlinkSync('./menus/learn-ide.cson')
+  var updated = menu.replace('Learn IDE', 'Mastermind')
+  fs.writeFileSync('./menus/mastermind.cson', updated)
+})
+
