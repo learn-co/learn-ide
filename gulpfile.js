@@ -232,7 +232,7 @@ gulp.task('alter-files', function() {
   replaceInFile(path.join(buildDir, 'menus', 'darwin.cson'), [
     [/application:check-for-update/, 'learn-ide:update-check'],
     [
-      '{ label: \'VERSION\', enabled: false }\n      { label: \'Restart and Install Update\', command: \'application:install-update\', visible: false}',
+      "{ label: 'VERSION', enabled: false }\n      { label: 'Restart and Install Update', command: 'application:install-update', visible: false}",
       "{ label: 'View Version', command: 'learn-ide:view-version'}"
     ],
     [/About Atom/, 'About'],
@@ -242,9 +242,13 @@ gulp.task('alter-files', function() {
   replaceInFile(path.join(buildDir, 'menus', 'win32.cson'), [
     [/application:check-for-update/, 'learn-ide:update-check'],
     [
-      '{ label: \'VERSION\', enabled: false }\n      { label: \'Restart and Install Update\', command: \'application:install-update\', visible: false}\n      { label: \'Check for Update\', command: \'learn-ide:update-check\', visible: false}\n      { label: \'Checking for Update\', enabled: false, visible: false}\n      { label: \'Downloading Update\', enabled: false, visible: false}\n',
+      "{ label: 'VERSION', enabled: false }\n      { label: 'Restart and Install Update', command: 'application:install-update', visible: false}"
       "{ label: 'View Version', command: 'learn-ide:view-version'}"
     ],
+    [
+      "\n      { label: 'Checking for Update', enabled: false, visible: false}\n      { label: 'Downloading Update', enabled: false, visible: false}",
+      '',
+    ]
     [/About Atom/, 'About'],
     [/application:about/, 'learn-ide:about']
   ]);
@@ -252,7 +256,7 @@ gulp.task('alter-files', function() {
   replaceInFile(path.join(buildDir, 'menus', 'linux.cson'), [
     [/About Atom/, 'About'],
     [
-      '{ label: "VERSION", enabled: false }\n',
+      '{ label: "VERSION", enabled: false }',
       "{ label: 'View Version', command: 'learn-ide:view-version'}"
     ],
     [/application:about/, 'learn-ide:about']
@@ -260,12 +264,12 @@ gulp.task('alter-files', function() {
 
   replaceInFile(path.join(buildDir, 'src', 'config-schema.js'), [
     [
-      'automaticallyUpdate: {\n        description: \'Automatically update Atom when a new release is available.\',\n        type: \'boolean\',\n        default: true\n      }',
-      'automaticallyUpdate: {\n        description: \'Automatically update Atom when a new release is available.\',\n        type: \'boolean\',\n        default: false\n      }',
+      "automaticallyUpdate: {\n        description: 'Automatically update Atom when a new release is available.',\n        type: 'boolean',\n        default: true\n      }",
+      "automaticallyUpdate: {\n        description: 'Automatically update Atom when a new release is available.',\n        type: 'boolean',\n        default: false\n      }",
     ],
     [
-      'openEmptyEditorOnStart: {\n        description: \'Automatically open an empty editor on startup.\',\n        type: \'boolean\',\n        default: true\n      }',
-      'openEmptyEditorOnStart: {\n        description: \'Automatically open an empty editor on startup.\',\n        type: \'boolean\',\n        default: false\n      }'
+      "openEmptyEditorOnStart: {\n        description: 'Automatically open an empty editor on startup.',\n        type: 'boolean',\n        default: true\n      }",
+      "openEmptyEditorOnStart: {\n        description: 'Automatically open an empty editor on startup.',\n        type: 'boolean',\n        default: false\n      }"
     ],
     [
       "['one-dark-ui', 'one-dark-syntax']", "['learn-ide-material-ui', 'atom-material-syntax']"
