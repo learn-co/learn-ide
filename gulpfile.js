@@ -230,7 +230,10 @@ gulp.task('alter-files', function() {
   ]);
 
   replaceInFile(path.join(buildDir, 'menus', 'darwin.cson'), [
-    [/application:check-for-update/, 'learn-ide:update-check'],
+    [
+      "{ label: 'Check for Update', command: 'application:check-for-update', visible: false}",
+      "{ label: 'Check for Update', command: 'learn-ide:update-check'}"
+    ],
     [
       "{ label: 'VERSION', enabled: false }\n      { label: 'Restart and Install Update', command: 'application:install-update', visible: false}",
       "{ label: 'View Version', command: 'learn-ide:view-version'}"
@@ -240,7 +243,10 @@ gulp.task('alter-files', function() {
   ]);
 
   replaceInFile(path.join(buildDir, 'menus', 'win32.cson'), [
-    [/application:check-for-update/, 'learn-ide:update-check'],
+    [
+      "{ label: 'Check for Update', command: 'application:check-for-update', visible: false}",
+      "{ label: 'Check for Update', command: 'learn-ide:update-check'}"
+    ],
     [
       "{ label: 'VERSION', enabled: false }\n      { label: 'Restart and Install Update', command: 'application:install-update', visible: false}",
       "{ label: 'View Version', command: 'learn-ide:view-version'}"
