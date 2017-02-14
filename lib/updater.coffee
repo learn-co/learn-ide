@@ -38,6 +38,7 @@ module.exports =
         description: 'This may take a few minutes. Please **do not** close the editor.'
         dismissable: true
 
+    localStorage.set('restartingForUpdate', true)
     @_updatePackage().then (pkgResult) =>
       @_installDependencies().then (depResult) =>
         log = "Learn IDE:\n#{pkgResult.log}"
@@ -49,17 +50,18 @@ module.exports =
 
         if code isnt 0
           waitNotification.dismiss()
+          localStorage.delete('restartingForUpdate')
           @_updateFailed(log)
           return
 
-        localStorage.set('updateResult', JSON.stringify({log, code}))
-        localStorage.set('restartingForUpdate', true)
+        localStorage.set('updateLog', log)
         atom.restartApplication()
 
   didRestartAfterUpdate: ->
-    updateResult = JSON.parse(localStorage.get('updateResult'))
-    if updateResult?
-      @_afterUpdate(updateResult)
+    log = localStorage.remove('updateLog')
+    target = localStorage.remove('targetedUpdateVersion')
+
+    if @_shouldUpdate(target) then @_updateFailed(log) else @_updateSucceeded()
 
   _fetchLatestVersionData: ->
     fetch(LATEST_VERSION_URL).then (@latestVersionData) =>
@@ -113,12 +115,12 @@ module.exports =
   _installDependencies: ->
     @_getDependenciesToInstall().then (dependencies) =>
       if not dependencies?
-        return Promise.resolve()
+        return
 
       install(dependencies)
 
   _getDependenciesToInstall: ->
-    @_getDependencies().then (dependencies) =>
+    @_getUpdatedDependencies().then (dependencies) =>
       packagesToUpdate = null
 
       for name, version of dependencies
@@ -128,7 +130,7 @@ module.exports =
 
       packagesToUpdate
 
-  _getDependencies: ->
+  _getUpdatedDependencies: ->
     @_getDependenciesFromPackagesDir().catch =>
       @_getDependenciesFromCurrentPackage()
 
@@ -157,20 +159,13 @@ module.exports =
     currentVersion isnt latestVersion
 
   _someDependencyIsMismatched: ->
-    isMismatched = false
+    {packageDependencies} = require('../package.json')
 
-    @_getDependencies().then (dependencies) =>
-      for name, version of dependencies
-        if @_shouldInstallDependency(name, version)
-          isMismatched = true
-          return
+    for name, version of packageDependencies
+      if @_shouldInstallDependency(name, version)
+        return true
 
-    isMismatched
-
-  _afterUpdate: ({log}) ->
-    target = localStorage.remove('targetedUpdateVersion')
-
-    if @_shouldUpdate(target) then @_updateFailed(log) else @_updateSucceeded()
+    false
 
   _updateFailed: (log) ->
     @updateNotification =
