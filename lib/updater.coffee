@@ -33,8 +33,10 @@ module.exports =
   update: ->
     @updateNotification?.dismiss()
 
-    atom.notifications.addInfo 'Please wait while the update is installed...',
-      dismissable: true
+    waitNotification =
+      atom.notifications.addInfo 'Please wait while the update is installed...',
+        description: 'This may take a few minutes. Please **do not** close the editor.'
+        dismissable: true
 
     @_updatePackage().then (pkgResult) =>
       @_installDependencies().then (depResult) =>
@@ -44,6 +46,11 @@ module.exports =
         if depResult?
           log += "\nDependencies:\n#{depResult.log}"
           code += depResult.code
+
+        if code isnt 0
+          waitNotification.dismiss()
+          @_updateFailed(log)
+          return
 
         localStorage.set('updateResult', JSON.stringify({log, code}))
         localStorage.set('restartingForUpdate', true)
@@ -70,7 +77,11 @@ module.exports =
 
   _shouldUpdate: (latestVersion) ->
     currentVersion = require './version'
-    compare(latestVersion, currentVersion) is 1
+
+    if compare(latestVersion, currentVersion) is 1
+      return true
+
+    return @_someDependencyIsMismatched()
 
   _shouldSkipCheck: ->
     twelveHours = 12 * 60 * 60
@@ -96,6 +107,7 @@ module.exports =
 
   _updatePackage: ->
     @_getLatestVersion().then (version) ->
+      localStorage.set('targetedUpdateVersion', version)
       install(name, version)
 
   _installDependencies: ->
@@ -144,28 +156,45 @@ module.exports =
 
     currentVersion isnt latestVersion
 
-  _afterUpdate: ({log, code}) ->
-    callback = if code is 0 then @_updateSucceeded else @_updateFailed
-    callback(log)
+  _someDependencyIsMismatched: ->
+    isMismatched = false
+
+    @_getDependencies().then (dependencies) =>
+      for name, version of dependencies
+        if @_shouldInstallDependency(name, version)
+          isMismatched = true
+          return
+
+    isMismatched
+
+  _afterUpdate: ({log}) ->
+    target = localStorage.remove('targetedUpdateVersion')
+
+    if @_shouldUpdate(target) then @_updateFailed(log) else @_updateSucceeded()
 
   _updateFailed: (log) ->
-    atom.notifications.addWarning 'Learn IDE: update failed!',
-      detail: log
-      description: 'Please include this information when contacting the Learn support team about the issue.'
-      dismissable: true
-      buttons: [
-        {
-          text: 'Copy this log'
-          onDidClick: ->
-            {clipboard} = require 'electron'
-            clipboard.writeText(log)
-        }
-        {
-          text: 'Visit help center'
-          onDidClick: ->
-            shell.openExternal(HELP_CENTER_URL)
-        }
-      ]
+    @updateNotification =
+      atom.notifications.addWarning 'Learn IDE: update failed!',
+        detail: log
+        description: 'Please include this information when contacting the Learn support team about the issue.'
+        dismissable: true
+        buttons: [
+          {
+            text: 'Retry'
+            onDidClick: => @update()
+          }
+          {
+            text: 'Visit help center'
+            onDidClick: ->
+              shell.openExternal(HELP_CENTER_URL)
+          }
+          {
+            text: 'Copy this log'
+            onDidClick: ->
+              {clipboard} = require 'electron'
+              clipboard.writeText(log)
+          }
+        ]
 
   _updateSucceeded: ->
     atom.notifications.addSuccess('Learn IDE: update successful!')
