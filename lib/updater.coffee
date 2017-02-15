@@ -1,16 +1,15 @@
 fs = require 'fs'
 path = require 'path'
 {shell} = require 'electron'
-{BufferedProcess} = require 'atom'
-compare = require 'semver-compare'
-config = require './config'
+semver = require 'semver'
+{learnCo} = require './config'
 fetch = require './fetch'
 {install} = require './apm'
 localStorage = require './local-storage'
 {name} = require '../package.json'
 
 HELP_CENTER_URL = 'https://help.learn.co/hc/en-us/sections/206572387-Common-IDE-Questions'
-LATEST_VERSION_URL = "#{config.learnCo}/api/v1/learn_ide/latest_version"
+LATEST_VERSION_URL = "#{learnCo}/api/v1/learn_ide/latest_version"
 
 module.exports =
   autoCheck: ->
@@ -80,7 +79,7 @@ module.exports =
   _shouldUpdate: (latestVersion) ->
     currentVersion = require './version'
 
-    if compare(latestVersion, currentVersion) is 1
+    if semver.gt(latestVersion, currentVersion)
       return true
 
     return @_someDependencyIsMismatched()
