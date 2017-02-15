@@ -40,11 +40,11 @@ module.exports =
 
     @_updatePackage().then (pkgResult) =>
       @_installDependencies().then (depResult) =>
-        log = "Learn IDE:\n#{pkgResult.log}"
+        log = "Learn IDE:\n---\n#{pkgResult.log}"
         code = pkgResult.code
 
         if depResult?
-          log += "\nDependencies:\n#{depResult.log}"
+          log += "\nDependencies:\n---\n#{depResult.log}"
           code += depResult.code
 
         if code isnt 0
