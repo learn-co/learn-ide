@@ -19,12 +19,21 @@ Those two packages include a couple important libraries:
 - **[nsync-fs](https://github.com/learn-co/nsync-fs)** A virtual file system for keeping Atom synced with the remote server
 - **[atom-socket](https://github.com/learn-co/atom-socket)** A library for sharing a single websocket connection in Atom packages.
 
+## Atom and Electron
+
+The Learn IDE application currently uses [Atom at v1.14.2](https://github.com/atom/atom/tree/v1.14.2/docs), which runs [Electron at v1.3.13](https://github.com/electron/electron/tree/v1.3.13/docs). While developling, be sure that you are referring to the documentation that corresponds to these specific versions.
+
 ## Getting Started
 
 1. Download [Atom](https://atom.io/)
-2. Clone this repo and [learn-ide-tree](https://github.com/learn-co/learn-ide-tree)
-3. Run `npm install` in both repos
-4. Run `apm link` inside both repos - This will create a sym link to your .atom directory, making the plugin available for use.
+2. Clone the package repos:
+```shell
+git clone https://github.com/learn-co/learn-ide.git
+git clone https://github.com/learn-co/learn-ide-tree.git
+git clone https://github.com/learn-co/learn-ide-material-ui.git
+```
+3. Run `npm install` in each repo
+4. Run `apm link` inside each repo - This will create a sym link to your .atom directory, making the plugin available for use.
 5. Open Atom
 
 ## Building the Learn IDE
@@ -46,12 +55,7 @@ Ensure the `packageDependencies` are up-to-date in `package.json`, then:
 4. Publish the new tag on apm: `apm publish --tag <tag>`, e.g. `apm publish --tag v2.5.0-beta0`
 5. Build & release as described above, but be sure to check the box indicating that this is a pre-release when creating the release on Github
 
-## Development
-### Atom and Electron
-
-The Learn IDE application currently uses [Atom at v1.14.2](https://github.com/atom/atom/tree/v1.14.2/docs), which runs [Electron at v1.3.13](https://github.com/electron/electron/tree/v1.3.13/docs). While developling, be sure that you are referring to the documentation that corresponds to these specific versions.
-
-### dotenv
+## dotenv
 
 You can configure the Learn IDE by creating a `.env` file either in Atom's home (e.g. `~/.atom/.env`) or wherever the package is being run (e.g. `~/development-stuff/learn-ide/.env`). The following keys can be used:
 
