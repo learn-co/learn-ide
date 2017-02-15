@@ -10,6 +10,7 @@ The Learn IDE client is a modified Atom build with two packages injected to prov
 
 - **[Learn IDE](https://github.com/learn-co/learn-ide)** - The main extension
 - **[Learn IDE Tree](https://github.com/learn-co/learn-ide-tree)** - Our fork of Atom's [tree view](https://github.com/atom/tree-view). Intercepts Atom's file system events and instead performs them on our remote backend.
+- **[Learn IDE Material UI](https://github.com/learn-co/learn-ide-material-ui)** - Our fork of [atom-material-ui](https://github.com/atom-material/atom-material-ui) with our own set of default configurations
 
 **Related libraries:**
 
@@ -32,8 +33,8 @@ Those two packages include a couple important libraries:
 
 ## Releasing
 
-Publish: `apm publish <major|minor|version>` - bumps version in `package.json`, tags it, and publishes the tag to apm
-Build: see above
+Publish: `apm publish <major|minor|patch>` - bumps the package version according to the specified semver segment, tags it, and publishes the tag to apm
+Build: see [building](#building-the-learn-ide)
 Release: convert the tag to a release on Github, and attach the binaries for each platform to the release
 
 ### Beta Release
@@ -41,7 +42,7 @@ Release: convert the tag to a release on Github, and attach the binaries for eac
 2. Commit that version change, and tag it as `v<version>`, e.g. `git commit -am "prep v2.5.0-beta0" && git tag v2.5.0-beta0`
 3. Push the commit and the tag: `git push && git push --tags`
 4. Publish the new tag on apm: `apm publish --tag <tag>`, e.g. `apm publish --tag v2.5.0-beta0`
-5. Build & release as described above, but be sure to check the box indicating that this is a pre-release when editing the tag on Github
+5. Build & release as described above, but be sure to check the box indicating that this is a pre-release when creating the release on Github
 
 ## Atom and Electron
 
