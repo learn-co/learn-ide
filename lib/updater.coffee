@@ -31,6 +31,7 @@ module.exports =
         @_addUpToDateNotification()
 
   update: ->
+    localStorage.set('restartingForUpdate', true)
     @updateNotification?.dismiss()
 
     waitNotification =
@@ -38,7 +39,6 @@ module.exports =
         description: 'This may take a few minutes. Please **do not** close the editor.'
         dismissable: true
 
-    localStorage.set('restartingForUpdate', true)
     @_updatePackage().then (pkgResult) =>
       @_installDependencies().then (depResult) =>
         log = "Learn IDE:\n#{pkgResult.log}"
@@ -123,10 +123,10 @@ module.exports =
     @_getUpdatedDependencies().then (dependencies) =>
       packagesToUpdate = null
 
-      for name, version of dependencies
-        if @_shouldInstallDependency(name, version)
+      for pkg, version of dependencies
+        if @_shouldInstallDependency(pkg, version)
           packagesToUpdate ?= {}
-          packagesToUpdate[name] = version
+          packagesToUpdate[pkg] = version
 
       packagesToUpdate
 
@@ -148,12 +148,17 @@ module.exports =
         if err?
           reject(err)
 
-        pkg = JSON.parse(data)
+        try
+          pkg = JSON.parse(data)
+        catch e
+          console.error("Unable to parse #{pkgJSON}:", e)
+          return reject(e)
+
         dependenciesObj = pkg.packageDependencies
         resolve(dependenciesObj)
 
-  _shouldInstallDependency: (name, latestVersion) ->
-    pkg = atom.packages.loadPackage(name)
+  _shouldInstallDependency: (pkgName, latestVersion) ->
+    pkg = atom.packages.loadPackage(pkgName)
     currentVersion = pkg?.metadata.version
 
     currentVersion isnt latestVersion
@@ -161,35 +166,37 @@ module.exports =
   _someDependencyIsMismatched: ->
     {packageDependencies} = require('../package.json')
 
-    for name, version of packageDependencies
-      if @_shouldInstallDependency(name, version)
+    for pkg, version of packageDependencies
+      if @_shouldInstallDependency(pkg, version)
         return true
 
     false
 
-  _updateFailed: (log) ->
+  _updateFailed: (detail) ->
+    description = 'The installation seems to have been interrupted.'
+    buttons = [
+      {
+        text: 'Retry'
+        onDidClick: =>
+          @update()
+      }
+      {
+        text: 'Visit help center'
+        onDidClick: ->
+          shell.openExternal(HELP_CENTER_URL)
+      }
+    ]
+
+    if detail?
+      description = 'Please include this information when contacting the Learn support team about the issue.'
+      buttons.push
+        text: 'Copy this log'
+        onDidClick: ->
+          {clipboard} = require 'electron'
+          clipboard.writeText(detail)
+
     @updateNotification =
-      atom.notifications.addWarning 'Learn IDE: update failed!',
-        detail: log
-        description: 'Please include this information when contacting the Learn support team about the issue.'
-        dismissable: true
-        buttons: [
-          {
-            text: 'Retry'
-            onDidClick: => @update()
-          }
-          {
-            text: 'Visit help center'
-            onDidClick: ->
-              shell.openExternal(HELP_CENTER_URL)
-          }
-          {
-            text: 'Copy this log'
-            onDidClick: ->
-              {clipboard} = require 'electron'
-              clipboard.writeText(log)
-          }
-        ]
+      atom.notifications.addWarning('Learn IDE: update failed!', {detail, description, buttons, dismissable: true})
 
   _updateSucceeded: ->
     atom.notifications.addSuccess('Learn IDE: update successful!')

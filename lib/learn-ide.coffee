@@ -121,7 +121,8 @@ module.exports =
       @notifier.activate()
 
   activateUpdater: ->
-    updater.autoCheck()
+    if not @isRestartAfterUpdate
+      updater.autoCheck()
 
   deactivate: ->
     localStorage.delete('disableTreeView')
