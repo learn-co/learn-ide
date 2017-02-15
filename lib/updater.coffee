@@ -160,7 +160,7 @@ module.exports =
     pkg = atom.packages.loadPackage(pkgName)
     currentVersion = pkg?.metadata.version
 
-    currentVersion isnt latestVersion
+    not semver.satisfies(currentVersion, latestVersion)
 
   _someDependencyIsMismatched: ->
     {packageDependencies} = require('../package.json')
