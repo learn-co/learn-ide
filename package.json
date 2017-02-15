@@ -1,11 +1,10 @@
 {
   "name": "learn-ide",
   "version": "2.3.3",
-  "atomVersion": "1.13.0",
-  "treeVersion": "1.0.21",
+  "atomVersion": "1.14.1",
   "main": "./lib/learn-ide",
   "urlMain": "./lib/url-handler",
-  "description": "An integrated development environment for use with Learn.co",
+  "description": "An integrated development environment for Learn.co",
   "scripts": {
     "start": "./node_modules/gulp/bin/gulp.js"
   },
@@ -29,8 +28,16 @@
     "learn-term.js": "0.0.7",
     "page-bus": "3.0.1",
     "register-protocol-win32": "1.0.0",
+    "semver-compare": "^1.0.0",
     "underscore-plus": "1.6.6",
     "utf8": "2.1.1"
+  },
+  "packageDependencies": {
+    "atom-material-syntax": "1.0.2",
+    "atom-material-syntax-dark": "0.2.7",
+    "atom-material-syntax-light": "0.4.6",
+    "learn-ide-material-ui": "1.3.12",
+    "learn-ide-tree": "1.0.21"
   },
   "configSchema": {
     "notifier": {
@@ -40,14 +47,14 @@
       "description": "Receive desktop notifications that correspond to the lights on Learn.co"
     },
     "terminalFontColor": {
-      "type": "string",
+      "type": "color",
       "default": "#ffffff",
       "title": "Terminal Font Color",
       "description": "A valid CSS color value which will be used to style your terminal's font"
     },
     "terminalBackgroundColor": {
-      "type": "string",
-      "default": "#000000",
+      "type": "color",
+      "default": "#1A2226",
       "title": "Terminal Background Color",
       "description": "A valid CSS color value which will be used to style your terminal's background"
     }

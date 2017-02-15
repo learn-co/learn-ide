@@ -26,6 +26,14 @@
       'label': 'Learn IDE'
       'submenu': [
         {
+          'label': 'Reconnect'
+          'command': 'learn-ide:reset-connection'
+        }
+        {
+          'label': 'Log In/Out'
+          'command': 'learn-ide:log-in-out'
+        }
+        {
           'label': 'Focus Terminal'
           'command': 'learn-ide:toggle-focus'
         }
@@ -38,12 +46,8 @@
           'command': 'learn-ide:toggle:debugger'
         }
         {
-          'label': 'Reconnect'
-          'command': 'learn-ide:reset-connection'
-        }
-        {
-          'label': 'Log In/Out'
-          'command': 'learn-ide:log-in-out'
+          'label': 'Check for Update'
+          'command': 'learn-ide:update-check'
         }
       ]
     ]

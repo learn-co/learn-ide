@@ -3,15 +3,19 @@ localStorage = require './local-storage'
 Terminal = require './terminal'
 TerminalView = require './views/terminal'
 StatusView = require './views/status'
+{BrowserWindow} = require 'remote'
 {EventEmitter} = require 'events'
-Updater = require './updater'
-bus = require('./event-bus')()
 Notifier = require './notifier'
 atomHelper = require './atom-helper'
-config = require './config'
 auth = require './auth'
-remote = require 'remote'
-BrowserWindow = remote.BrowserWindow
+bus = require('./event-bus')()
+config = require './config'
+{shell} = require 'electron'
+updater = require './updater'
+version = require './version'
+{name} = require '../package.json'
+
+ABOUT_URL = 'https://help.learn.co/hc/en-us/categories/204144547-The-Learn-IDE'
 
 module.exports =
   token: require('./token')
@@ -33,7 +37,12 @@ module.exports =
       console.error('failed to authenticate')
 
   activateIDE: (state) ->
-    @isTerminalWindow = (localStorage.get('popoutTerminal') == 'true')
+    @isRestartAfterUpdate = (localStorage.get('restartingForUpdate') is 'true')
+    if @isRestartAfterUpdate
+      updater.didRestartAfterUpdate()
+      localStorage.delete('restartingForUpdate')
+
+    @isTerminalWindow = (localStorage.get('popoutTerminal') is 'true')
     if @isTerminalWindow
       window.resizeTo(750, 500)
       localStorage.delete('popoutTerminal')
@@ -87,9 +96,17 @@ module.exports =
       'learn-ide:focus': => @termView.fullFocus()
       'learn-ide:toggle:debugger': => @term.toggleDebugger()
       'learn-ide:reset-connection': => @term.reset()
-      'application:update-ile': -> (new Updater).checkForUpdate()
+      'learn-ide:view-version': => @viewVersion()
+      'learn-ide:update-check': -> updater.checkForUpdate()
+      'learn-ide:about': => @about()
 
-    atom.config.onDidChange 'learn-ide.notifier', ({newValue}) =>
+    atom.config.onDidChange "#{name}.terminalFontColor", ({newValue}) =>
+      @termView.updateFontColor(newValue)
+
+    atom.config.onDidChange "#{name}.terminalBackgroundColor", ({newValue}) =>
+      @termView.updateBackgroundColor(newValue)
+
+    atom.config.onDidChange "#{name}.notifier", ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()
 
     openPath = localStorage.get('learnOpenLabOnActivation')
@@ -99,13 +116,13 @@ module.exports =
 
 
   activateNotifier: ->
-    if atom.config.get('learn-ide.notifier')
+    if atom.config.get("#{name}.notifier")
       @notifier = new Notifier(@token.get())
       @notifier.activate()
 
   activateUpdater: ->
-    @updater = new Updater(true)
-    @updater.checkForUpdate()
+    if not @isRestartAfterUpdate
+      updater.autoCheck()
 
   deactivate: ->
     localStorage.delete('disableTreeView')
@@ -169,4 +186,10 @@ module.exports =
 
     priority = (rightMostTile?.priority || 0) - 1
     statusBar.addRightTile({item: @statusView, priority})
+
+  about: ->
+    shell.openExternal(ABOUT_URL)
+
+  viewVersion: ->
+    atom.notifications.addInfo("Learn IDE: v#{version}")
 

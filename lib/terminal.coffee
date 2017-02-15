@@ -41,8 +41,9 @@ module.exports = class Terminal extends EventEmitter
         @emit 'error', e
 
   url: ->
+    version = require './version'
     protocol = if @port == 443 then 'wss' else 'ws'
-    "#{protocol}://#{@host}:#{@port}/#{@path}?token=#{@token}&version=#{LEARN_IDE_VERSION}"
+    "#{protocol}://#{@host}:#{@port}/#{@path}?token=#{@token}&version=#{version}"
 
   reset: ->
     console.log('term:reset')

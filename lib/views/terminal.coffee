@@ -1,7 +1,7 @@
+{Menu} = require 'remote'
 {$, View} = require 'atom-space-pen-views'
 Clipboard = require 'clipboard'
-remote    = require 'remote'
-Menu      = remote.Menu
+{name} = require '../../package.json'
 TerminalWrapper = require './terminal-wrapper'
 localStorage = require '../local-storage'
 
@@ -43,8 +43,8 @@ class TerminalView extends View
     @terminalWrapper.element.style.height = '100%'
     @terminalWrapper.element.style.fontFamily = -> atom.config.get('editor.fontFamily') or "monospace"
     @terminalWrapper.element.style.fontSize = "#{fontSize}px"
-    @openColor = atom.config.get('learn-ide.terminalFontColor')
-    @openBackgroundColor = atom.config.get('learn-ide.terminalBackgroundColor')
+    @openColor = atom.config.get("#{name}.terminalFontColor").toRGBAString()
+    @openBackgroundColor = atom.config.get("#{name}.terminalBackgroundColor").toRGBAString()
 
   displayDisconnected: ->
     @displayingDisconnect = true
@@ -205,4 +205,12 @@ class TerminalView extends View
       @panel.hide()
     else
       @showAndFocus()
+
+  updateFontColor: (color) ->
+    @openColor = color.toRGBAString()
+    @terminalWrapper.element.style.color = @openColor
+
+  updateBackgroundColor: (color) ->
+    @openBackgroundColor = color.toRGBAString()
+    @terminalWrapper.element.style.backgroundColor = @openBackgroundColor
 

@@ -1,94 +1,203 @@
-https = require 'https'
-{EventEmitter} = require 'events'
-remote = require 'remote'
-BrowserWindow = remote.BrowserWindow
-version = require './version'
-shell = require 'shell'
+fs = require 'fs'
 path = require 'path'
+{shell} = require 'electron'
+{BufferedProcess} = require 'atom'
+compare = require 'semver-compare'
+config = require './config'
+fetch = require './fetch'
+{install} = require './apm'
 localStorage = require './local-storage'
+{name} = require '../package.json'
 
-module.exports = class Updater extends EventEmitter
-  constructor: (autoCheck) ->
-    @currentVersion = version
-    @autoCheck = autoCheck
+HELP_CENTER_URL = 'https://help.learn.co/hc/en-us/sections/206572387-Common-IDE-Questions'
+LATEST_VERSION_URL = "#{config.learnCo}/api/v1/learn_ide/latest_version"
 
-  checkForUpdate: =>
-    if (@autoCheck && @noCheckToday()) || !@autoCheck
-      https.get
-        host: 'learn.co'
-        path: '/api/v1/learn_ide/latest_version'
-      , (response) =>
-        body = ''
+module.exports =
+  autoCheck: ->
+    if not @_shouldSkipCheck()
+      @_fetchLatestVersionData().then ({version, detail}) =>
+        @_setCheckDate()
 
-        response.on 'data', (d) ->
-          body += d
+        if @_shouldUpdate(version)
+          @_addUpdateNotification(detail)
 
-        response.on 'end', =>
-          parsed = JSON.parse(body)
+  checkForUpdate: ->
+    @_fetchLatestVersionData().then ({version, detail}) =>
+      @_setCheckDate()
 
-          try
-            currentVersionNums = @currentVersion.split('.').map((n) -> parseInt(n))
-            latestVersionNums  = parsed.version.split('.').map((n) -> parseInt(n))
+      if @_shouldUpdate(version)
+        @_addUpdateNotification(detail)
+      else
+        @_addUpToDateNotification()
 
-            atom.blobStore.set('learnUpdateCheckDate', 'learn-update-key', new Buffer(Date.now().toString()))
-            atom.blobStore.save()
+  update: ->
+    localStorage.set('restartingForUpdate', true)
+    @updateNotification?.dismiss()
 
-            outOfDate = @outOfDate(currentVersionNums, latestVersionNums)
+    waitNotification =
+      atom.notifications.addInfo 'Please wait while the update is installed...',
+        description: 'This may take a few minutes. Please **do not** close the editor.'
+        dismissable: true
 
-            if @autoCheck && !outOfDate
-              console.log 'Automatically checked for updates...up to date.'
-            else
-              {win, mac} = parsed.download_urls
-              downloadURL = if process.platform == 'win32' then win else mac
+    @_updatePackage().then (pkgResult) =>
+      @_installDependencies().then (depResult) =>
+        log = "Learn IDE:\n#{pkgResult.log}"
+        code = pkgResult.code
 
-              localStorage.set 'updateCheck', JSON.stringify(
-                downloadURL: downloadURL
-                outOfDate: outOfDate
-              )
+        if depResult?
+          log += "\nDependencies:\n#{depResult.log}"
+          code += depResult.code
 
-              args =
-                width: 500
-                height: 250
-                show: false
-                title: 'Update Learn IDE'
-                resizable: false
+        if code isnt 0
+          waitNotification.dismiss()
+          localStorage.delete('restartingForUpdate')
+          @_updateFailed(log)
+          return
 
-              win = new BrowserWindow(args)
+        localStorage.set('updateLog', log)
+        atom.restartApplication()
 
-              win.on 'closed', ->
-                win = null
+  didRestartAfterUpdate: ->
+    log = localStorage.remove('updateLog')
+    target = localStorage.remove('targetedUpdateVersion')
 
-              updatePath = path.resolve(path.join(__dirname, '..', 'static', 'update_check.html'))
+    if @_shouldUpdate(target) then @_updateFailed(log) else @_updateSucceeded()
 
-              updatePageURL = "file://#{ updatePath }"
-              win.loadURL(updatePageURL)
+  _fetchLatestVersionData: ->
+    fetch(LATEST_VERSION_URL).then (@latestVersionData) =>
+      return @latestVersionData
 
-              win.webContents.on 'did-finish-load', ->
-                win.show()
+  _getLatestVersion: ->
+    if @latestVersionData? and @latestVersionData.version?
+      return Promise.resolve(@latestVersionData.version)
 
-          catch err
-            console.log 'There was a problem checking for updates.'
-            console.error(err)
+    @_fetchLatestVersionData().then ({version}) ->
+      return version
 
-  outOfDate: (currentNums, latestNums) =>
-    @laterMajorVersion(currentNums, latestNums) || @laterMinorVersion(currentNums, latestNums) || @laterPatchVersion(currentNums, latestNums)
+  _setCheckDate: ->
+    localStorage.set('updateCheckDate', Date.now())
 
-  laterMajorVersion: (currentNums, latestNums) =>
-    latestNums[0] > currentNums[0]
+  _shouldUpdate: (latestVersion) ->
+    currentVersion = require './version'
 
-  laterMinorVersion: (currentNums, latestNums) =>
-    latestNums[0] == currentNums[0] && latestNums[1] > currentNums[1]
+    if compare(latestVersion, currentVersion) is 1
+      return true
 
-  laterPatchVersion: (currentNums, latestNums) =>
-    latestNums[0] == currentNums[0] && latestNums[1] == currentNums[1] && latestNums[2] > currentNums[2]
+    return @_someDependencyIsMismatched()
 
-  noCheckToday: =>
-    checkDate = atom.blobStore.get('learnUpdateCheckDate', 'learn-update-key')
+  _shouldSkipCheck: ->
+    twelveHours = 12 * 60 * 60
+    @_lastCheckedAgo() < twelveHours
 
-    if checkDate
-      checkDate = parseInt(checkDate.toString())
+  _lastCheckedAgo: ->
+    checked = parseInt(localStorage.get('updateCheckDate'))
+    Date.now() - checked
 
-    if !checkDate || (checkDate && ((Date.now() - checkDate) >= 86400))
-      true
-    else
-      false
+  _addUpdateNotification: (detail) ->
+    @updateNotification =
+      atom.notifications.addInfo 'Learn IDE: update available!',
+        detail: detail
+        description: 'Just click below to get the sweet, sweet newness.'
+        dismissable: true
+        buttons: [
+          text: 'Install update & restart editor'
+          onDidClick: => @update()
+        ]
+
+  _addUpToDateNotification: ->
+    atom.notifications.addSuccess 'Learn IDE: up-to-date!'
+
+  _updatePackage: ->
+    @_getLatestVersion().then (version) ->
+      localStorage.set('targetedUpdateVersion', version)
+      install(name, version)
+
+  _installDependencies: ->
+    @_getDependenciesToInstall().then (dependencies) =>
+      if not dependencies?
+        return
+
+      install(dependencies)
+
+  _getDependenciesToInstall: ->
+    @_getUpdatedDependencies().then (dependencies) =>
+      packagesToUpdate = null
+
+      for pkg, version of dependencies
+        if @_shouldInstallDependency(pkg, version)
+          packagesToUpdate ?= {}
+          packagesToUpdate[pkg] = version
+
+      packagesToUpdate
+
+  _getUpdatedDependencies: ->
+    @_getDependenciesFromPackagesDir().catch =>
+      @_getDependenciesFromCurrentPackage()
+
+  _getDependenciesFromPackagesDir: ->
+    pkg = path.join(atom.getConfigDirPath(), 'packages', name, 'package.json')
+    @_getDependenciesFromPath(pkg)
+
+  _getDependenciesFromCurrentPackage: ->
+    pkgJSON = path.resolve(__dirname, '..', 'package.json')
+    @_getDependenciesFromPath(pkgJSON)
+
+  _getDependenciesFromPath: (pkgJSON) ->
+    new Promise (resolve, reject) ->
+      fs.readFile pkgJSON, 'utf-8', (err, data) ->
+        if err?
+          reject(err)
+
+        try
+          pkg = JSON.parse(data)
+        catch e
+          console.error("Unable to parse #{pkgJSON}:", e)
+          return reject(e)
+
+        dependenciesObj = pkg.packageDependencies
+        resolve(dependenciesObj)
+
+  _shouldInstallDependency: (pkgName, latestVersion) ->
+    pkg = atom.packages.loadPackage(pkgName)
+    currentVersion = pkg?.metadata.version
+
+    currentVersion isnt latestVersion
+
+  _someDependencyIsMismatched: ->
+    {packageDependencies} = require('../package.json')
+
+    for pkg, version of packageDependencies
+      if @_shouldInstallDependency(pkg, version)
+        return true
+
+    false
+
+  _updateFailed: (detail) ->
+    description = 'The installation seems to have been interrupted.'
+    buttons = [
+      {
+        text: 'Retry'
+        onDidClick: =>
+          @update()
+      }
+      {
+        text: 'Visit help center'
+        onDidClick: ->
+          shell.openExternal(HELP_CENTER_URL)
+      }
+    ]
+
+    if detail?
+      description = 'Please include this information when contacting the Learn support team about the issue.'
+      buttons.push
+        text: 'Copy this log'
+        onDidClick: ->
+          {clipboard} = require 'electron'
+          clipboard.writeText(detail)
+
+    @updateNotification =
+      atom.notifications.addWarning('Learn IDE: update failed!', {detail, description, buttons, dismissable: true})
+
+  _updateSucceeded: ->
+    atom.notifications.addSuccess('Learn IDE: update successful!')
+
