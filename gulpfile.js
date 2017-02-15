@@ -195,8 +195,8 @@ gulp.task('alter-files', function() {
 
   replaceInFile(path.join(buildDir, 'src', 'main-process', 'atom-application.coffee'), [
     [
-      'options.socketPath = "\\\\.\\pipe\\atom-#{options.version}-#{userNameSafe}-sock"',
-      'options.socketPath = "\\\\.\\pipe\\' + executableName() + '-#{options.version}-#{userNameSafe}-sock"',
+      /options.socketPath = "\\\\\\\\.\\\\pipe\\\\atom-#{options.version}-#{userNameSafe}-#{process.arch}-sock"/,
+      'options.socketPath = "\\\\\\\\.\\\\pipe\\\\' + executableName() + '-#{options.version}-#{userNameSafe}-#{process.arch}-sock"'
     ],
     [
       'options.socketPath = path.join(os.tmpdir(), "atom-#{options.version}-#{process.env.USER}.sock")',
@@ -230,30 +230,56 @@ gulp.task('alter-files', function() {
   ]);
 
   replaceInFile(path.join(buildDir, 'menus', 'darwin.cson'), [
-    [/application:check-for-update/, 'learn-ide:update-check'],
+    [
+      "{ label: 'Check for Update', command: 'application:check-for-update', visible: false}",
+      "{ label: 'Check for Update', command: 'learn-ide:update-check'}"
+    ],
+    [
+      "{ label: 'VERSION', enabled: false }\n      { label: 'Restart and Install Update', command: 'application:install-update', visible: false}",
+      "{ label: 'View Version', command: 'learn-ide:view-version'}"
+    ],
     [/About Atom/, 'About'],
     [/application:about/, 'learn-ide:about']
   ]);
 
   replaceInFile(path.join(buildDir, 'menus', 'win32.cson'), [
-    [/application:check-for-update/, 'learn-ide:update-check'],
+    [
+      "{ label: 'Check for Update', command: 'application:check-for-update', visible: false}",
+      "{ label: 'Check for Update', command: 'learn-ide:update-check'}"
+    ],
+    [
+      "{ label: 'VERSION', enabled: false }\n      { label: 'Restart and Install Update', command: 'application:install-update', visible: false}",
+      "{ label: 'View Version', command: 'learn-ide:view-version'}"
+    ],
+    [
+      "\n      { label: 'Checking for Update', enabled: false, visible: false}\n      { label: 'Downloading Update', enabled: false, visible: false}",
+      ''
+    ],
     [/About Atom/, 'About'],
     [/application:about/, 'learn-ide:about']
   ]);
 
   replaceInFile(path.join(buildDir, 'menus', 'linux.cson'), [
     [/About Atom/, 'About'],
+    [
+      '{ label: "VERSION", enabled: false }',
+      "{ label: 'View Version', command: 'learn-ide:view-version'}"
+    ],
     [/application:about/, 'learn-ide:about']
   ]);
 
   replaceInFile(path.join(buildDir, 'src', 'config-schema.js'), [
     [
-      'automaticallyUpdate: {\n        description: \'Automatically update Atom when a new release is available.\',\n        type: \'boolean\',\n        default: true\n      }',
-      'automaticallyUpdate: {\n        description: \'Automatically update Atom when a new release is available.\',\n        type: \'boolean\',\n        default: false\n      }',
+      "automaticallyUpdate: {\n        description: 'Automatically update Atom when a new release is available.',\n        type: 'boolean',\n        default: true\n      }",
+      "automaticallyUpdate: {\n        description: 'Automatically update Atom when a new release is available.',\n        type: 'boolean',\n        default: false\n      }",
     ],
     [
-      'openEmptyEditorOnStart: {\n        description: \'Automatically open an empty editor on startup.\',\n        type: \'boolean\',\n        default: true\n      }',
-      'openEmptyEditorOnStart: {\n        description: \'Automatically open an empty editor on startup.\',\n        type: \'boolean\',\n        default: false\n      }'
+      "openEmptyEditorOnStart: {\n        description: 'When checked opens an untitled editor when loading a blank environment (such as with _File > New Window_ or when \"Restore Previous Windows On Start\" is unchecked); otherwise no editor is opened when loading a blank environment. This setting has no effect when restoring a previous state.',\n        type: 'boolean',\n        default: true",
+      "openEmptyEditorOnStart: {\n        description: 'When checked opens an untitled editor when loading a blank environment (such as with _File > New Window_ or when \"Restore Previous Windows On Start\" is unchecked); otherwise no editor is opened when loading a blank environment. This setting has no effect when restoring a previous state.',\n        type: 'boolean',\n        default: false"
+    ],
+    [
+      "restorePreviousWindowsOnStart: {\n        description: 'When checked restores the last state of all Atom windows when started from the icon or `atom` by itself from the command line; otherwise a blank environment is loaded.',\n        type: 'boolean',\n        default: true",
+      "restorePreviousWindowsOnStart: {\n        description: 'When checked restores the last state of all Atom windows when started from the icon or `atom` by itself from the command line; otherwise a blank environment is loaded.',\n        type: 'boolean',\n        default: false"
     ],
     [
       "['one-dark-ui', 'one-dark-syntax']", "['learn-ide-material-ui', 'atom-material-syntax']"
@@ -344,5 +370,26 @@ gulp.task('build', function(done) {
     'cleanup',
     done
   )
+})
+
+gulp.task('mastermind', function(done) {
+  // update package.json
+  var pkg = require('./package.json')
+  pkg.name = 'mastermind'
+  pkg.description = 'The Learn IDE\'s evil twin that we use for testing'
+  pkg.packageDependencies['mirage'] = 'learn-co/mirage#master'
+  pkg.repository = pkg.repository.replace('learn-ide', 'mastermind')
+  delete pkg.packageDependencies['learn-ide-tree']
+  fs.writeFileSync('./package.json', JSON.stringify(pkg, null, '  '))
+
+  // update gulpfile
+  var gf = fs.readFileSync('./gulpfile.js', 'utf-8')
+  var updated = gf.replace('Learn IDE', 'Mastermind IDE')
+  fs.writeFileSync('./gulpfile.js', updated)
+
+  // update menus
+  var menu = fs.readFileSync('./menus/learn-ide.cson', 'utf-8')
+  var updated = menu.replace(/Learn IDE/g, 'Mastermind')
+  fs.writeFileSync('./menus/learn-ide.cson', updated)
 })
 
