@@ -1,7 +1,7 @@
 localStorage = require './local-storage'
 {CompositeDisposable} = require 'atom'
 Terminal = require './terminal'
-TerminalView = require './views/terminal'
+TerminalView = require './terminal-view'
 StatusView = require './views/status'
 {BrowserWindow} = require 'remote'
 {EventEmitter} = require 'events'
@@ -61,8 +61,7 @@ module.exports =
       path: config.path
       token: @token.get()
 
-    @termView = new TerminalView(@term, null, @isTerminalWindow)
-    @termView.toggle()
+    @termView = new TerminalView(@term)
 
   activateStatusView: (state) ->
     @statusView = new StatusView state, @term, {@isTerminalWindow}

@@ -1,4 +1,3 @@
-utf8 = require 'utf8'
 {EventEmitter} = require 'events'
 atomHelper = require './atom-helper'
 path = require 'path'
@@ -32,7 +31,8 @@ module.exports = class Terminal extends EventEmitter
         resolve()
 
       @socket.on 'message', (message) =>
-        @emit 'message', utf8.decode(atob(message))
+        decoded = new Buffer(message, 'base64').toString()
+        @emit 'message', decoded
 
       @socket.on 'close', =>
         @emit 'close'
