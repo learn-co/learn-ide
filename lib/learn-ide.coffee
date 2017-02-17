@@ -78,7 +78,7 @@ module.exports =
 
     # listen for learn:open event from other render processes (url handler)
     bus.on 'learn:open', (lab) =>
-      @termView.openLab(lab.slug)
+      @learnOpen(lab.slug)
       atom.getCurrentWindow().focus()
 
     # tidy up when the window closes
@@ -89,7 +89,7 @@ module.exports =
 
   activateSubscriptions: ->
     @subscriptions.add atom.commands.add 'atom-workspace',
-      'learn-ide:open': (e) => @termView.openLab(e.detail.path)
+      'learn-ide:open': (e) => @learnOpen(e.detail.path)
       'learn-ide:toggle-terminal': () => @termView.toggle()
       'learn-ide:toggle-focus': => @termView.toggleFocus()
       'learn-ide:focus': => @termView.fullFocus()
@@ -115,7 +115,7 @@ module.exports =
     openPath = localStorage.get('learnOpenLabOnActivation')
     if openPath
       localStorage.delete('learnOpenLabOnActivation')
-      @termView.openLab(openPath)
+      @learnOpen(openPath)
 
 
   activateNotifier: ->
@@ -189,6 +189,10 @@ module.exports =
 
     priority = (rightMostTile?.priority || 0) - 1
     statusBar.addRightTile({item: @statusView, priority})
+
+  learnOpen: (labSlug) ->
+    if labSlug?
+      @term.send("learn open #{labSlug.toString()}\r")
 
   about: ->
     shell.openExternal(ABOUT_URL)

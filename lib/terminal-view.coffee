@@ -8,13 +8,12 @@ class TerminalView extends View
   @content: ->
     @div class: 'terminal-resizer tool-panel', =>
       @div class: 'terminal-resize-handle', outlet: 'resizeHandle'
-      @div class: 'terminal-container', outlet: 'emulatorContainer'
+      @div class: 'emulator-container', outlet: 'emulatorContainer'
 
-  initialize: (@terminal, @openPath) ->
+  initialize: (@terminal) ->
     @emulator = new TerminalEmulator({cursorBlink: true})
     @subscribe()
     @attach()
-    window.view = this
 
   subscribe: ->
     @emulator.on 'data', (data) =>
