@@ -5,14 +5,14 @@
       'command': 'learn-ide:toggle-terminal'
     }
   ]
-  '.learn-terminal': [
+  '.terminal': [
     {
       'label': 'Copy'
-      'command': 'learn-ide:copy'
+      'command': 'core:copy'
     }
     {
       'label': 'Paste'
-      'command': 'learn-ide:paste'
+      'command': 'core:paste'
     }
     {
       'label': 'Hide Learn IDE Terminal'

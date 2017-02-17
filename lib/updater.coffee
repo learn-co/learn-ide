@@ -1,6 +1,5 @@
 fs = require 'fs'
 path = require 'path'
-{shell} = require 'electron'
 semver = require 'semver'
 {learnCo} = require './config'
 fetch = require './fetch'
@@ -172,6 +171,8 @@ module.exports =
     false
 
   _updateFailed: (detail) ->
+    {shell, clipboard} = require 'electron'
+
     description = 'The installation seems to have been interrupted.'
     buttons = [
       {
@@ -191,7 +192,6 @@ module.exports =
       buttons.push
         text: 'Copy this log'
         onDidClick: ->
-          {clipboard} = require 'electron'
           clipboard.writeText(detail)
 
     @updateNotification =

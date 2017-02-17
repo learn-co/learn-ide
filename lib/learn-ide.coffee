@@ -99,6 +99,10 @@ module.exports =
       'learn-ide:update-check': -> updater.checkForUpdate()
       'learn-ide:about': => @about()
 
+    @subscriptions.add atom.commands.add '.terminal',
+      'core:copy': => @termView.copyText()
+      'core:paste': => @termView.pasteText()
+
     atom.config.onDidChange "#{name}.terminalFontColor", ({newValue}) =>
       @termView.updateFontColor(newValue)
 

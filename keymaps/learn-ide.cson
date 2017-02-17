@@ -2,17 +2,12 @@
   'cmd-i': 'learn-ide:toggle-terminal'
   'cmd-;': 'learn-ide:toggle-focus'
 
-'.platform-darwin .learn-terminal':
-  'cmd-c': 'learn-ide:copy'
-  'cmd-v': 'learn-ide:paste'
+'.platform-darwin .terminal':
   'cmd-=': 'learn-ide:increase-font-size'
   'cmd--': 'learn-ide:decrease-font-size'
   'cmd-0': 'learn-ide:reset-font-size'
 
-'.platform-win32 .learn-terminal':
-  # TODO: make these work & remove listeners in TerminalView
-  # 'ctrl-shift-C': 'learn-ide:copy'
-  # 'ctrl-shift-V': 'learn-ide:paste'
+'.platform-win32 .terminal':
   'ctrl-+': 'learn-ide:increase-font-size'
   'ctrl-_': 'learn-ide:decrease-font-size'
   'ctrl-0': 'learn-ide:reset-font-size'

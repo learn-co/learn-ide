@@ -1,4 +1,5 @@
 {$, View} = require 'atom-space-pen-views'
+{clipboard} = require 'electron'
 TerminalEmulator = require 'xterm'
 TerminalEmulator.loadAddon 'fit'
 
@@ -27,6 +28,19 @@ class TerminalView extends View
   attach: ->
     atom.workspace.addBottomPanel({item: this})
     @emulator.open(@emulatorContainer[0])
+
+  copyText: ->
+    selection = document.getSelection()
+    rawText = selection.toString()
+    preparedText = rawText.replace(/\u00A0/g, ' ').replace(/\s+(\n)?$/gm, '$1')
+
+    clipboard.writeText(preparedText)
+
+  pasteText: ->
+   rawText = clipboard.readText()
+   preparedText = rawText.replace(/\n/g, '\r')
+
+   @terminal.send(preparedText)
 
   resizeStarted: =>
     $(document).on('mousemove', @resizeTerminal)
