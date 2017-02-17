@@ -1,6 +1,6 @@
 {
   "name": "learn-ide",
-  "version": "2.4.0-beta5",
+  "version": "2.4.0",
   "atomVersion": "1.14.2",
   "main": "./lib/learn-ide",
   "urlMain": "./lib/url-handler",
@@ -36,7 +36,7 @@
     "atom-material-syntax": "1.0.2",
     "atom-material-syntax-dark": "0.2.7",
     "atom-material-syntax-light": "0.4.6",
-    "learn-ide-material-ui": "1.3.13",
+    "learn-ide-material-ui": "1.3.14",
     "learn-ide-tree": "1.0.22"
   },
   "configSchema": {
