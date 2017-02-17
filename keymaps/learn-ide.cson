@@ -1,6 +1,10 @@
 '.platform-darwin':
-  'cmd-i': 'learn-ide:toggle-terminal'
+  'cmd-I': 'learn-ide:toggle-terminal'
   'cmd-;': 'learn-ide:toggle-focus'
+
+'.platform-win32, .platform-linux':
+  'ctrl-I': 'learn-ide:toggle-terminal'
+  'ctrl-;': 'learn-ide:toggle-focus'
 
 '.platform-darwin .terminal':
   'cmd-=': 'learn-ide:increase-font-size'

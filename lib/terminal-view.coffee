@@ -22,7 +22,8 @@ class TerminalView extends View
     @terminal.on 'message', (msg) =>
       @emulator.write(msg)
 
-    @on 'mousedown', '.terminal-resize-handle', (e) => @resizeStarted(e)
+    @on 'mousedown', '.terminal-resize-handle', (e) =>
+      @resizeStarted(e)
 
   attach: ->
     atom.workspace.addBottomPanel({item: this})
@@ -36,10 +37,21 @@ class TerminalView extends View
     clipboard.writeText(preparedText)
 
   pasteText: ->
-   rawText = clipboard.readText()
-   preparedText = rawText.replace(/\n/g, '\r')
+    rawText = clipboard.readText()
+    preparedText = rawText.replace(/\n/g, '\r')
 
-   @terminal.send(preparedText)
+    @terminal.send(preparedText)
+
+  toggleFocus: ->
+    hasFocus = document.activeElement is @emulator.textarea
+
+    if hasFocus then @transferFocus() else @focusEmulator()
+
+  transferFocus: ->
+    atom.workspace.getActivePane().activate()
+
+  focusEmulator: ->
+    @emulator.focus()
 
   resizeStarted: =>
     $(document).on('mousemove', @resizeTerminal)
