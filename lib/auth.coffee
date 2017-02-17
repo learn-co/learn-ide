@@ -1,46 +1,19 @@
 url = require 'url'
-https = require 'https'
-remote = require 'remote'
 shell = require 'shell'
 path = require 'path'
+version = require './version'
+fetch = require './fetch'
 _token = require './token'
-config = require './config'
-BrowserWindow = remote.BrowserWindow
+{learnCo} = require './config'
+{BrowserWindow} = require 'remote'
 
-workspaceView = atom.views.getView(atom.workspace)
+AUTH_URL = "#{learnCo}/api/v1/users/me?ile_version=#{version}"
 
 confirmOauthToken = (token) ->
-  return new Promise (resolve, reject) ->
-    try
-      authRequest = https.get
-        host: 'learn.co'
-        path: '/api/v1/users/me?ile_version=' + atom.appVersion
-        headers:
-          'Authorization': 'Bearer ' + token
-      , (response) ->
-        body = ''
+  headers = new Headers({'Authorization': "Bearer #{token}"})
 
-        response.on 'data', (d) ->
-          body += d
-
-        response.on 'error', reject
-
-        response.on 'end', ->
-          try
-            parsed = JSON.parse(body)
-
-            if parsed.email
-              resolve parsed
-            else
-              resolve false
-          catch
-            reject false
-
-      authRequest.on 'error', (err) ->
-        reject err
-
-    catch err
-      reject err
+  fetch(AUTH_URL, {headers}).then (data) ->
+    if data.email? then data else false
 
 githubLogin = () ->
   new Promise (resolve, reject) ->
@@ -56,7 +29,7 @@ githubLogin = () ->
 
     # hide window immediately after login
     webContents.on 'will-navigate', (e, url) ->
-      win.hide() if url.match("#{config.learnCo}/users/auth/github/callback")
+      win.hide() if url.match("#{learnCo}/users/auth/github/callback")
 
     webContents.on 'did-get-redirect-request', (e, oldURL, newURL) ->
       return unless newURL.match(/ide_token/)
@@ -67,8 +40,12 @@ githubLogin = () ->
         win.destroy()
         resolve()
 
-    if not win.loadURL("#{config.learnCo}/ide/token?ide_config=true")
-      promptManualEntry()
+    if not win.loadURL("#{learnCo}/ide/token?ide_config=true")
+      atom.notifications.warning 'Learn IDE: connectivity issue',
+        detail: "The editor is unable to connect to #{learnCo}. Are you connected to the internet?"
+        buttons: [
+          {text: 'Try again', onDidClick: -> learnSignIn()}
+        ]
 
 learnSignIn = () ->
   new Promise (resolve, reject) ->
@@ -103,52 +80,9 @@ learnSignIn = () ->
         win.destroy()
         githubLogin().then(resolve)
 
-    if not win.loadURL("#{config.learnCo}/ide/sign_in?ide_onboard=true")
+    if not win.loadURL("#{learnCo}/ide/sign_in?ide_onboard=true")
       win.destroy()
       githubLogin.then(resolve)
-
-promptManualEntry = ->
-  oauthPrompt = document.createElement 'div'
-  oauthPrompt.setAttribute 'style', 'width:100%; text-align: center;'
-
-  oauthLabel = document.createElement 'div'
-  oauthLabel.setAttribute 'style', 'margin-top: 12px; font-weight: bold; font-size: 12px;'
-  oauthLabel.appendChild document.createTextNode 'Please enter your Learn OAuth Token'
-  tokenLinkDiv = document.createElement 'div'
-  tokenText = document.createTextNode 'Get your token here: '
-  tokenLink = document.createElement 'a'
-  tokenLink.title = "#{config.learnCo}/ide/token"
-  tokenLink.href = "#{config.learnCo}/ide/token"
-  tokenLink.setAttribute 'style', 'text-decoration: underline;'
-  tokenLink.appendChild document.createTextNode "#{config.learnCo}/ide/token"
-  tokenLinkDiv.appendChild tokenText
-  tokenLinkDiv.appendChild tokenLink
-  oauthPrompt.appendChild oauthLabel
-  oauthLabel.appendChild tokenLinkDiv
-
-  invalidLabel = document.createElement 'label'
-  invalidLabel.setAttribute 'style', 'opacity: 0;'
-  invalidLabel.appendChild document.createTextNode 'Invalid token. Please try again.'
-  oauthPrompt.appendChild invalidLabel
-  input = document.createElement 'input'
-  input.setAttribute 'style', 'width: 100%; text-align: center;'
-  input.classList.add 'native-key-bindings'
-  oauthPrompt.appendChild input
-
-  panel = atom.workspace.addModalPanel item: oauthPrompt
-  input.focus()
-
-  input.addEventListener 'keypress', (e) =>
-    if e.which is 13
-      token = input.value.trim()
-      confirmOauthToken(token).then (res) ->
-        if res
-          _token.set(token)
-          panel.destroy()
-          atom.commands.dispatch(workspaceView, 'learn-ide:toggle-terminal')
-          return true
-        else
-          invalidLabel.setAttribute 'style', 'color: red; opacity: 100;'
 
 githubLogout = ->
   win = new BrowserWindow(show: false)
@@ -158,7 +92,7 @@ githubLogout = ->
 learnLogout = ->
   win = new BrowserWindow(show: false)
   win.webContents.on 'did-finish-load', -> win.destroy()
-  win.loadURL("#{config.learnCo}/sign_out")
+  win.loadURL("#{learnCo}/sign_out")
 
 window.logout = ->
   _token.unset()
