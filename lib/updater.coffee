@@ -1,8 +1,7 @@
 fs = require 'fs'
 path = require 'path'
 {shell} = require 'electron'
-{BufferedProcess} = require 'atom'
-compare = require 'semver-compare'
+semver = require 'semver'
 {learnCo} = require './config'
 fetch = require './fetch'
 {install} = require './apm'
@@ -41,11 +40,11 @@ module.exports =
 
     @_updatePackage().then (pkgResult) =>
       @_installDependencies().then (depResult) =>
-        log = "Learn IDE:\n#{pkgResult.log}"
+        log = "Learn IDE:\n---\n#{pkgResult.log}"
         code = pkgResult.code
 
         if depResult?
-          log += "\nDependencies:\n#{depResult.log}"
+          log += "\nDependencies:\n---\n#{depResult.log}"
           code += depResult.code
 
         if code isnt 0
@@ -80,7 +79,7 @@ module.exports =
   _shouldUpdate: (latestVersion) ->
     currentVersion = require './version'
 
-    if compare(latestVersion, currentVersion) is 1
+    if semver.gt(latestVersion, currentVersion)
       return true
 
     return @_someDependencyIsMismatched()
@@ -161,7 +160,7 @@ module.exports =
     pkg = atom.packages.loadPackage(pkgName)
     currentVersion = pkg?.metadata.version
 
-    currentVersion isnt latestVersion
+    not semver.satisfies(currentVersion, latestVersion)
 
   _someDependencyIsMismatched: ->
     {packageDependencies} = require('../package.json')

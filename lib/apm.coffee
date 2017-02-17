@@ -1,17 +1,21 @@
 {BufferedProcess} = require 'atom'
-command = atom.packages.getApmPath()
 
 run = (args) ->
   new Promise (resolve) ->
+    command = atom.packages.getApmPath()
+
     log = ''
 
     stdout = (data) ->
-      log += "  #{data}"
+      log += "#{data}"
+
+    stderr = (data) ->
+      log += "#{data}"
 
     exit = (code) ->
       resolve({log, code})
 
-    new BufferedProcess({command, args, stdout, exit})
+    new BufferedProcess({command, args, stdout, stderr, exit})
 
 fullname = (name, version) ->
   if version? then "#{name}@#{version}" else name
