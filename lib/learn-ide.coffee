@@ -102,6 +102,7 @@ module.exports =
     @subscriptions.add atom.commands.add '.terminal',
       'core:copy': => @termView.copyText()
       'core:paste': => @termView.pasteText()
+      'learn-ide:clear-terminal': => @term.send('')
 
     atom.config.onDidChange "#{name}.terminalFontColor", ({newValue}) =>
       @termView.updateFontColor(newValue)

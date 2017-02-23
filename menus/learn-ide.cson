@@ -15,6 +15,10 @@
       'command': 'core:paste'
     }
     {
+      'label': 'Clear terminal'
+      'command': 'learn-ide:clear-terminal'
+    }
+    {
       'label': 'Hide Learn IDE Terminal'
       'command': 'learn-ide:toggle-terminal'
     }
