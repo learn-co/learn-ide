@@ -15,7 +15,7 @@ updater = require './updater'
 version = require './version'
 {name} = require '../package.json'
 
-ABOUT_URL = 'https://help.learn.co/hc/en-us/categories/204144547-The-Learn-IDE'
+ABOUT_URL = "#{config.learnCo}/ide/about"
 
 module.exports =
   token: require('./token')
