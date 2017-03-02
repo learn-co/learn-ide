@@ -1,6 +1,6 @@
 {
   "name": "learn-ide",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "atomVersion": "1.14.4",
   "main": "./lib/learn-ide",
   "urlMain": "./lib/url-handler",
