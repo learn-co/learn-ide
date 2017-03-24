@@ -102,6 +102,9 @@ module.exports =
     @subscriptions.add atom.commands.add '.terminal',
       'core:copy': => @termView.copyText()
       'core:paste': => @termView.pasteText()
+      'learn-ide:reset-font-size': => @termView.resetFontSize()
+      'learn-ide:increase-font-size': => @termView.increaseFontSize()
+      'learn-ide:decrease-font-size': => @termView.decreaseFontSize()
       'learn-ide:clear-terminal': => @term.send('')
 
     atom.config.onDidChange "#{name}.terminalFontColor", ({newValue}) =>

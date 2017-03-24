@@ -23,7 +23,7 @@ class TerminalView extends View
       @emulator.write(msg)
 
     @on 'mousedown', '.terminal-resize-handle', (e) =>
-      @resizeStarted(e)
+      @resizeByDragStarted(e)
 
   attach: ->
     atom.workspace.addBottomPanel({item: this})
@@ -53,21 +53,45 @@ class TerminalView extends View
   focusEmulator: ->
     @emulator.focus()
 
-  resizeStarted: =>
-    $(document).on('mousemove', @resizeTerminal)
-    $(document).on('mouseup', @resizeStopped)
+  currentFontSize: ->
+    $el = $(@emulator.element)
+    parseInt($el.css('font-size'))
 
-  resizeStopped: =>
-    $(document).off('mousemove', @resizeTerminal)
-    $(document).off('mouseup', @resizeStopped)
+  increaseFontSize: ->
+    @setFontSize(@currentFontSize() + 2)
 
-  resizeTerminal: ({pageY, which}) =>
-    return @resizeStopped() unless which is 1
+  decreaseFontSize: ->
+    currentSize = @currentFontSize()
+
+    if currentSize > 2
+      @setFontSize(currentSize - 2)
+
+  resetFontSize: ->
+    defaultSize = atom.config.defaultSettings.editor.fontSize
+    @setFontSize(defaultSize)
+
+  setFontSize: (size) ->
+    $(@emulator.element).css('font-size', size)
+    @resizeTerminal()
+
+  resizeByDragStarted: =>
+    $(document).on('mousemove', @resizeAfterDrag)
+    $(document).on('mouseup', @resizeByDragStopped)
+
+  resizeByDragStopped: =>
+    $(document).off('mousemove', @resizeAfterDrag)
+    $(document).off('mouseup', @resizeByDragStopped)
+
+  resizeAfterDrag: ({pageY, which}) =>
+    if which isnt 1
+      return @resizeByDragStopped()
 
     height = @outerHeight() + @offset().top - pageY
 
-    return if height < 100
+    if height > 100
+      @resizeTerminal(height)
 
+  resizeTerminal: (height = @height()) ->
     # resize container and fit emulator inside it
     @emulatorContainer.height(height - @resizeHandle.height())
     @emulator.fit()
