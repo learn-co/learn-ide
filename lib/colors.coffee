@@ -35,7 +35,8 @@ module.exports = setTerminalColors = ->
   file = path.join(__dirname, '..', 'styles', 'terminal-colors.css')
   fs.writeFile file, css, (err) ->
     if err?
-      console.warn 'unable to write colors:', err
+      console.warn 'unable to write colors to file:', err
+      atomHelper.addStylesheet(css)
 
     atomHelper.reloadStylesheets()
 

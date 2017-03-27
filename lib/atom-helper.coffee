@@ -38,3 +38,6 @@ module.exports =
     pkg = atom.packages.getActivePackage(packageName())
     pkg.reloadStylesheets()
 
+  addStylesheet: (css) ->
+    atom.styles.addStyleSheet(css)
+
