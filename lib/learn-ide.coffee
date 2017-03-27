@@ -14,6 +14,7 @@ config = require './config'
 updater = require './updater'
 version = require './version'
 {name} = require '../package.json'
+setTerminalColors = require './colors'
 
 ABOUT_URL = 'https://help.learn.co/hc/en-us/categories/204144547-The-Learn-IDE'
 
@@ -25,6 +26,7 @@ module.exports =
     @checkForV1WindowsInstall()
     @registerWindowsProtocol()
     @disableFormerPackage()
+    setTerminalColors()
 
     @subscriptions = new CompositeDisposable
     @subscribeToLogin()
@@ -107,11 +109,11 @@ module.exports =
       'learn-ide:decrease-font-size': => @termView.decreaseFontSize()
       'learn-ide:clear-terminal': => @term.send('')
 
-    atom.config.onDidChange "#{name}.terminalFontColor", ({newValue}) =>
-      @termView.updateFontColor(newValue)
+    atom.config.onDidChange "#{name}.basicColors", =>
+      setTerminalColors()
 
-    atom.config.onDidChange "#{name}.terminalBackgroundColor", ({newValue}) =>
-      @termView.updateBackgroundColor(newValue)
+    atom.config.onDidChange "#{name}.ansiColors", =>
+      setTerminalColors()
 
     atom.config.onDidChange "#{name}.notifier", ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()
