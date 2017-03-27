@@ -17,13 +17,40 @@ class TerminalView extends View
 
   subscribe: ->
     @emulator.on 'data', (data) =>
-      @terminal.send(data)
+      if not event?
+        @terminal.send(data)
+      else
+        @parseTerminalDataEvent(event, data)
 
     @terminal.on 'message', (msg) =>
       @emulator.write(msg)
 
     @on 'mousedown', '.terminal-resize-handle', (e) =>
       @resizeByDragStarted(e)
+
+  parseTerminalDataEvent: ({which, ctrlKey, shiftKey}, data) ->
+    if not ctrlKey or process.platform is 'darwin'
+      @terminal.send(data)
+      return
+
+    if shiftKey and which is 67
+      # ctrl-C
+      atom.commands.dispatch(@element, 'core:copy')
+      return
+
+    if shiftKey and which is 86
+      # ctrl-V
+      atom.commands.dispatch(@element, 'core:paste')
+      return
+
+    if which is 83
+      # ctrl-s
+      view = atom.views.getView(atom.workspace)
+      atom.commands.dispatch(view, 'learn-ide:save')
+      return
+
+    @terminal.send(data)
+
 
   attach: ->
     atom.workspace.addBottomPanel({item: this})
