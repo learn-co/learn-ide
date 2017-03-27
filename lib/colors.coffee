@@ -3,8 +3,19 @@ path = require 'path'
 atomHelper = require './atom-helper'
 {name} = require '../package.json'
 
+convertLegacyConfig = ->
+  text = atom.config.get("#{name}.terminalFontColor")
+  atom.config.unset("#{name}.terminalFontColor")
+  if text?
+    atom.config.set("#{name}.basicColors.text", text)
+
+  background = atom.config.get("#{name}.terminalBackgroundColor")
+  atom.config.unset("#{name}.terminalBackgroundColor")
+  if background?
+    atom.config.set("#{name}.basicColors.background", background)
+
 module.exports = setTerminalColors = ->
-  # TODO: handle legacy config keys
+  convertLegacyConfig()
   text = atom.config.get("#{name}.basicColors.text")
   background = atom.config.get("#{name}.basicColors.background")
 
