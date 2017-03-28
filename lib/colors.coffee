@@ -38,6 +38,7 @@ helper =
     css = """
       .terminal {
         color: #{foreground.toRGBAString()};
+        background-color: #{background.toRGBAString()};
       }
 
       .terminal .xterm-viewport {

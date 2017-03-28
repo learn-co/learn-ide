@@ -93,6 +93,7 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace',
       'learn-ide:open': (e) => @learnOpen(e.detail.path)
       'learn-ide:toggle-terminal': () => @termView.toggle()
+      'learn-ide:toggle-popout': () => @termView.popout()
       'learn-ide:toggle-focus': => @termView.toggleFocus()
       'learn-ide:focus': => @termView.focusEmulator()
       'learn-ide:toggle:debugger': => @term.toggleDebugger()

@@ -1,7 +1,13 @@
 {$, View} = require 'atom-space-pen-views'
 {clipboard} = require 'electron'
+{BrowserWindow} = require 'remote'
 TerminalEmulator = require 'xterm'
 TerminalEmulator.loadAddon 'fit'
+path = require 'path'
+bus = require './event-bus'
+localStorage = require './local-storage'
+
+POPOUT_WINDOW = path.resolve( __dirname, '..', 'static', 'popout-terminal.html')
 
 module.exports =
 class TerminalView extends View
@@ -24,6 +30,8 @@ class TerminalView extends View
 
     @terminal.on 'message', (msg) =>
       @emulator.write(msg)
+      if @popoutPresent
+        bus.emit('popout-terminal:message', msg)
 
     @on 'mousedown', '.terminal-resize-handle', (e) =>
       @resizeByDragStarted(e)
@@ -54,6 +62,24 @@ class TerminalView extends View
   attach: ->
     atom.workspace.addBottomPanel({item: this})
     @emulator.open(@emulatorContainer[0])
+
+  popout: ->
+    @hide()
+    @popoutPresent = true
+
+    win = new BrowserWindow()
+    win.loadURL("file://#{POPOUT_WINDOW}")
+    win.once 'ready-to-show', => win.show()
+    win.openDevTools()
+    win.on 'closed', =>
+      @show()
+      @popoutPresent = false
+
+    bus.on 'popout-terminal:data', (data) =>
+      if not event?
+        @terminal.send(data)
+      else
+        @parseTerminalDataEvent(event, data)
 
   copyText: ->
     selection = document.getSelection()

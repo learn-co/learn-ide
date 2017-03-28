@@ -1,6 +1,7 @@
 '.platform-darwin':
-  'cmd-I': 'learn-ide:toggle-terminal'
+  'cmd-i': 'learn-ide:toggle-terminal'
   'cmd-;': 'learn-ide:toggle-focus'
+  'cmd-I': 'learn-ide:toggle-popout'
 
 '.platform-win32, .platform-linux':
   'ctrl-I': 'learn-ide:toggle-terminal'

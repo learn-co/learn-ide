@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+	<head>
+    <link rel="stylesheet" href="../node_modules/xterm/dist/xterm.css" />
+    <link rel="stylesheet" href="../styles/terminal-colors.css" />
+    <script src="../node_modules/xterm/dist/xterm.js"></script>
+
+    <script src="../node_modules/xterm/dist/addons/fit/fit.js"></script>
+
+    <link rel="stylesheet" href="../node_modules/xterm/dist/addons/fullscreen/fullscreen.css" />
+    <script src="../node_modules/xterm/dist/addons/fullscreen/fullscreen.js"></script>
+
+    <script src="../lib/event-bus.js"></script>
+    <script src="../lib/local-storage.js"></script>
+  </head>
+	<body>
+		<div id="terminal"></div>
+    <script>
+      var el = document.getElementById('terminal')
+      var term = new Terminal({cursorBlink: true})
+
+      term.open(el)
+      term.toggleFullscreen()
+
+      term.on('data', (data) => {
+        bus.emit('popout-terminal:data', data)
+      })
+
+      bus.on('popout-terminal:message', (msg) => {
+        term.write(msg)
+      })
+
+      bus.emit('popout-terminal:data', 'clear\r')
+    </script>
+	</body>
+</html>
