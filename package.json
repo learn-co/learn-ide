@@ -61,11 +61,11 @@
       "title": "Terminal: Basic Colors",
       "type": "object",
       "properties": {
-        "text": {
+        "foreground": {
           "order": 0,
           "type": "color",
           "default": "#ffffff",
-          "title": "Text"
+          "title": "Foreground"
         },
         "background": {
           "order": 1,
@@ -177,6 +177,13 @@
           "title": "Bright White"
         }
       }
+    },
+    "colorsJSON": {
+      "title": "Terminal: Structured JSON color scheme",
+      "order": 3,
+      "type": "string",
+      "default": "",
+      "description": "Customize your terminal by pasting an exported JSON scheme from [terminal.sexy](https://terminal.sexy/) here. For more information, visit the [help center](http://help.learn.co/)."
     }
   }
 }

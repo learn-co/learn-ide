@@ -14,40 +14,66 @@ convertLegacyConfig = ->
   if background?
     atom.config.set("#{name}.basicColors.background", background)
 
-module.exports = setTerminalColors = ->
-  convertLegacyConfig()
-  text = atom.config.get("#{name}.basicColors.text")
-  background = atom.config.get("#{name}.basicColors.background")
+module.exports = colors =
+  parseTerminalDotSexyScheme: (jsonString) ->
+    if not jsonString? or not jsonString.length
+      return
 
-  css = """
-    .terminal {
-      color: #{text.toRGBAString()};
-    }
+    try
+      scheme = JSON.parse(jsonString)
+    catch err
+      console.error err
+      atom.notifications.addWarning 'Learn IDE: Unable to parse color scheme!',
+        description: 'The scheme you\'ve entered is invalid JSON. Did you export the complete JSON from [terminal.sexy](https://terminal.sexy)?'
+      return
 
-    .terminal .xterm-viewport {
-      background-color: #{background.toRGBAString()};
-    }\n
-    """
+    {color, foreground, background} = scheme
 
-  for n in [0..15]
-    color = atom.config.get("#{name}.ansiColors.ansiColor#{n}")
-    rgba = color.toRGBAString()
+    if not color? or not foreground? or not background?
+      atom.notifications.addWarning 'Learn IDE: Unable to parse color scheme!',
+        description: 'The scheme you\'ve entered is incomplete. Be sure to export the complete JSON from [terminal.sexy](https://terminal.sexy)?'
 
-    css += """
-      \n.terminal .xterm-color-#{n} {
-        color: #{rgba};
+    ansiColors = {}
+    color.forEach (value, index) ->
+      ansiColors["ansiColor#{index}"] = value
+
+    atom.config.set("#{name}.ansiColors", ansiColors)
+    atom.config.set("#{name}.basicColors", {foreground, background})
+
+  updateTerminal: ->
+    convertLegacyConfig()
+    foreground = atom.config.get("#{name}.basicColors.foreground")
+    background = atom.config.get("#{name}.basicColors.background")
+
+    css = """
+      .terminal {
+        color: #{foreground.toRGBAString()};
       }
 
-      .terminal .xterm-bg-color-#{n} {
-        background-color: #{rgba};
+      .terminal .xterm-viewport {
+        background-color: #{background.toRGBAString()};
       }\n
       """
 
-  file = path.join(__dirname, '..', 'styles', 'terminal-colors.css')
-  fs.writeFile file, css, (err) ->
-    if err?
-      console.warn 'unable to write colors to file:', err
-      atomHelper.addStylesheet(css)
+    for n in [0..15]
+      color = atom.config.get("#{name}.ansiColors.ansiColor#{n}")
+      rgba = color.toRGBAString()
 
-    atomHelper.reloadStylesheets()
+      css += """
+        \n.terminal .xterm-color-#{n} {
+          color: #{rgba};
+        }
+
+        .terminal .xterm-bg-color-#{n} {
+          background-color: #{rgba};
+        }\n
+        """
+
+    file = path.join(__dirname, '..', 'styles', 'terminal-colors.css')
+    fs.writeFile file, css, (err) ->
+      if err?
+        console.warn 'unable to write colors to file:', err
+        atomHelper.addStylesheet(css)
+
+      atomHelper.reloadStylesheets()
 

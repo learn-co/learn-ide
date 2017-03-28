@@ -14,7 +14,7 @@ config = require './config'
 updater = require './updater'
 version = require './version'
 {name} = require '../package.json'
-setTerminalColors = require './colors'
+colors = require './colors'
 
 ABOUT_URL = 'https://help.learn.co/hc/en-us/categories/204144547-The-Learn-IDE'
 
@@ -26,7 +26,7 @@ module.exports =
     @checkForV1WindowsInstall()
     @registerWindowsProtocol()
     @disableFormerPackage()
-    setTerminalColors()
+    colors.updateTerminal()
 
     @subscriptions = new CompositeDisposable
     @subscribeToLogin()
@@ -110,10 +110,13 @@ module.exports =
       'learn-ide:clear-terminal': => @term.send('')
 
     atom.config.onDidChange "#{name}.basicColors", =>
-      setTerminalColors()
+      colors.updateTerminal()
 
     atom.config.onDidChange "#{name}.ansiColors", =>
-      setTerminalColors()
+      colors.updateTerminal()
+
+    atom.config.onDidChange "#{name}.colorsJSON", ({newValue}) =>
+      colors.parseTerminalDotSexyScheme(newValue)
 
     atom.config.onDidChange "#{name}.notifier", ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()
