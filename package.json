@@ -56,134 +56,140 @@
       "title": "Learn Status Notifications",
       "description": "Receive desktop notifications that correspond to the lights on Learn.co"
     },
-    "basicColors": {
+    "terminalColors": {
       "order": 1,
-      "title": "Terminal: Basic Colors",
       "type": "object",
-      "properties": {
-        "foreground": {
-          "order": 0,
-          "type": "color",
-          "default": "#ffffff",
-          "title": "Foreground"
-        },
-        "background": {
+      "properties" : {
+        "basic": {
           "order": 1,
-          "type": "color",
-          "default": "#1A2226",
-          "title": "Background"
-        }
-      }
-    },
-    "ansiColors": {
-      "order": 2,
-      "title": "Terminal: ANSI Colors",
-      "type": "object",
-      "properties": {
-        "ansiColor0": {
-          "order": 0,
-          "type": "color",
-          "default": "#2e3436",
-          "title": "Black"
+          "title": "Basic Colors",
+          "type": "object",
+          "properties": {
+            "foreground": {
+              "order": 0,
+              "type": "color",
+              "default": "#ffffff",
+              "title": "Foreground"
+            },
+            "background": {
+              "order": 1,
+              "type": "color",
+              "default": "#1A2226",
+              "title": "Background"
+            }
+          }
         },
-        "ansiColor1": {
-          "order": 1,
-          "type": "color",
-          "default": "#cc0000",
-          "title": "Red"
-        },
-        "ansiColor2": {
+        "ansi": {
           "order": 2,
-          "type": "color",
-          "default": "#4e9a06",
-          "title": "Green"
+          "title": "ANSI Colors",
+          "type": "object",
+          "properties": {
+            "0": {
+              "order": 0,
+              "type": "color",
+              "default": "#2e3436",
+              "title": "Black"
+            },
+            "1": {
+              "order": 1,
+              "type": "color",
+              "default": "#cc0000",
+              "title": "Red"
+            },
+            "2": {
+              "order": 2,
+              "type": "color",
+              "default": "#4e9a06",
+              "title": "Green"
+            },
+            "3": {
+              "order": 3,
+              "type": "color",
+              "default": "#c4a000",
+              "title": "Yellow"
+            },
+            "4": {
+              "order": 4,
+              "type": "color",
+              "default": "#3465a4",
+              "title": "Blue"
+            },
+            "5": {
+              "order": 5,
+              "type": "color",
+              "default": "#75507b",
+              "title": "Magenta"
+            },
+            "6": {
+              "order": 6,
+              "type": "color",
+              "default": "#06989a",
+              "title": "Cyan"
+            },
+            "7": {
+              "order": 7,
+              "type": "color",
+              "default": "#d3d7cf",
+              "title": "White"
+            },
+            "8": {
+              "order": 8,
+              "type": "color",
+              "default": "#555753",
+              "title": "Bright Black"
+            },
+            "9": {
+              "order": 9,
+              "type": "color",
+              "default": "#ef2929",
+              "title": "Bright Red"
+            },
+            "10": {
+              "order": 10,
+              "type": "color",
+              "default": "#8ae234",
+              "title": "Bright Green"
+            },
+            "11": {
+              "order": 11,
+              "type": "color",
+              "default": "#fce94f",
+              "title": "Bright Yellow"
+            },
+            "12": {
+              "order": 12,
+              "type": "color",
+              "default": "#729fcf",
+              "title": "Bright Blue"
+            },
+            "13": {
+              "order": 13,
+              "type": "color",
+              "default": "#ad7fa8",
+              "title": "Bright Magenta"
+            },
+            "14": {
+              "order": 14,
+              "type": "color",
+              "default": "#34e2e2",
+              "title": "Bright Cyan"
+            },
+            "15": {
+              "order": 15,
+              "type": "color",
+              "default": "#eeeeec",
+              "title": "Bright White"
+            }
+          }
         },
-        "ansiColor3": {
+        "json": {
+          "title": "JSON Color Scheme",
           "order": 3,
-          "type": "color",
-          "default": "#c4a000",
-          "title": "Yellow"
-        },
-        "ansiColor4": {
-          "order": 4,
-          "type": "color",
-          "default": "#3465a4",
-          "title": "Blue"
-        },
-        "ansiColor5": {
-          "order": 5,
-          "type": "color",
-          "default": "#75507b",
-          "title": "Magenta"
-        },
-        "ansiColor6": {
-          "order": 6,
-          "type": "color",
-          "default": "#06989a",
-          "title": "Cyan"
-        },
-        "ansiColor7": {
-          "order": 7,
-          "type": "color",
-          "default": "#d3d7cf",
-          "title": "White"
-        },
-        "ansiColor8": {
-          "order": 8,
-          "type": "color",
-          "default": "#555753",
-          "title": "Bright Black"
-        },
-        "ansiColor9": {
-          "order": 9,
-          "type": "color",
-          "default": "#ef2929",
-          "title": "Bright Red"
-        },
-        "ansiColor10": {
-          "order": 10,
-          "type": "color",
-          "default": "#8ae234",
-          "title": "Bright Green"
-        },
-        "ansiColor11": {
-          "order": 11,
-          "type": "color",
-          "default": "#fce94f",
-          "title": "Bright Yellow"
-        },
-        "ansiColor12": {
-          "order": 12,
-          "type": "color",
-          "default": "#729fcf",
-          "title": "Bright Blue"
-        },
-        "ansiColor13": {
-          "order": 13,
-          "type": "color",
-          "default": "#ad7fa8",
-          "title": "Bright Magenta"
-        },
-        "ansiColor14": {
-          "order": 14,
-          "type": "color",
-          "default": "#34e2e2",
-          "title": "Bright Cyan"
-        },
-        "ansiColor15": {
-          "order": 15,
-          "type": "color",
-          "default": "#eeeeec",
-          "title": "Bright White"
+          "type": "string",
+          "default": "",
+          "description": "Import complete and customizable color schemes from [terminal.sexy](https://terminal.sexy/) by pasting a JSON export here. For more information, visit the [help center](http://help.learn.co/)."
         }
       }
-    },
-    "colorsJSON": {
-      "title": "Terminal: Structured JSON color scheme",
-      "order": 3,
-      "type": "string",
-      "default": "",
-      "description": "Customize your terminal by pasting an exported JSON scheme from [terminal.sexy](https://terminal.sexy/) here. For more information, visit the [help center](http://help.learn.co/)."
     }
   }
 }

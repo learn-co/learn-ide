@@ -51,7 +51,6 @@ class TerminalView extends View
 
     @terminal.send(data)
 
-
   attach: ->
     atom.workspace.addBottomPanel({item: this})
     @emulator.open(@emulatorContainer[0])

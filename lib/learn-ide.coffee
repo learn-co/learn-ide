@@ -26,7 +26,7 @@ module.exports =
     @checkForV1WindowsInstall()
     @registerWindowsProtocol()
     @disableFormerPackage()
-    colors.updateTerminal()
+    colors.apply()
 
     @subscriptions = new CompositeDisposable
     @subscribeToLogin()
@@ -109,14 +109,14 @@ module.exports =
       'learn-ide:decrease-font-size': => @termView.decreaseFontSize()
       'learn-ide:clear-terminal': => @term.send('')
 
-    atom.config.onDidChange "#{name}.basicColors", =>
-      colors.updateTerminal()
+    atom.config.onDidChange "#{name}.terminalColors.basic", =>
+      colors.apply()
 
-    atom.config.onDidChange "#{name}.ansiColors", =>
-      colors.updateTerminal()
+    atom.config.onDidChange "#{name}.terminalColors.ansi", =>
+      colors.apply()
 
-    atom.config.onDidChange "#{name}.colorsJSON", ({newValue}) =>
-      colors.parseTerminalDotSexyScheme(newValue)
+    atom.config.onDidChange "#{name}.terminalColors.json", ({newValue}) =>
+      colors.parseJSON(newValue)
 
     atom.config.onDidChange "#{name}.notifier", ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()
