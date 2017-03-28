@@ -3,34 +3,11 @@
 	<head>
     <link rel="stylesheet" href="../node_modules/xterm/dist/xterm.css" />
     <link rel="stylesheet" href="../styles/terminal-colors.css" />
-    <script src="../node_modules/xterm/dist/xterm.js"></script>
-
-    <script src="../node_modules/xterm/dist/addons/fit/fit.js"></script>
-
     <link rel="stylesheet" href="../node_modules/xterm/dist/addons/fullscreen/fullscreen.css" />
-    <script src="../node_modules/xterm/dist/addons/fullscreen/fullscreen.js"></script>
-
-    <script src="./event-bus.js"></script>
-    <script src="./local-storage.js"></script>
   </head>
 	<body>
 		<div id="terminal"></div>
-    <script>
-      var el = document.getElementById('terminal')
-      var term = new Terminal({cursorBlink: true})
-
-      term.open(el)
-      term.toggleFullscreen()
-
-      term.on('data', (data) => {
-        bus.emit('popout-emulator:data', data)
-      })
-
-      bus.on('popout-emulator:write', (msg) => {
-        term.write(msg)
-      })
-
-      bus.emit('popout-emulator:data', '')
-    </script>
+    <script src="./popout-emulator.js"></script>
 	</body>
 </html>
+
