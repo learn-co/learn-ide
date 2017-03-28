@@ -7,7 +7,7 @@ path = require 'path'
 bus = require './event-bus'
 localStorage = require './local-storage'
 
-POPOUT_WINDOW = path.resolve( __dirname, '..', 'static', 'popout-terminal.html')
+POPOUT_EMULATOR = path.resolve(__dirname, 'popout-emulator.html')
 
 module.exports =
 class TerminalView extends View
@@ -23,20 +23,24 @@ class TerminalView extends View
 
   subscribe: ->
     @emulator.on 'data', (data) =>
-      if not event?
-        @terminal.send(data)
-      else
-        @parseTerminalDataEvent(event, data)
+      @handleEmulatorData(data, event)
 
     @terminal.on 'message', (msg) =>
-      @emulator.write(msg)
-      if @popout?
-        bus.emit('popout-terminal:message', msg)
+      @writeToEmulator(msg)
 
     @on 'mousedown', '.terminal-resize-handle', (e) =>
       @resizeByDragStarted(e)
 
-  parseTerminalDataEvent: ({which, ctrlKey, shiftKey}, data) ->
+    bus.on 'popout-emulator:data', (data) =>
+      @handleEmulatorData(data, event)
+
+  handleEmulatorData: (data, event) ->
+    if not event?
+      @terminal.send(data)
+    else
+      @parseEmulatorDataEvent(event, data)
+
+  parseEmulatorDataEvent: ({which, ctrlKey, shiftKey}, data) ->
     if not ctrlKey or process.platform is 'darwin'
       @terminal.send(data)
       return
@@ -63,31 +67,35 @@ class TerminalView extends View
     atom.workspace.addBottomPanel({item: this})
     @emulator.open(@emulatorContainer[0])
 
-  focusPopout: ->
-    @hide()
+  loadPopoutEmulator: ->
+    new Promise (resolve) =>
+      @popout = new BrowserWindow({show: false})
+      @popout.loadURL("file://#{POPOUT_EMULATOR}")
 
-    if @popout? and not @popout.isDestroyed()
-      @popout.focus()
-    else
-      @popout = @constructPopout()
+      @popout.once 'ready-to-show', =>
+        resolve(@popout)
 
-  constructPopout: ->
-    win = new BrowserWindow({show: false})
-    win.loadURL("file://#{POPOUT_WINDOW}")
+      @popout.on 'closed', =>
+        @show()
 
-    win.once 'ready-to-show', ->
-      win.show()
+  hasPopoutEmulator: ->
+    @popout? and not @popout.isDestroyed()
 
-    win.on 'closed', =>
-      @show()
+  focusPopoutEmulator: ->
+    if @hasPopoutEmulator()
+      @hide()
+      return @popout.focus()
 
-    bus.on 'popout-terminal:data', (data) =>
-      if not event?
-        @terminal.send(data)
-      else
-        @parseTerminalDataEvent(event, data)
+    @loadPopoutEmulator().then =>
+      @hide()
+      @popout.show()
 
-    win
+  writeToEmulator: (text) ->
+    debugger
+    if @hasPopoutEmulator()
+      bus.emit('popout-emulator:write', text)
+
+    @emulator.write(text)
 
   copyText: ->
     selection = document.getSelection()

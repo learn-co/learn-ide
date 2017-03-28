@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="../node_modules/xterm/dist/addons/fullscreen/fullscreen.css" />
     <script src="../node_modules/xterm/dist/addons/fullscreen/fullscreen.js"></script>
 
-    <script src="../lib/event-bus.js"></script>
-    <script src="../lib/local-storage.js"></script>
+    <script src="./event-bus.js"></script>
+    <script src="./local-storage.js"></script>
   </head>
 	<body>
 		<div id="terminal"></div>
@@ -23,14 +23,14 @@
       term.toggleFullscreen()
 
       term.on('data', (data) => {
-        bus.emit('popout-terminal:data', data)
+        bus.emit('popout-emulator:data', data)
       })
 
-      bus.on('popout-terminal:message', (msg) => {
+      bus.on('popout-emulator:write', (msg) => {
         term.write(msg)
       })
 
-      bus.emit('popout-terminal:data', 'clear\r')
+      bus.emit('popout-emulator:data', '')
     </script>
 	</body>
 </html>

@@ -69,7 +69,6 @@ helper =
 
 module.exports = colors =
   apply: ->
-    console.debug('APPLY')
     helper.convertLegacyConfig()
 
     foreground = atom.config.get("#{name}.terminalColors.basic.foreground")
