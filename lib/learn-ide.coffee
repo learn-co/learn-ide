@@ -44,11 +44,6 @@ module.exports =
       updater.didRestartAfterUpdate()
       localStorage.delete('restartingForUpdate')
 
-    @isTerminalWindow = (localStorage.get('popoutTerminal') is 'true')
-    if @isTerminalWindow
-      window.resizeTo(750, 500)
-      localStorage.delete('popoutTerminal')
-
     @activateTerminal()
     @activateStatusView(state)
     @activateEventHandlers()
@@ -66,14 +61,7 @@ module.exports =
     @termView = new TerminalView(@term)
 
   activateStatusView: (state) ->
-    @statusView = new StatusView state, @term, {@isTerminalWindow}
-
-    bus.on 'terminal:popin', () =>
-      @statusView.onTerminalPopIn()
-      @termView.showAndFocus()
-
-    @statusView.on 'terminal:popout', =>
-      @termView.toggle()
+    @statusView = new StatusView(state, @term)
 
   activateEventHandlers: ->
     atomHelper.trackFocusedWindow()
@@ -86,14 +74,12 @@ module.exports =
     # tidy up when the window closes
     atom.getCurrentWindow().on 'close', =>
       @cleanup()
-      if @isTerminalWindow
-        bus.emit('terminal:popin', Date.now())
 
   activateSubscriptions: ->
     @subscriptions.add atom.commands.add 'atom-workspace',
       'learn-ide:open': (e) => @learnOpen(e.detail.path)
       'learn-ide:toggle-terminal': () => @termView.toggle()
-      'learn-ide:toggle-popout': () => @termView.popout()
+      'learn-ide:toggle-popout': () => @termView.focusPopout()
       'learn-ide:toggle-focus': => @termView.toggleFocus()
       'learn-ide:focus': => @termView.focusEmulator()
       'learn-ide:toggle:debugger': => @term.toggleDebugger()
@@ -192,10 +178,6 @@ module.exports =
     leftTiles = Array.from(statusBar.getLeftTiles())
     rightTiles = Array.from(statusBar.getRightTiles())
     rightMostTile = rightTiles[rightTiles.length - 1]
-
-    if @isTerminalWindow
-      leftTiles.concat(rightTiles).forEach (tile) ->
-        tile.destroy()
 
     priority = (rightMostTile?.priority || 0) - 1
     statusBar.addRightTile({item: @statusView, priority})

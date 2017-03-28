@@ -11,7 +11,7 @@ class StatusView extends View
       @div class: 'learn-status-icon inline-block inline-block-tight icon icon-terminal', id: 'learn-status-icon', ' Learn'
       @div class: 'learn-popout-terminal-icon inline-block inline-block-tight icon icon-link-external', id: 'learn-popout-terminal-icon'
 
-  constructor: (state, termSocket, @options) ->
+  constructor: (state, termSocket) ->
     super
     @socket = termSocket
     @activateEventHandlers()
@@ -45,18 +45,12 @@ class StatusView extends View
     icon.dataset.status = 'bad'
 
   activatePopoutIcon: ->
-    if @options.isTerminalWindow
-      @hidePopoutIcon()
-
     @popoutIcon().addEventListener 'click', =>
       @popoutTerminal()
 
   popoutTerminal: ->
-    localStorage.set('popoutTerminal', true)
-    localStorage.set('disableTreeView', true)
-    ipcRenderer.send('command', 'application:new-window')
-    @emitter.emit 'terminal:popout'
-    @hidePopoutIcon()
+    view = atom.views.getView(atom.workspace)
+    atom.commands.dispatch(view, 'learn-ide:toggle-popout')
 
   onTerminalPopIn: ->
     @showPopoutIcon()

@@ -30,7 +30,7 @@ class TerminalView extends View
 
     @terminal.on 'message', (msg) =>
       @emulator.write(msg)
-      if @popoutPresent
+      if @popout?
         bus.emit('popout-terminal:message', msg)
 
     @on 'mousedown', '.terminal-resize-handle', (e) =>
@@ -63,23 +63,31 @@ class TerminalView extends View
     atom.workspace.addBottomPanel({item: this})
     @emulator.open(@emulatorContainer[0])
 
-  popout: ->
+  focusPopout: ->
     @hide()
-    @popoutPresent = true
 
-    win = new BrowserWindow()
+    if @popout? and not @popout.isDestroyed()
+      @popout.focus()
+    else
+      @popout = @constructPopout()
+
+  constructPopout: ->
+    win = new BrowserWindow({show: false})
     win.loadURL("file://#{POPOUT_WINDOW}")
-    win.once 'ready-to-show', => win.show()
-    win.openDevTools()
+
+    win.once 'ready-to-show', ->
+      win.show()
+
     win.on 'closed', =>
       @show()
-      @popoutPresent = false
 
     bus.on 'popout-terminal:data', (data) =>
       if not event?
         @terminal.send(data)
       else
         @parseTerminalDataEvent(event, data)
+
+    win
 
   copyText: ->
     selection = document.getSelection()
