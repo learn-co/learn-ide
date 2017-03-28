@@ -1,7 +1,7 @@
 {EventEmitter} = require 'events'
 atomHelper = require './atom-helper'
 path = require 'path'
-bus = require('./event-bus')()
+bus = require './event-bus'
 AtomSocket = require('atom-socket')
 
 module.exports = class Terminal extends EventEmitter
