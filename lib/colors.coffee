@@ -71,14 +71,15 @@ module.exports = colors =
   apply: ->
     helper.convertLegacyConfig()
 
+    helper.addStylesheet(@getCSS()).then ->
+      atomHelper.reloadStylesheets()
+
+  getCSS: ->
     foreground = atom.config.get("#{name}.terminalColors.basic.foreground")
     background = atom.config.get("#{name}.terminalColors.basic.background")
     ansiColors = helper.ansiObjectToArray(atom.config.get("#{name}.terminalColors.ansi"))
 
-    css = helper.buildCSS({foreground, background, ansiColors})
-
-    helper.addStylesheet(css).then ->
-      atomHelper.reloadStylesheets()
+    helper.buildCSS({foreground, background, ansiColors})
 
   parseJSON: (jsonString) ->
     if not jsonString? or not jsonString.length

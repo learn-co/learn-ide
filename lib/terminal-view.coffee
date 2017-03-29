@@ -6,6 +6,7 @@ TerminalEmulator.loadAddon 'fit'
 path = require 'path'
 bus = require './event-bus'
 localStorage = require './local-storage'
+colors = require './colors'
 
 POPOUT_EMULATOR = path.resolve(__dirname, 'popout-emulator.html')
 
@@ -69,6 +70,7 @@ class TerminalView extends View
 
   loadPopoutEmulator: ->
     new Promise (resolve) =>
+      localStorage.set('popout-emulator:css', colors.getCSS())
       @popout = new BrowserWindow({show: false})
       @popout.loadURL("file://#{POPOUT_EMULATOR}")
 
@@ -84,14 +86,13 @@ class TerminalView extends View
   focusPopoutEmulator: ->
     if @hasPopoutEmulator()
       @hide()
-      return @popout.focus()
-
-    @loadPopoutEmulator().then =>
-      @hide()
-      @popout.show()
+      @popout.focus()
+    else
+      @loadPopoutEmulator().then =>
+        @hide()
+        @popout.show()
 
   writeToEmulator: (text) ->
-    debugger
     if @hasPopoutEmulator()
       bus.emit('popout-emulator:write', text)
 
