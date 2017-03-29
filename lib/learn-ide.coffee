@@ -89,8 +89,8 @@ module.exports =
       'learn-ide:about': => @about()
 
     @subscriptions.add atom.commands.add '.terminal',
-      'core:copy': => @termView.copyText()
-      'core:paste': => @termView.pasteText()
+      'core:copy': => @termView.clipboardCopy()
+      'core:paste': => @termView.clipboardPaste()
       'learn-ide:reset-font-size': => @termView.resetFontSize()
       'learn-ide:increase-font-size': => @termView.increaseFontSize()
       'learn-ide:decrease-font-size': => @termView.decreaseFontSize()
