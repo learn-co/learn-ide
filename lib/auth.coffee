@@ -4,6 +4,7 @@ path = require 'path'
 version = require './version'
 fetch = require './fetch'
 _token = require './token'
+localStorage = require './local-storage'
 {learnCo} = require './config'
 {BrowserWindow} = require 'remote'
 
@@ -17,7 +18,7 @@ confirmOauthToken = (token) ->
 
 githubLogin = () ->
   new Promise (resolve, reject) ->
-    win = new BrowserWindow(show: false, width: 440, height: 660, resizable: false)
+    win = new BrowserWindow(autoHideMenuBar: true, show: false, width: 440, height: 660, resizable: false)
     webContents = win.webContents
 
     win.setSkipTaskbar(true)
@@ -36,6 +37,7 @@ githubLogin = () ->
       token = url.parse(newURL, true).query.ide_token
       confirmOauthToken(token).then (res) ->
         return unless res?
+        localStorage.set('didCompleteGithubLogin')
         _token.set(token)
         win.destroy()
         resolve()
@@ -49,7 +51,7 @@ githubLogin = () ->
 
 learnSignIn = () ->
   new Promise (resolve, reject) ->
-    win = new BrowserWindow(show: false, width: 400, height: 600, resizable: false)
+    win = new BrowserWindow(autoHideMenuBar: true, show: false, width: 400, height: 600, resizable: false)
     {webContents} = win
 
     win.setSkipTaskbar(true)
@@ -86,7 +88,11 @@ learnSignIn = () ->
 
 githubLogout = ->
   win = new BrowserWindow(show: false)
-  win.webContents.on 'did-finish-load', -> win.show()
+
+  win.webContents.on 'did-finish-load', ->
+    win.show()
+    localStorage.delete('didCompleteGithubLogin')
+
   win.loadURL('https://github.com/logout')
 
 learnLogout = ->

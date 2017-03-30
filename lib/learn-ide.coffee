@@ -150,17 +150,32 @@ module.exports =
   logout: ->
     @token.unset()
 
-    github = new BrowserWindow(show: false)
-    github.webContents.on 'did-finish-load', -> github.show()
-    github.loadURL('https://github.com/logout')
-
     learn = new BrowserWindow(show: false)
     learn.webContents.on 'did-finish-load', -> learn.destroy()
     learn.loadURL("#{config.learnCo}/sign_out")
 
-    atomHelper.emit('learn-ide:logout')
-    atomHelper.closePaneItems()
-    atom.reload()
+    if localStorage.remove('didCompleteGithubLogin')
+      github = new BrowserWindow(autoHideMenuBar: true, show: false)
+
+      github.once 'ready-to-show', ->
+        github.show()
+
+      github.webContents.on 'will-navigate', (e, url) ->
+        console.debug('will:', url)
+        github.hide()
+
+      github.webContents.on 'did-navigate', (e, url) ->
+        console.debug('did:', url)
+        if url.match(/github\.com\/$/)
+          atomHelper.emit('learn-ide:logout')
+          atomHelper.closePaneItems()
+          atom.reload()
+
+      github.loadURL('https://github.com/logout')
+    else
+      atomHelper.emit('learn-ide:logout')
+      atomHelper.closePaneItems()
+      atom.reload()
 
   checkForV1WindowsInstall: ->
     require('./windows')
