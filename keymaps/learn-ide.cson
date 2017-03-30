@@ -1,18 +1,22 @@
 '.platform-darwin':
   'cmd-i': 'learn-ide:toggle-terminal'
   'cmd-;': 'learn-ide:toggle-focus'
-  'cmd-I': 'learn-ide:toggle-popout'
+  'cmd-:': 'learn-ide:toggle-popout'
 
 '.platform-win32, .platform-linux':
-  'ctrl-I': 'learn-ide:toggle-terminal'
+  'ctrl-U': 'learn-ide:toggle-terminal'
   'ctrl-;': 'learn-ide:toggle-focus'
+  'ctrl-:': 'learn-ide:toggle-popout'
 
 '.platform-darwin .terminal':
   'cmd-=': 'learn-ide:increase-font-size'
   'cmd--': 'learn-ide:decrease-font-size'
   'cmd-0': 'learn-ide:reset-font-size'
 
-'.platform-win32 .terminal':
-  'ctrl-+': 'learn-ide:increase-font-size'
-  'ctrl-_': 'learn-ide:decrease-font-size'
+'.platform-win32 .terminal, .platform-linux .terminal':
+  'ctrl-=': 'learn-ide:increase-font-size'
+  'ctrl--': 'learn-ide:decrease-font-size'
   'ctrl-0': 'learn-ide:reset-font-size'
+  'ctrl-C': 'core:copy'
+  'ctrl-V': 'core:paste'
+
