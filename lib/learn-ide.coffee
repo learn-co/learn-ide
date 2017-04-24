@@ -170,10 +170,10 @@ module.exports =
       require('./protocol')
 
   disableFormerPackage: ->
-    ilePkg = atom.packages.loadPackage('integrated-learn-environment')
+    pkgName = 'integrated-learn-environment'
 
-    if ilePkg?
-      ilePkg.disable()
+    if not atom.packages.isPackageDisabled(pkgName)
+      atom.packages.disablePackage(pkgName)
 
   addLearnToStatusBar: (statusBar) ->
     leftTiles = Array.from(statusBar.getLeftTiles())
