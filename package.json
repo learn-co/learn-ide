@@ -68,7 +68,7 @@
             "foreground": {
               "order": 0,
               "type": "color",
-              "default": "#ffffff",
+              "default": "#7ea2b4",
               "title": "Foreground"
             },
             "background": {
@@ -87,97 +87,97 @@
             "0": {
               "order": 0,
               "type": "color",
-              "default": "#2e3436",
+              "default": "#161b1d",
               "title": "Black"
             },
             "1": {
               "order": 1,
               "type": "color",
-              "default": "#cc0000",
+              "default": "#d22d72",
               "title": "Red"
             },
             "2": {
               "order": 2,
               "type": "color",
-              "default": "#4e9a06",
+              "default": "#568c3b",
               "title": "Green"
             },
             "3": {
               "order": 3,
               "type": "color",
-              "default": "#c4a000",
+              "default": "#8a8a0f",
               "title": "Yellow"
             },
             "4": {
               "order": 4,
               "type": "color",
-              "default": "#3465a4",
+              "default": "#257fad",
               "title": "Blue"
             },
             "5": {
               "order": 5,
               "type": "color",
-              "default": "#75507b",
+              "default": "#5d5db1",
               "title": "Magenta"
             },
             "6": {
               "order": 6,
               "type": "color",
-              "default": "#06989a",
+              "default": "#2d8f6f",
               "title": "Cyan"
             },
             "7": {
               "order": 7,
               "type": "color",
-              "default": "#d3d7cf",
+              "default": "#7ea2b4",
               "title": "White"
             },
             "8": {
               "order": 8,
               "type": "color",
-              "default": "#555753",
+              "default": "#5a7b8c",
               "title": "Bright Black"
             },
             "9": {
               "order": 9,
               "type": "color",
-              "default": "#ef2929",
+              "default": "#d22d72",
               "title": "Bright Red"
             },
             "10": {
               "order": 10,
               "type": "color",
-              "default": "#8ae234",
+              "default": "#568c3b",
               "title": "Bright Green"
             },
             "11": {
               "order": 11,
               "type": "color",
-              "default": "#fce94f",
+              "default": "#8a8a0f",
               "title": "Bright Yellow"
             },
             "12": {
               "order": 12,
               "type": "color",
-              "default": "#729fcf",
+              "default": "#257fad",
               "title": "Bright Blue"
             },
             "13": {
               "order": 13,
               "type": "color",
-              "default": "#ad7fa8",
+              "default": "#5d5db1",
               "title": "Bright Magenta"
             },
             "14": {
               "order": 14,
               "type": "color",
-              "default": "#34e2e2",
+              "default": "#2d8f6f",
               "title": "Bright Cyan"
             },
             "15": {
               "order": 15,
               "type": "color",
-              "default": "#eeeeec",
+              "default": "#ebf8ff",
               "title": "Bright White"
             }
           }
