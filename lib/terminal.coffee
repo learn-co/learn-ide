@@ -14,7 +14,6 @@ module.exports = class Terminal extends EventEmitter
     @path = args.path
     @token = args.token
 
-    @isConnected = false
     @hasFailed = false
 
     @connect()
@@ -23,19 +22,24 @@ module.exports = class Terminal extends EventEmitter
     @socket = new AtomSocket('term', @url())
 
     @waitForSocket = new Promise (resolve, reject) =>
-      @socket.on 'open', =>
-        @emit 'open'
+      @socket.on 'open', (e) =>
+        @emit 'open', e
         resolve()
 
-      @socket.on 'open:cached', =>
-        @emit 'open'
+      @socket.on 'open:cached', (e) =>
+        @emit 'open', e
         resolve()
 
       @socket.on 'message', (message) =>
-        @emit 'message', utf8.decode(atob(message))
+        decoded = new Buffer(message or '', 'base64').toString()
+        if @promisedSend? and @promisedSend.test(decoded)
+          @promisedSend.resolve(decoded)
+          @promisedSend = null
+        else
+          @emit('message', decoded)
 
-      @socket.on 'close', =>
-        @emit 'close'
+      @socket.on 'close', (e) =>
+        @emit 'close', e
 
       @socket.on 'error', (e) =>
         @emit 'error', e
@@ -46,8 +50,12 @@ module.exports = class Terminal extends EventEmitter
     "#{protocol}://#{@host}:#{@port}/#{@path}?token=#{@token}&version=#{version}"
 
   reset: ->
-    console.log('term:reset')
     @socket.reset()
+
+  sendWithPromise: (msg, test) ->
+    new Promise (resolve) =>
+      @promisedSend = {test, resolve}
+      @send(msg)
 
   send: (msg) ->
     if @waitForSocket
@@ -60,13 +68,20 @@ module.exports = class Terminal extends EventEmitter
   toggleDebugger: () ->
     @socket.toggleDebugger()
 
+  getHostIp: () ->
+    key = 'host_ip:'
+
+    @sendWithPromise("echo #{key}$HOST_IP && clear\r", (msg) =>
+      msg.startsWith(key)
+    ).then((msg) =>
+      msg.replace(key, '').replace(/\s/g, '')
+    )
+
   debugInfo: ->
     {
       host: @host,
       port: @port,
       path: @path,
       token: @token,
-      isConnected: @isConnected,
-      hasFailed: @hasFailed,
       socket: @socket
     }
