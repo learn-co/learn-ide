@@ -32,9 +32,9 @@ module.exports = class Terminal extends EventEmitter
 
       @socket.on 'message', (message) =>
         decoded = new Buffer(message or '', 'base64').toString()
-        if @promisedSend? and @promisedSend.test(decoded)
-          @promisedSend.resolve(decoded)
-          @promisedSend = null
+        if @captureResponse? and @captureResponse.test(decoded)
+          @captureResponse.resolve(decoded)
+          @captureResponse = null
         else
           @emit('message', decoded)
 
@@ -52,9 +52,9 @@ module.exports = class Terminal extends EventEmitter
   reset: ->
     @socket.reset()
 
-  sendWithPromise: (msg, test) ->
+  sendAndCaptureResponse: (msg, test) ->
     new Promise (resolve) =>
-      @promisedSend = {test, resolve}
+      @captureResponse = {test, resolve}
       @send(msg)
 
   send: (msg) ->
@@ -71,7 +71,7 @@ module.exports = class Terminal extends EventEmitter
   getHostIp: () ->
     key = 'host_ip:'
 
-    @sendWithPromise("echo #{key}$HOST_IP && clear\r", (msg) =>
+    @sendAndCaptureResponse("echo #{key}$HOST_IP && clear\r", (msg) =>
       msg.startsWith(key)
     ).then((msg) =>
       msg.replace(key, '').replace(/\s/g, '')
