@@ -4,12 +4,12 @@ Terminal = require './terminal'
 TerminalView = require './views/terminal'
 StatusView = require './views/status'
 {BrowserWindow} = require 'remote'
-{EventEmitter} = require 'events'
 Notifier = require './notifier'
 atomHelper = require './atom-helper'
 auth = require './auth'
 bus = require('./event-bus')()
 config = require './config'
+monitor = require './monitor'
 {shell} = require 'electron'
 updater = require './updater'
 version = require './version'
@@ -23,6 +23,7 @@ module.exports =
 
   activate: (state) ->
     console.log 'activating learn ide'
+    LEARN_IDE_HOST_IP = null
     @checkForV1WindowsInstall()
     @registerWindowsProtocol()
     @disableFormerPackage()
@@ -54,6 +55,7 @@ module.exports =
     @activateSubscriptions()
     @activateNotifier()
     @activateUpdater()
+    @activateMonitor()
     @activateRemoteNotification()
 
   activateTerminal: ->
@@ -126,6 +128,9 @@ module.exports =
     if not @isRestartAfterUpdate
       updater.autoCheck()
 
+  activateMonitor: ->
+    monitor(@term, @subscriptions)
+
   activateRemoteNotification: ->
     remoteNotification()
 
@@ -135,6 +140,7 @@ module.exports =
     @termView = null
     @statusView = null
     @subscriptions.dispose()
+    @term.removeAllListeners()
 
   subscribeToLogin: ->
     @subscriptions.add atom.commands.add 'atom-workspace',
