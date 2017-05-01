@@ -32,16 +32,11 @@ module.exports = class Terminal extends EventEmitter
 
       @socket.on 'message', (message) =>
         decoded = new Buffer(message or '', 'base64').toString()
-
-        if @captureResponse? and decoded.includes(@captureResponse.msg)
-          return
-
         if @captureResponse? and @captureResponse.test(decoded)
           @captureResponse.resolve(decoded)
           @captureResponse = null
-          return
-
-        @emit('message', decoded)
+        else
+          @emit('message', decoded)
 
       @socket.on 'close', (e) =>
         @emit 'close', e
@@ -59,7 +54,7 @@ module.exports = class Terminal extends EventEmitter
 
   sendAndCaptureResponse: (msg, test) ->
     new Promise (resolve) =>
-      @captureResponse = {msg, test, resolve}
+      @captureResponse = {test, resolve}
       @send(msg)
 
   send: (msg) ->
