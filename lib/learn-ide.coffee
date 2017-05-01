@@ -5,11 +5,11 @@ TerminalView = require './views/terminal'
 StatusView = require './views/status'
 {BrowserWindow} = require 'remote'
 Notifier = require './notifier'
+airbrake = require './airbrake'
 atomHelper = require './atom-helper'
 auth = require './auth'
 bus = require('./event-bus')()
 config = require './config'
-monitor = require './monitor'
 {shell} = require 'electron'
 updater = require './updater'
 version = require './version'
@@ -129,7 +129,10 @@ module.exports =
       updater.autoCheck()
 
   activateMonitor: ->
-    monitor(@term, @subscriptions)
+    @subscriptions.add atom.onDidThrowError ({message, url, line, column, originalError}) =>
+      {stack} = originalError
+      location = "#{url}:#{line}:#{column}"
+      airbrake.notify({location, message, stack})
 
   activateRemoteNotification: ->
     remoteNotification()
