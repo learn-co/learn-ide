@@ -13,7 +13,6 @@ monitor = require './monitor'
 {shell} = require 'electron'
 updater = require './updater'
 version = require './version'
-remoteNotification = require './remote-notification'
 {name} = require '../package.json'
 
 ABOUT_URL = "#{config.learnCo}/ide/about"
@@ -56,7 +55,6 @@ module.exports =
     @activateNotifier()
     @activateUpdater()
     @activateMonitor()
-    @activateRemoteNotification()
 
   activateTerminal: ->
     @term = new Terminal
@@ -130,9 +128,6 @@ module.exports =
 
   activateMonitor: ->
     monitor(@term, @subscriptions)
-
-  activateRemoteNotification: ->
-    remoteNotification()
 
   deactivate: ->
     localStorage.delete('disableTreeView')
