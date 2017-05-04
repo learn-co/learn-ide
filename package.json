@@ -6,7 +6,7 @@
   "urlMain": "./lib/url-handler",
   "description": "An integrated development environment for Learn.co",
   "scripts": {
-    "start": "./node_modules/gulp/bin/gulp.js"
+    "prepublish": "scripts/airbrake_deploy"
   },
   "keywords": [],
   "repository": "https://github.com/learn-co/learn-ide",

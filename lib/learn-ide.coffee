@@ -22,13 +22,13 @@ module.exports =
   token: require('./token')
 
   activate: (state) ->
-    console.log 'activating learn ide'
-    LEARN_IDE_HOST_IP = null
+    @subscriptions = new CompositeDisposable
+
+    @activateMonitor()
     @checkForV1WindowsInstall()
     @registerWindowsProtocol()
     @disableFormerPackage()
 
-    @subscriptions = new CompositeDisposable
     @subscribeToLogin()
 
     @waitForAuth = auth().then =>
@@ -55,7 +55,6 @@ module.exports =
     @activateSubscriptions()
     @activateNotifier()
     @activateUpdater()
-    @activateMonitor()
     @activateRemoteNotification()
 
   activateTerminal: ->
@@ -129,10 +128,8 @@ module.exports =
       updater.autoCheck()
 
   activateMonitor: ->
-    @subscriptions.add atom.onDidThrowError ({message, url, line, column, originalError}) =>
-      {stack} = originalError
-      location = "#{url}:#{line}:#{column}"
-      airbrake.notify({location, message, stack})
+   @subscriptions.add atom.onDidThrowError ({originalError}) =>
+     airbrake.notify(originalError).then (res) => console.log(res)
 
   activateRemoteNotification: ->
     remoteNotification()
