@@ -13,6 +13,7 @@ config = require './config'
 {shell} = require 'electron'
 updater = require './updater'
 version = require './version'
+handleErrorNotifications = require './handle-error'
 remoteNotification = require './remote-notification'
 {name} = require '../package.json'
 
@@ -128,8 +129,10 @@ module.exports =
       updater.autoCheck()
 
   activateMonitor: ->
-   @subscriptions.add atom.onDidThrowError ({originalError}) =>
-     airbrake.notify(originalError).then (res) => console.log(res)
+   @subscriptions.add atom.onWillThrowError (err) =>
+     {url, line, column, originalError} = err
+     airbrake.notify(originalError, {file: url, line, column})
+     handleErrorNotifications(err)
 
   activateRemoteNotification: ->
     remoteNotification()
