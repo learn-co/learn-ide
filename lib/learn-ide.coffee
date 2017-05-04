@@ -130,8 +130,7 @@ module.exports =
 
   activateMonitor: ->
    @subscriptions.add atom.onWillThrowError (err) =>
-     {url, line, column, originalError} = err
-     airbrake.notify(originalError, {file: url, line, column})
+     airbrake.notify(err.originalError)
      handleErrorNotifications(err)
 
   activateRemoteNotification: ->
