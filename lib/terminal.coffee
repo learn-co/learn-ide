@@ -40,7 +40,7 @@ module.exports = class Terminal extends EventEmitter
         @emit 'error', e
 
   url: ->
-    version = require './version'
+    {version} = require '../package.json'
     protocol = if @port == 443 then 'wss' else 'ws'
     "#{protocol}://#{@host}:#{@port}/#{@path}?token=#{@token}&version=#{version}"
 

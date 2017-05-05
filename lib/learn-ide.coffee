@@ -11,12 +11,13 @@ bus = require './event-bus'
 config = require './config'
 {shell} = require 'electron'
 updater = require './updater'
-version = require './version'
 handleErrorNotifications = require './handle-error'
 remoteNotification = require './remote-notification'
-{name} = require '../package.json'
+{name, version} = require '../package.json'
 colors = require './colors'
 logout = require './logout'
+
+window.LEARN_IDE_VERSION = version
 
 ABOUT_URL = "#{config.learnCo}/ide/about"
 
