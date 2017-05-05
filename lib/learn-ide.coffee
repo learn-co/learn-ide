@@ -5,14 +5,15 @@ TerminalView = require './views/terminal'
 StatusView = require './views/status'
 {BrowserWindow} = require 'remote'
 Notifier = require './notifier'
+airbrake = require './airbrake'
 atomHelper = require './atom-helper'
 auth = require './auth'
 bus = require('./event-bus')()
 config = require './config'
-monitor = require './monitor'
 {shell} = require 'electron'
 updater = require './updater'
 version = require './version'
+handleErrorNotifications = require './handle-error'
 remoteNotification = require './remote-notification'
 {name} = require '../package.json'
 
@@ -22,13 +23,13 @@ module.exports =
   token: require('./token')
 
   activate: (state) ->
-    console.log 'activating learn ide'
-    LEARN_IDE_HOST_IP = null
+    @subscriptions = new CompositeDisposable
+
+    @activateMonitor()
     @checkForV1WindowsInstall()
     @registerWindowsProtocol()
     @disableFormerPackage()
 
-    @subscriptions = new CompositeDisposable
     @subscribeToLogin()
 
     @waitForAuth = auth().then =>
@@ -55,7 +56,6 @@ module.exports =
     @activateSubscriptions()
     @activateNotifier()
     @activateUpdater()
-    @activateMonitor()
     @activateRemoteNotification()
 
   activateTerminal: ->
@@ -129,7 +129,9 @@ module.exports =
       updater.autoCheck()
 
   activateMonitor: ->
-    monitor(@term, @subscriptions)
+   @subscriptions.add atom.onWillThrowError (err) =>
+     airbrake.notify(err.originalError)
+     handleErrorNotifications(err)
 
   activateRemoteNotification: ->
     remoteNotification()
