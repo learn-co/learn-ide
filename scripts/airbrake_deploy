@@ -1,0 +1,20 @@
+#!/bin/bash
+
+source ./.env
+
+ENVIRONMENT=$(jq -r .name ./package.json)
+REPOSITORY=$(jq -r .repository ./package.json)
+REVISION=$(git rev-parse HEAD)
+USERNAME=$(whoami)
+VERSION=v$(jq -r .version ./package.json)
+
+PAYLOAD="{'environment':'${ENVIRONMENT}','version':'${VERSION}','username':'${USERNAME}','repository':'${REPOSITORY}','revision':'${REVISION}'}"
+
+echo $PAYLOAD
+echo $AIRBRAKE_PROJECT_ID
+echo $AIRBRAKE_PROJECT_KEY
+
+#curl -X POST \
+#  -H "Content-Type: application/json" \
+#  -d PAYLOAD \
+#  "https://airbrake.io/api/v4/projects/${AIRBRAKE_PROJECT_ID}/deploys?key=${AIRBRAKE_PROJECT_KEY}"

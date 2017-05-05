@@ -6,7 +6,7 @@
   "urlMain": "./lib/url-handler",
   "description": "An integrated development environment for Learn.co",
   "scripts": {
-    "start": "./node_modules/gulp/bin/gulp.js"
+    "prepublish": "scripts/airbrake_deploy"
   },
   "keywords": [],
   "repository": "https://github.com/learn-co/learn-ide",
@@ -22,15 +22,15 @@
     }
   },
   "dependencies": {
-    "atom-socket": "0.0.8",
+    "atom-socket": "0.0.9",
     "atom-space-pen-views": "2.1.0",
     "dotenv": "2.0.0",
-    "learn-term.js": "0.0.7",
     "page-bus": "3.0.1",
     "register-protocol-win32": "1.0.0",
     "semver": "^5.3.0",
+    "stacktrace-parser": "^0.1.4",
     "underscore-plus": "1.6.6",
-    "utf8": "2.1.1"
+    "xterm": "^2.4.0"
   },
   "packageDependencies": {
     "atom-material-syntax": "1.0.2",
@@ -38,26 +38,6 @@
     "atom-material-syntax-light": "0.4.6",
     "learn-ide-material-ui": "1.3.14",
     "learn-ide-tree": "1.0.22"
-  },
-  "configSchema": {
-    "notifier": {
-      "type": "boolean",
-      "default": true,
-      "title": "Learn Status Notifications",
-      "description": "Receive desktop notifications that correspond to the lights on Learn.co"
-    },
-    "terminalFontColor": {
-      "type": "color",
-      "default": "#ffffff",
-      "title": "Terminal Font Color",
-      "description": "A valid CSS color value which will be used to style your terminal's font"
-    },
-    "terminalBackgroundColor": {
-      "type": "color",
-      "default": "#1A2226",
-      "title": "Terminal Background Color",
-      "description": "A valid CSS color value which will be used to style your terminal's background"
-    }
   },
   "devDependencies": {
     "decompress": "4.0.0",
@@ -68,5 +48,149 @@
     "run-sequence": "1.2.2",
     "shelljs": "0.7.3",
     "ssh2": "0.5.0"
+  },
+  "configSchema": {
+    "notifier": {
+      "order": 0,
+      "type": "boolean",
+      "default": true,
+      "title": "Learn Status Notifications",
+      "description": "Receive desktop notifications that correspond to the lights on Learn.co"
+    },
+    "terminalColors": {
+      "order": 1,
+      "type": "object",
+      "properties" : {
+        "basic": {
+          "order": 1,
+          "title": "Basic Colors",
+          "type": "object",
+          "properties": {
+            "foreground": {
+              "order": 0,
+              "type": "color",
+              "default": "#7ea2b4",
+              "title": "Foreground"
+            },
+            "background": {
+              "order": 1,
+              "type": "color",
+              "default": "#1A2226",
+              "title": "Background"
+            }
+          }
+        },
+        "ansi": {
+          "order": 2,
+          "title": "ANSI Colors",
+          "type": "object",
+          "properties": {
+            "0": {
+              "order": 0,
+              "type": "color",
+              "default": "#161b1d",
+              "title": "Black"
+            },
+            "1": {
+              "order": 1,
+              "type": "color",
+              "default": "#d22d72",
+              "title": "Red"
+            },
+            "2": {
+              "order": 2,
+              "type": "color",
+              "default": "#568c3b",
+              "title": "Green"
+            },
+            "3": {
+              "order": 3,
+              "type": "color",
+              "default": "#8a8a0f",
+              "title": "Yellow"
+            },
+            "4": {
+              "order": 4,
+              "type": "color",
+              "default": "#257fad",
+              "title": "Blue"
+            },
+            "5": {
+              "order": 5,
+              "type": "color",
+              "default": "#5d5db1",
+              "title": "Magenta"
+            },
+            "6": {
+              "order": 6,
+              "type": "color",
+              "default": "#2d8f6f",
+              "title": "Cyan"
+            },
+            "7": {
+              "order": 7,
+              "type": "color",
+              "default": "#7ea2b4",
+              "title": "White"
+            },
+            "8": {
+              "order": 8,
+              "type": "color",
+              "default": "#5a7b8c",
+              "title": "Bright Black"
+            },
+            "9": {
+              "order": 9,
+              "type": "color",
+              "default": "#d22d72",
+              "title": "Bright Red"
+            },
+            "10": {
+              "order": 10,
+              "type": "color",
+              "default": "#568c3b",
+              "title": "Bright Green"
+            },
+            "11": {
+              "order": 11,
+              "type": "color",
+              "default": "#8a8a0f",
+              "title": "Bright Yellow"
+            },
+            "12": {
+              "order": 12,
+              "type": "color",
+              "default": "#257fad",
+              "title": "Bright Blue"
+            },
+            "13": {
+              "order": 13,
+              "type": "color",
+              "default": "#5d5db1",
+              "title": "Bright Magenta"
+            },
+            "14": {
+              "order": 14,
+              "type": "color",
+              "default": "#2d8f6f",
+              "title": "Bright Cyan"
+            },
+            "15": {
+              "order": 15,
+              "type": "color",
+              "default": "#ebf8ff",
+              "title": "Bright White"
+            }
+          }
+        },
+        "json": {
+          "title": "JSON Color Scheme",
+          "order": 3,
+          "type": "string",
+          "default": "",
+          "description": "Import complete and customizable color schemes from [terminal.sexy](https://terminal.sexy/) by pasting a JSON export here. For more information, visit the [help center](http://help.learn.co/)."
+        }
+      }
+    }
   }
 }

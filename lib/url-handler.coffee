@@ -1,7 +1,7 @@
 url = require 'url'
 {ipcRenderer} = require 'electron'
 localStorage = require './local-storage'
-bus = require('./event-bus')()
+bus = require './event-bus'
 
 getLabSlug = ->
   {urlToOpen} = JSON.parse(decodeURIComponent(location.hash.substr(1)))
