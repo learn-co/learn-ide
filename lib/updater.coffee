@@ -76,9 +76,9 @@ module.exports =
     localStorage.set('updateCheckDate', Date.now())
 
   _shouldUpdate: (latestVersion) ->
-    currentVersion = require './version'
+    {version} = require '../package.json'
 
-    if semver.gt(latestVersion, currentVersion)
+    if semver.gt(latestVersion, version)
       return true
 
     return @_someDependencyIsMismatched()
