@@ -38,8 +38,6 @@ function windowsInstallerName() {
   return productName().replace(/ /g, '') + 'Setup.exe';
 }
 
-gulp.task('default', ['ws:start']);
-
 gulp.task('setup', function() {
   shell.cp('./.env.example', './.env');
 });

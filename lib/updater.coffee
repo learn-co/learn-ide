@@ -7,7 +7,7 @@ fetch = require './fetch'
 localStorage = require './local-storage'
 {name} = require '../package.json'
 
-HELP_CENTER_URL = 'https://help.learn.co/hc/en-us/sections/206572387-Common-IDE-Questions'
+HELP_CENTER_URL = "#{learnCo}/ide/faq"
 LATEST_VERSION_URL = "#{learnCo}/api/v1/learn_ide/latest_version"
 
 module.exports =

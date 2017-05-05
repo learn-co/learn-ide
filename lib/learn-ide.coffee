@@ -4,8 +4,8 @@ Terminal = require './terminal'
 TerminalView = require './terminal-view'
 StatusView = require './views/status'
 {BrowserWindow} = require 'remote'
-{EventEmitter} = require 'events'
 Notifier = require './notifier'
+airbrake = require './airbrake'
 atomHelper = require './atom-helper'
 auth = require './auth'
 bus = require './event-bus'
@@ -13,22 +13,25 @@ config = require './config'
 {shell} = require 'electron'
 updater = require './updater'
 version = require './version'
+handleErrorNotifications = require './handle-error'
+remoteNotification = require './remote-notification'
 {name} = require '../package.json'
 colors = require './colors'
 
-ABOUT_URL = 'https://help.learn.co/hc/en-us/categories/204144547-The-Learn-IDE'
+ABOUT_URL = "#{config.learnCo}/ide/about"
 
 module.exports =
   token: require('./token')
 
   activate: (state) ->
-    console.log 'activating learn ide'
+    @subscriptions = new CompositeDisposable
+
+    @activateMonitor()
     @checkForV1WindowsInstall()
     @registerWindowsProtocol()
     @disableFormerPackage()
     colors.apply()
 
-    @subscriptions = new CompositeDisposable
     @subscribeToLogin()
 
     @waitForAuth = auth().then =>
@@ -50,6 +53,7 @@ module.exports =
     @activateSubscriptions()
     @activateNotifier()
     @activateUpdater()
+    @activateRemoteNotification()
 
   activateTerminal: ->
     @term = new Terminal
@@ -123,12 +127,21 @@ module.exports =
     if not @isRestartAfterUpdate
       updater.autoCheck()
 
+  activateMonitor: ->
+   @subscriptions.add atom.onWillThrowError (err) =>
+     airbrake.notify(err.originalError)
+     handleErrorNotifications(err)
+
+  activateRemoteNotification: ->
+    remoteNotification()
+
   deactivate: ->
     localStorage.delete('disableTreeView')
     localStorage.delete('terminalOut')
     @termView = null
     @statusView = null
     @subscriptions.dispose()
+    @term.removeAllListeners()
 
   subscribeToLogin: ->
     @subscriptions.add atom.commands.add 'atom-workspace',
@@ -169,10 +182,10 @@ module.exports =
       require('./protocol')
 
   disableFormerPackage: ->
-    ilePkg = atom.packages.loadPackage('integrated-learn-environment')
+    pkgName = 'integrated-learn-environment'
 
-    if ilePkg?
-      ilePkg.disable()
+    if not atom.packages.isPackageDisabled(pkgName)
+      atom.packages.disablePackage(pkgName)
 
   addLearnToStatusBar: (statusBar) ->
     leftTiles = Array.from(statusBar.getLeftTiles())
