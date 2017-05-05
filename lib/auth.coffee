@@ -86,25 +86,6 @@ learnSignIn = () ->
       win.destroy()
       githubLogin.then(resolve)
 
-githubLogout = ->
-  win = new BrowserWindow(show: false)
-
-  win.webContents.on 'did-finish-load', ->
-    win.show()
-    localStorage.delete('didCompleteGithubLogin')
-
-  win.loadURL('https://github.com/logout')
-
-learnLogout = ->
-  win = new BrowserWindow(show: false)
-  win.webContents.on 'did-finish-load', -> win.destroy()
-  win.loadURL("#{learnCo}/sign_out")
-
-window.logout = ->
-  _token.unset()
-  learnLogout()
-  githubLogout()
-
 module.exports = ->
   existingToken = _token.get()
 

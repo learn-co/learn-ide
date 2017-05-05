@@ -3,7 +3,6 @@ localStorage = require './local-storage'
 Terminal = require './terminal'
 TerminalView = require './terminal-view'
 StatusView = require './views/status'
-{BrowserWindow} = require 'remote'
 Notifier = require './notifier'
 airbrake = require './airbrake'
 atomHelper = require './atom-helper'
@@ -17,6 +16,7 @@ handleErrorNotifications = require './handle-error'
 remoteNotification = require './remote-notification'
 {name} = require '../package.json'
 colors = require './colors'
+logout = require './logout'
 
 ABOUT_URL = "#{config.learnCo}/ide/about"
 
@@ -155,39 +155,9 @@ module.exports =
 
   logInOrOut: ->
     if @token.get()?
-      @logout()
+      logout()
     else
       atomHelper.resetPackage()
-
-  logout: ->
-    @token.unset()
-
-    learn = new BrowserWindow(show: false)
-    learn.webContents.on 'did-finish-load', -> learn.destroy()
-    learn.loadURL("#{config.learnCo}/sign_out")
-
-    if localStorage.remove('didCompleteGithubLogin')
-      github = new BrowserWindow(autoHideMenuBar: true, show: false)
-
-      github.once 'ready-to-show', ->
-        github.show()
-
-      github.webContents.on 'will-navigate', (e, url) ->
-        console.debug('will:', url)
-        github.hide()
-
-      github.webContents.on 'did-navigate', (e, url) ->
-        console.debug('did:', url)
-        if url.match(/github\.com\/$/)
-          atomHelper.emit('learn-ide:logout')
-          atomHelper.closePaneItems()
-          atom.reload()
-
-      github.loadURL('https://github.com/logout')
-    else
-      atomHelper.emit('learn-ide:logout')
-      atomHelper.closePaneItems()
-      atom.reload()
 
   checkForV1WindowsInstall: ->
     require('./windows')
