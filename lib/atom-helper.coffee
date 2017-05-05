@@ -34,3 +34,10 @@ module.exports =
     atom.packages.activatePackage(packageName()).then ->
       atom.menu.sortPackagesMenu()
 
+  reloadStylesheets: ->
+    pkg = atom.packages.getActivePackage(packageName())
+    pkg.reloadStylesheets()
+
+  addStylesheet: (css) ->
+    atom.styles.addStyleSheet(css)
+

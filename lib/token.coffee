@@ -1,5 +1,5 @@
 localStorage = require './local-storage'
-bus = require('./event-bus')()
+bus = require './event-bus'
 
 TOKEN_KEY = 'learn-ide:token'
 

@@ -1,0 +1,47 @@
+@import (less) "../node_modules/xterm/src/xterm.css";
+
+.terminal-resize-handle {
+  height: 0.2rem;
+  background: rgba(0,0,0,0.18);
+  cursor: row-resize;
+  z-index: 3;
+}
+
+.learn-synced-fs-status {
+  &:hover {
+    cursor: default;
+  }
+}
+
+.learn-popout-terminal-icon {
+  margin-left: 12px !important;
+
+  &.active {
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  &.inactive {
+    &:hover {
+      cursor: default;
+    }
+    display: none;
+  }
+}
+
+.learn-status-icon {
+  &[data-status='good'] {
+    color: #73c990;
+  }
+
+  &[data-status='bad'] {
+    color: #d92626;
+    text-decoration: underline;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
+

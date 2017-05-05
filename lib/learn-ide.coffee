@@ -1,14 +1,14 @@
 localStorage = require './local-storage'
 {CompositeDisposable} = require 'atom'
 Terminal = require './terminal'
-TerminalView = require './views/terminal'
+TerminalView = require './terminal-view'
 StatusView = require './views/status'
 {BrowserWindow} = require 'remote'
 Notifier = require './notifier'
 airbrake = require './airbrake'
 atomHelper = require './atom-helper'
 auth = require './auth'
-bus = require('./event-bus')()
+bus = require './event-bus'
 config = require './config'
 {shell} = require 'electron'
 updater = require './updater'
@@ -16,6 +16,7 @@ version = require './version'
 handleErrorNotifications = require './handle-error'
 remoteNotification = require './remote-notification'
 {name} = require '../package.json'
+colors = require './colors'
 
 ABOUT_URL = "#{config.learnCo}/ide/about"
 
@@ -29,6 +30,7 @@ module.exports =
     @checkForV1WindowsInstall()
     @registerWindowsProtocol()
     @disableFormerPackage()
+    colors.apply()
 
     @subscribeToLogin()
 
@@ -45,11 +47,6 @@ module.exports =
       updater.didRestartAfterUpdate()
       localStorage.delete('restartingForUpdate')
 
-    @isTerminalWindow = (localStorage.get('popoutTerminal') is 'true')
-    if @isTerminalWindow
-      window.resizeTo(750, 500)
-      localStorage.delete('popoutTerminal')
-
     @activateTerminal()
     @activateStatusView(state)
     @activateEventHandlers()
@@ -65,50 +62,52 @@ module.exports =
       path: config.path
       token: @token.get()
 
-    @termView = new TerminalView(@term, null, @isTerminalWindow)
-    @termView.toggle()
+    @termView = new TerminalView(@term)
 
   activateStatusView: (state) ->
-    @statusView = new StatusView state, @term, {@isTerminalWindow}
-
-    bus.on 'terminal:popin', () =>
-      @statusView.onTerminalPopIn()
-      @termView.showAndFocus()
-
-    @statusView.on 'terminal:popout', =>
-      @termView.toggle()
+    @statusView = new StatusView(state, @term)
 
   activateEventHandlers: ->
     atomHelper.trackFocusedWindow()
 
     # listen for learn:open event from other render processes (url handler)
     bus.on 'learn:open', (lab) =>
-      @termView.openLab(lab.slug)
+      @learnOpen(lab.slug)
       atom.getCurrentWindow().focus()
 
     # tidy up when the window closes
     atom.getCurrentWindow().on 'close', =>
       @cleanup()
-      if @isTerminalWindow
-        bus.emit('terminal:popin', Date.now())
 
   activateSubscriptions: ->
     @subscriptions.add atom.commands.add 'atom-workspace',
-      'learn-ide:open': (e) => @termView.openLab(e.detail.path)
+      'learn-ide:open': (e) => @learnOpen(e.detail.path)
       'learn-ide:toggle-terminal': () => @termView.toggle()
+      'learn-ide:toggle-popout': () => @termView.focusPopoutEmulator()
       'learn-ide:toggle-focus': => @termView.toggleFocus()
-      'learn-ide:focus': => @termView.fullFocus()
+      'learn-ide:focus': => @termView.focusEmulator()
       'learn-ide:toggle:debugger': => @term.toggleDebugger()
       'learn-ide:reset-connection': => @term.reset()
       'learn-ide:view-version': => @viewVersion()
       'learn-ide:update-check': -> updater.checkForUpdate()
       'learn-ide:about': => @about()
 
-    atom.config.onDidChange "#{name}.terminalFontColor", ({newValue}) =>
-      @termView.updateFontColor(newValue)
+    @subscriptions.add atom.commands.add '.terminal',
+      'core:copy': => @termView.clipboardCopy()
+      'core:paste': => @termView.clipboardPaste()
+      'learn-ide:reset-font-size': => @termView.resetFontSize()
+      'learn-ide:increase-font-size': => @termView.increaseFontSize()
+      'learn-ide:decrease-font-size': => @termView.decreaseFontSize()
+      'learn-ide:clear-terminal': => @term.send('')
 
-    atom.config.onDidChange "#{name}.terminalBackgroundColor", ({newValue}) =>
-      @termView.updateBackgroundColor(newValue)
+    atom.config.onDidChange "#{name}.terminalColors.basic", =>
+      colors.apply()
+
+    atom.config.onDidChange "#{name}.terminalColors.ansi", =>
+      colors.apply()
+
+    atom.config.onDidChange "#{name}.terminalColors.json", ({newValue}) =>
+      colors.parseJSON(newValue)
 
     atom.config.onDidChange "#{name}.notifier", ({newValue}) =>
       if newValue then @activateNotifier() else @notifier.deactivate()
@@ -116,7 +115,7 @@ module.exports =
     openPath = localStorage.get('learnOpenLabOnActivation')
     if openPath
       localStorage.delete('learnOpenLabOnActivation')
-      @termView.openLab(openPath)
+      @learnOpen(openPath)
 
 
   activateNotifier: ->
@@ -193,12 +192,12 @@ module.exports =
     rightTiles = Array.from(statusBar.getRightTiles())
     rightMostTile = rightTiles[rightTiles.length - 1]
 
-    if @isTerminalWindow
-      leftTiles.concat(rightTiles).forEach (tile) ->
-        tile.destroy()
-
     priority = (rightMostTile?.priority || 0) - 1
     statusBar.addRightTile({item: @statusView, priority})
+
+  learnOpen: (labSlug) ->
+    if labSlug?
+      @term.send("learn open #{labSlug.toString()}\r")
 
   about: ->
     shell.openExternal(ABOUT_URL)
