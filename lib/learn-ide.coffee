@@ -12,7 +12,6 @@ config = require './config'
 {shell} = require 'electron'
 updater = require './updater'
 version = require './version'
-handleErrorNotifications = require './handle-error'
 remoteNotification = require './remote-notification'
 {name} = require '../package.json'
 colors = require './colors'
@@ -117,7 +116,6 @@ module.exports =
       localStorage.delete('learnOpenLabOnActivation')
       @learnOpen(openPath)
 
-
   activateNotifier: ->
     if atom.config.get("#{name}.notifier")
       @notifier = new Notifier(@token.get())
@@ -128,9 +126,8 @@ module.exports =
       updater.autoCheck()
 
   activateMonitor: ->
-   @subscriptions.add atom.onWillThrowError (err) =>
-     airbrake.notify(err.originalError)
-     handleErrorNotifications(err)
+   @subscriptions.add atom.onWillThrowError ({originalError}) =>
+     airbrake.notify(originalError)
 
   activateRemoteNotification: ->
     remoteNotification()
