@@ -56,7 +56,7 @@
       "type": "boolean",
       "default": false,
       "title": "Subscribe to Bleeding Updates",
-      "description": "Recieve update notifications as beta and early releases of the Learn IDE become available. Learn more on the [help center](https://learn.co/ide/beta)."
+      "description": "Recieve update notifications as beta and early releases of the Learn IDE become available. Learn more on the [help center](https://learn.co/ide/bleeding)."
     },
     "notifier": {
       "order": 1,
