@@ -121,6 +121,7 @@ gulp.task('inject-packages', function() {
   rmPackage('welcome')
   rmPackage('tree-view')
   rmPackage('about')
+  rmPackage('notifications')
   injectPackage(pkg.name, pkg.version)
   _.each(pkg.packageDependencies, (version, name) => {
     injectPackage(name, version)
