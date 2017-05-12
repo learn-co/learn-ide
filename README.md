@@ -10,18 +10,17 @@ The Learn IDE client is a modified Atom build with two packages injected to prov
 
 - **[Learn IDE](https://github.com/learn-co/learn-ide)** - The main extension
 - **[Learn IDE Tree](https://github.com/learn-co/learn-ide-tree)** - Our fork of Atom's [tree view](https://github.com/atom/tree-view). Intercepts Atom's file system events and instead performs them on our remote backend.
-- **[Learn IDE Material UI](https://github.com/learn-co/learn-ide-material-ui)** - Our fork of [atom-material-ui](https://github.com/atom-material/atom-material-ui) with our own set of default configurations
+- **[Learn IDE Material UI](https://github.com/learn-co/learn-ide-material-ui)** - Our fork of [atom-material-ui](https://github.com/atom-material/atom-material-ui) with our own set of default configurations.
+- **[Learn IDE Notifications](https://github.com/learn-co/learn-ide-notifications)** - Our fork of Atom's [notifications](https://github.com/atom/notifications) with our own set of default configurations.
 
 **Related libraries:**
-
-Those two packages include a couple important libraries:
 
 - **[nsync-fs](https://github.com/learn-co/nsync-fs)** A virtual file system for keeping Atom synced with the remote server
 - **[atom-socket](https://github.com/learn-co/atom-socket)** A library for sharing a single websocket connection in Atom packages.
 
 ## Atom and Electron
 
-The Learn IDE application currently uses [Atom at v1.14.2](https://github.com/atom/atom/tree/v1.14.2/docs), which runs [Electron at v1.3.13](https://github.com/electron/electron/tree/v1.3.13/docs). While developling, be sure that you are referring to the documentation that corresponds to these specific versions.
+The Learn IDE application currently uses [Atom at v1.14.4](https://github.com/atom/atom/tree/v1.14.4/docs), which runs [Electron at v1.3.13](https://github.com/electron/electron/tree/v1.3.13/docs). While developling, be sure that you are referring to the documentation that corresponds to these specific versions.
 
 ## Getting Started
 
