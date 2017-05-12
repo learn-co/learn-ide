@@ -51,15 +51,22 @@
     "underscore-plus": "^1.6.6"
   },
   "configSchema": {
-    "notifier": {
+    "bleedingUpdates": {
       "order": 0,
+      "type": "boolean",
+      "default": false,
+      "title": "Subscribe to Bleeding Updates",
+      "description": "Recieve update notifications as beta and early releases of the Learn IDE become available. Learn more on the [help center](https://learn.co/ide/bleeding)."
+    },
+    "notifier": {
+      "order": 1,
       "type": "boolean",
       "default": true,
       "title": "Learn Status Notifications",
-      "description": "Receive desktop notifications that correspond to the lights on Learn.co"
+      "description": "Receive desktop notifications that correspond to the lights on Learn.co."
     },
     "terminalColors": {
-      "order": 1,
+      "order": 2,
       "type": "object",
       "properties": {
         "basic": {
