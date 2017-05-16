@@ -1,24 +1,24 @@
 @import (less) "../node_modules/xterm/dist/xterm.css";
 
 .terminal-resizer {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  cursor: default;
-  -webkit-user-select: none;
-  min-height: 100px;
   z-index: 2;
-  display: flex;
-  flex-direction: column-reverse;
 
   .terminal-resize-handle {
     position: absolute;
     height: 10px;
-    top: 10;
+    top: 0;
     left: 0;
     right: 0;
     cursor: row-resize;
     z-index: 3;
+  }
+}
+
+.platform-win32 {
+  .terminal-resizer {
+    .terminal-resize-handle {
+      cursor: ns-resize;
+    }
   }
 }
 
