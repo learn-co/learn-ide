@@ -1,10 +1,25 @@
-@import (less) "../node_modules/xterm/src/xterm.css";
+@import (less) "../node_modules/xterm/dist/xterm.css";
 
-.terminal-resize-handle {
-  height: 0.2rem;
-  background: rgba(0,0,0,0.18);
-  cursor: row-resize;
-  z-index: 3;
+.terminal-resizer {
+  z-index: 2;
+
+  .terminal-resize-handle {
+    position: absolute;
+    height: 10px;
+    top: 0;
+    left: 0;
+    right: 0;
+    cursor: row-resize;
+    z-index: 3;
+  }
+}
+
+.platform-win32 {
+  .terminal-resizer {
+    .terminal-resize-handle {
+      cursor: ns-resize;
+    }
+  }
 }
 
 .learn-synced-fs-status {
