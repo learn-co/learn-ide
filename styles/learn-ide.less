@@ -1,7 +1,11 @@
 @import (less) "../node_modules/xterm/dist/xterm.css";
 
+@red: #d92626;
+@green: #73c990;
+
 .terminal-resizer {
   z-index: 2;
+  padding: 0 1px;
 
   .terminal-resize-handle {
     position: absolute;
@@ -47,11 +51,11 @@
 
 .learn-status-icon {
   &[data-status='good'] {
-    color: #73c990;
+    color: @green;
   }
 
   &[data-status='bad'] {
-    color: #d92626;
+    color: @red;
     text-decoration: underline;
 
     &:hover {
