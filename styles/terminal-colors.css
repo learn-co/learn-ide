@@ -1,4 +1,4 @@
-.terminal.xterm {color: rgba(126, 162, 180, 1); background-color: rgba(22, 27, 29, 1)}               .terminal.xterm .xterm-rows, .terminal.xterm .xterm-viewport {background-color: rgba(22, 27, 29, 1)}
+.terminal.xterm {color: rgba(126, 162, 180, 1); background-color: rgba(22, 27, 29, 1)}               .bottom .tool-panel .terminal-resizer, .terminal.xterm .xterm-rows, .terminal.xterm .xterm-viewport {background-color: rgba(22, 27, 29, 1)}
 .terminal.xterm .xterm-color-0 {color: rgba(22, 27, 29, 1)}							.terminal.xterm .xterm-bg-color-0 {background-color: rgba(22, 27, 29, 1)}
 .terminal.xterm .xterm-color-1 {color: rgba(210, 45, 114, 1)}							.terminal.xterm .xterm-bg-color-1 {background-color: rgba(210, 45, 114, 1)}
 .terminal.xterm .xterm-color-2 {color: rgba(86, 140, 59, 1)}							.terminal.xterm .xterm-bg-color-2 {background-color: rgba(86, 140, 59, 1)}
