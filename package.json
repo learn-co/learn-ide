@@ -199,6 +199,13 @@
           "description": "Import complete and customizable color schemes from [terminal.sexy](https://terminal.sexy/) by pasting a JSON export here. For more information, visit the [help center](http://help.learn.co/)."
         }
       }
+    },
+    "fontFamily": {
+      "title": "Font Family",
+      "order": 3,
+      "type": "string",
+      "default": "",
+      "description": "The name of the font family used in the terminal. Be sure to choose a monospaced font!"
     }
   }
 }
