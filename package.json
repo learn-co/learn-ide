@@ -206,6 +206,14 @@
       "type": "string",
       "default": "",
       "description": "The name of the font family used in the terminal. Be sure to choose a monospaced font!"
+    },
+    "fontSize": {
+      "title": "Font Size",
+      "order": 4,
+      "type": "number",
+      "default": 14,
+      "minimum": 2,
+      "description": "The name of the font size used in the terminal."
     }
   }
 }
