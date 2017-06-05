@@ -238,7 +238,10 @@ gulp.task('alter-files', function() {
       "{ label: 'View Version', command: 'learn-ide:view-version'}"
     ],
     [/About Atom/, 'About'],
-    [/application:about/, 'learn-ide:about']
+    [/application:about/, 'learn-ide:about'],
+    [/application:open-faq/, 'learn-ide:faq'],
+    [/application:report-issue/, 'learn-ide:report-issue'],
+["\n      { label: 'Search Issues', command: 'application:search-issues' }", ""],
   ]);
 
   replaceInFile(path.join(buildDir, 'menus', 'win32.cson'), [
@@ -255,7 +258,10 @@ gulp.task('alter-files', function() {
       ''
     ],
     [/About Atom/, 'About'],
-    [/application:about/, 'learn-ide:about']
+    [/application:about/, 'learn-ide:about'],
+    [/application:open-faq/, 'learn-ide:faq'],
+    [/application:report-issue/, 'learn-ide:report-issue'],
+["\n      { label: 'Search Issues', command: 'application:search-issues' }", ""],
   ]);
 
   replaceInFile(path.join(buildDir, 'menus', 'linux.cson'), [
@@ -264,7 +270,10 @@ gulp.task('alter-files', function() {
       '{ label: "VERSION", enabled: false }',
       "{ label: 'View Version', command: 'learn-ide:view-version'}"
     ],
-    [/application:about/, 'learn-ide:about']
+    [/application:about/, 'learn-ide:about'],
+    [/application:open-faq/, 'learn-ide:faq'],
+    [/application:report-issue/, 'learn-ide:report-issue'],
+["\n      { label: 'Search Issues', command: 'application:search-issues' }", ""],
   ]);
 
   replaceInFile(path.join(buildDir, 'src', 'config-schema.js'), [
