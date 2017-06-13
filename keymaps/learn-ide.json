@@ -1,0 +1,29 @@
+{
+  ".platform-darwin": {
+    "cmd-i": "learn-ide:toggle-terminal",
+    "cmd-;": "learn-ide:toggle-focus",
+    "cmd-:": "learn-ide:toggle-popout"
+  },
+  ".platform-win32, .platform-linux": {
+    "ctrl-U": "learn-ide:toggle-terminal",
+    "ctrl-;": "learn-ide:toggle-focus",
+    "ctrl-:": "learn-ide:toggle-popout"
+  },
+  ".platform-darwin .terminal": {
+    "cmd-=": "learn-ide:increase-font-size",
+    "cmd--": "learn-ide:decrease-font-size",
+    "cmd-0": "learn-ide:reset-font-size",
+    "cmd-up": "learn-ide:scroll-up",
+    "cmd-down": "learn-ide:scroll-down"
+  },
+  ".platform-win32 .terminal, .platform-linux .terminal": {
+    "ctrl-=": "learn-ide:increase-font-size",
+    "ctrl--": "learn-ide:decrease-font-size",
+    "ctrl-0": "learn-ide:reset-font-size",
+    "ctrl-C": "core:copy",
+    "ctrl-V": "core:paste",
+    "ctrl-up": "learn-ide:scroll-up",
+    "ctrl-down": "learn-ide:scroll-down"
+  }
+}
+
