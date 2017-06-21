@@ -14,7 +14,9 @@
     "cmd--": "learn-ide:decrease-font-size",
     "cmd-0": "learn-ide:reset-font-size",
     "cmd-up": "learn-ide:scroll-up",
-    "cmd-down": "learn-ide:scroll-down"
+    "cmd-down": "learn-ide:scroll-down",
+    "ctrl-alt-up": "learn-ide:scroll-up",
+    "ctrl-alt-down": "learn-ide:scroll-down"
   },
   ".platform-win32 .terminal, .platform-linux .terminal": {
     "ctrl-=": "learn-ide:increase-font-size",
