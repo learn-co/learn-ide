@@ -46,10 +46,6 @@
           'command': 'learn-ide:toggle-terminal'
         }
         {
-          'label': 'Toggle Debugger'
-          'command': 'learn-ide:toggle:debugger'
-        }
-        {
           'label': 'Check for Update'
           'command': 'learn-ide:update-check'
         }
