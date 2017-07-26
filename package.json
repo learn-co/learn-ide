@@ -215,6 +215,13 @@
       "default": 14,
       "minimum": 2,
       "description": "The name of the font size used in the terminal."
+    },
+    "openOnHome": {
+      "order": 5,
+      "type": "boolean",
+      "default": false,
+      "title": "Set Home as the Default Project",
+      "description": "When the Learn IDE is opened without a lab, open the tree on the remote server's home directory rather than 'temporary' (your work will still NOT be persisted; in other words, it is still temporary, just in a different location)."
     }
   }
 }
